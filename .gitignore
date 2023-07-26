@@ -1,0 +1,12 @@
+node_modules/
+yarn-error.log
+
+# IDEs
+*.iml
+.idea
+.DS_Store
+*_action.json
+.vscode
+
+write-file-atomic*
+junit.xml
