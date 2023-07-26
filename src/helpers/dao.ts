@@ -622,7 +622,9 @@ export class DaoMember {
     );
 
     const proposalId = parseInt(attribute);
-    expect(proposalId).toBeGreaterThanOrEqual(0);
+    if (proposalId < 0) {
+      throw new Error('proposalId < 0');
+    }
     return proposalId;
   }
 
@@ -809,7 +811,10 @@ export class DaoMember {
     );
 
     const proposalId = parseInt(attribute);
-    expect(proposalId).toBeGreaterThanOrEqual(0);
+    if (proposalId < 0) {
+      throw new Error('proposalId < 0');
+    }
+
     return proposalId;
   }
 
@@ -953,7 +958,9 @@ export class DaoMember {
     );
 
     const proposalId1 = parseInt(attribute);
-    expect(proposalId1).toBeGreaterThanOrEqual(0);
+    if (proposalId1 < 0) {
+      throw new Error('proposalId < 0');
+    }
     return proposalId1;
   }
 

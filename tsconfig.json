@@ -1,12 +1,15 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "types": ["node", "jest"],
+    "types": ["node", "long"],
     "module": "commonjs",
     "lib": ["esnext"],
-    "outDir": "lib",
+    "outDir": "./dist",
     "resolveJsonModule": true,
-    "esModuleInterop": true
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "removeComments": true
   },
   "include": ["./src/**/*"],
   "exclude": ["./src/**/*.test.ts"]

@@ -6,22 +6,24 @@ import { InlineResponse20075TxResponse } from '@cosmos-client/core/cjs/openapi/a
 import { WalletWrapper } from '../helpers/cosmos';
 import Long from 'long';
 
-cosmosclient.codec.register(
-  '/osmosis.tokenfactory.v1beta1.MsgCreateDenom',
-  osmosis.tokenfactory.v1beta1.MsgCreateDenom,
-);
-cosmosclient.codec.register(
-  '/osmosis.tokenfactory.v1beta1.MsgMint',
-  osmosis.tokenfactory.v1beta1.MsgMint,
-);
-cosmosclient.codec.register(
-  '/osmosis.tokenfactory.v1beta1.MsgBurn',
-  osmosis.tokenfactory.v1beta1.MsgBurn,
-);
-cosmosclient.codec.register(
-  '/osmosis.tokenfactory.v1beta1.MsgChangeAdmin',
-  osmosis.tokenfactory.v1beta1.MsgChangeAdmin,
-);
+export function registerCodecs() {
+  cosmosclient.codec.register(
+    '/osmosis.tokenfactory.v1beta1.MsgCreateDenom',
+    osmosis.tokenfactory.v1beta1.MsgCreateDenom,
+  );
+  cosmosclient.codec.register(
+    '/osmosis.tokenfactory.v1beta1.MsgMint',
+    osmosis.tokenfactory.v1beta1.MsgMint,
+  );
+  cosmosclient.codec.register(
+    '/osmosis.tokenfactory.v1beta1.MsgBurn',
+    osmosis.tokenfactory.v1beta1.MsgBurn,
+  );
+  cosmosclient.codec.register(
+    '/osmosis.tokenfactory.v1beta1.MsgChangeAdmin',
+    osmosis.tokenfactory.v1beta1.MsgChangeAdmin,
+  );
+}
 
 export const msgMintDenom = async (
   cmNeutron: WalletWrapper,

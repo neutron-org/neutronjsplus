@@ -4,7 +4,6 @@ import { cosmwasmproto } from '@cosmos-client/cosmwasm';
 import { cosmos as AdminProto, ibc as ibcProto } from '../generated/ibc/proto';
 import { neutron } from '../generated/proto';
 import axios from 'axios';
-import { CodeId, Wallet } from '../types';
 import Long from 'long';
 import { BlockWaiter, getWithAttempts } from './wait';
 import {
@@ -28,6 +27,8 @@ import {
   PinnedCodesResponse,
   IcaHostParamsResponse,
   GlobalFeeMinGasPrices,
+  Wallet,
+  CodeId,
 } from './types';
 import { getContractBinary } from './env';
 const adminmodule = AdminProto.adminmodule.adminmodule;
@@ -65,35 +66,37 @@ export type TotalBurnedNeutronsAmountResponse = {
   };
 };
 
-cosmosclient.codec.register(
-  '/neutron.interchainqueries.MsgRemoveInterchainQueryRequest',
-  neutron.interchainqueries.MsgRemoveInterchainQueryRequest,
-);
-cosmosclient.codec.register(
-  '/cosmos.params.v1beta1.ParameterChangeProposal',
-  proto.cosmos.params.v1beta1.ParameterChangeProposal,
-);
+export function registerCodecs() {
+  cosmosclient.codec.register(
+    '/neutron.interchainqueries.MsgRemoveInterchainQueryRequest',
+    neutron.interchainqueries.MsgRemoveInterchainQueryRequest,
+  );
+  cosmosclient.codec.register(
+    '/cosmos.params.v1beta1.ParameterChangeProposal',
+    proto.cosmos.params.v1beta1.ParameterChangeProposal,
+  );
 
-cosmosclient.codec.register(
-  '/neutron.interchainqueries.MsgRemoveInterchainQueryRequest',
-  neutron.interchainqueries.MsgRemoveInterchainQueryRequest,
-);
-cosmosclient.codec.register(
-  '/cosmos.params.v1beta1.ParameterChangeProposal',
-  proto.cosmos.params.v1beta1.ParameterChangeProposal,
-);
-cosmosclient.codec.register(
-  '/ibc.applications.transfer.v1.MsgTransfer',
-  ibcProto.applications.transfer.v1.MsgTransfer,
-);
-cosmosclient.codec.register(
-  '/cosmos.adminmodule.adminmodule.MsgSubmitProposal',
-  adminmodule.MsgSubmitProposal,
-);
-cosmosclient.codec.register(
-  '/ibc.lightclients.tendermint.v1.ClientState',
-  ibcProto.lightclients.tendermint.v1.ClientState,
-);
+  cosmosclient.codec.register(
+    '/neutron.interchainqueries.MsgRemoveInterchainQueryRequest',
+    neutron.interchainqueries.MsgRemoveInterchainQueryRequest,
+  );
+  cosmosclient.codec.register(
+    '/cosmos.params.v1beta1.ParameterChangeProposal',
+    proto.cosmos.params.v1beta1.ParameterChangeProposal,
+  );
+  cosmosclient.codec.register(
+    '/ibc.applications.transfer.v1.MsgTransfer',
+    ibcProto.applications.transfer.v1.MsgTransfer,
+  );
+  cosmosclient.codec.register(
+    '/cosmos.adminmodule.adminmodule.MsgSubmitProposal',
+    adminmodule.MsgSubmitProposal,
+  );
+  cosmosclient.codec.register(
+    '/ibc.lightclients.tendermint.v1.ClientState',
+    ibcProto.lightclients.tendermint.v1.ClientState,
+  );
+}
 
 export class CosmosWrapper {
   readonly sdk: cosmosclient.CosmosSDK;
@@ -170,7 +173,7 @@ export class CosmosWrapper {
     }
   }
 
-  async getSeq(address: cosmosclient.AccAddress): Promise<number> {
+  async getSeq(address: cosmosclient.AccAddress): Promise<Long.Long> {
     const account = await rest.auth
       .account(this.sdk, address)
       .then((res) =>
@@ -438,7 +441,7 @@ export class WalletWrapper {
     msgs: T[],
     numAttempts = 10,
     mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
-    sequence: number = this.wallet.account.sequence,
+    sequence: Long.Long = this.wallet.account.sequence,
   ): Promise<CosmosTxV1beta1GetTxResponse> {
     const protoMsgs: Array<google.protobuf.IAny> = [];
     msgs.forEach((msg) => {
@@ -467,7 +470,7 @@ export class WalletWrapper {
       authInfo,
     );
     const signDocBytes = txBuilder.signDocBytes(
-      this.wallet.account.account_number,
+      this.wallet.account.account_number.toNumber(),
     );
     txBuilder.addSignature(this.wallet.privKey.sign(signDocBytes));
     const res = await rest.tx.broadcastTx(this.chain.sdk as CosmosSDK, {
@@ -490,7 +493,7 @@ export class WalletWrapper {
           return null;
         });
       if (data != null) {
-        this.wallet.account.sequence++;
+        this.wallet.account.sequence = this.wallet.account.sequence.add(1);
         return data.data;
       }
     }
@@ -531,7 +534,7 @@ export class WalletWrapper {
     admin: string = this.wallet.address.toString(),
   ): Promise<Array<Record<string, string>>> {
     const msgInit = new cosmwasmproto.cosmwasm.wasm.v1.MsgInstantiateContract({
-      code_id: codeId + '',
+      code_id: new Long(codeId),
       sender: this.wallet.address.toString(),
       admin: admin,
       label,
@@ -599,7 +602,7 @@ export class WalletWrapper {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: this.chain.denom, amount: '1000' }],
     },
-    sequence: number = this.wallet.account.sequence,
+    sequence: Long.Long = this.wallet.account.sequence,
     mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
   ): Promise<InlineResponse20075TxResponse> {
     const { amount, denom = this.chain.denom } =
@@ -621,7 +624,7 @@ export class WalletWrapper {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: this.chain.denom, amount: '1000' }],
     },
-    sequence: number = this.wallet.account.sequence,
+    sequence: Long.Long = this.wallet.account.sequence,
     mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
   ): Promise<InlineResponse20075TxResponse> {
     const msg = new adminmodule.MsgSubmitProposal({
@@ -658,8 +661,13 @@ export class WalletWrapper {
   ) {
     // check contract's pause info before pausing
     let pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    expect(pauseInfo).toEqual({ unpaused: {} });
-    expect(pauseInfo.paused).toEqual(undefined);
+    if (pauseInfo?.paused !== undefined) {
+      throw new Error('Contract is already paused');
+    }
+
+    if (pauseInfo?.unpaused === undefined) {
+      throw new Error('Contract is already paused');
+    }
 
     // pause contract
     let res = await this.executeContract(
@@ -670,15 +678,32 @@ export class WalletWrapper {
         },
       }),
     );
-    expect(res.code).toEqual(0);
+    if (res.code !== 0) {
+      throw new Error(`pause error: ${res.raw_log}`);
+    }
 
     // check contract's pause info after pausing
     pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    expect(pauseInfo.unpaused).toEqual(undefined);
-    expect(pauseInfo.paused.until_height).toBeGreaterThan(0);
+    if (
+      pauseInfo?.paused?.until_height === undefined ||
+      pauseInfo.paused.until_height <= 0
+    ) {
+      throw new Error('Contract can not be paused until 0 height');
+    }
+
+    if (pauseInfo?.unpaused !== undefined) {
+      throw new Error('Contract should not be unpaused');
+    }
 
     // execute msgs on paused contract
-    await expect(execAction()).rejects.toThrow(/Contract execution is paused/);
+    try {
+      await execAction();
+    } catch (e) {
+      const error = e as Error;
+      if (!error.message.includes('Contract execution is paused')) {
+        throw new Error(error.message);
+      }
+    }
 
     // unpause contract
     res = await this.executeContract(
@@ -687,16 +712,26 @@ export class WalletWrapper {
         unpause: {},
       }),
     );
-    expect(res.code).toEqual(0);
+
+    if (res.code !== 0) {
+      throw new Error(`Contract execution error: ${res.raw_log}`);
+    }
 
     // check contract's pause info after unpausing
     pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    expect(pauseInfo).toEqual({ unpaused: {} });
-    expect(pauseInfo.paused).toEqual(undefined);
+    if (pauseInfo?.paused !== undefined) {
+      throw new Error('Contract is already paused');
+    }
+
+    if (pauseInfo?.unpaused === undefined) {
+      throw new Error('Contract is already paused');
+    }
 
     // execute msgs on unpaused contract
     const code = await execAction();
-    expect(code).toEqual(0);
+    if (code !== 0) {
+      throw new Error(`Contract execution code: ${code}`);
+    }
     await actionCheck();
 
     // pause contract again for a short period
@@ -709,18 +744,33 @@ export class WalletWrapper {
         },
       }),
     );
-    expect(res.code).toEqual(0);
+    if (res.code !== 0) {
+      throw new Error(`Contract execution error: ${res.raw_log}`);
+    }
 
     // check contract's pause info after pausing
     pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    expect(pauseInfo.unpaused).toEqual(undefined);
-    expect(pauseInfo.paused.until_height).toBeGreaterThan(0);
+    if (
+      pauseInfo?.paused?.until_height === undefined ||
+      pauseInfo.paused.until_height <= 0
+    ) {
+      throw new Error('Contract can not be paused until 0 height');
+    }
+
+    if (pauseInfo?.unpaused !== undefined) {
+      throw new Error('Contract should not be unpaused');
+    }
 
     // wait and check contract's pause info after unpausing
     await this.chain.blockWaiter.waitBlocks(shortPauseDuration);
     pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    expect(pauseInfo).toEqual({ unpaused: {} });
-    expect(pauseInfo.paused).toEqual(undefined);
+    if (pauseInfo?.paused !== undefined) {
+      throw new Error('Contract is already paused');
+    }
+
+    if (pauseInfo?.unpaused === undefined) {
+      throw new Error('Contract is already paused');
+    }
   }
 
   /* simulateFeeBurning simulates fee burning via send tx.
@@ -757,7 +807,7 @@ export class WalletWrapper {
   ): Promise<InlineResponse20075TxResponse> {
     const msgRemove =
       new neutron.interchainqueries.MsgRemoveInterchainQueryRequest({
-        query_id: queryId,
+        query_id: new Long(queryId),
         sender,
       });
 
@@ -959,7 +1009,9 @@ export const getEventAttribute = (
     (attr) => attr.key === Buffer.from(attribute).toString('base64'),
   )?.value as string;
 
-  expect(encodedAttr).toBeDefined();
+  if (!encodedAttr) {
+    throw new Error(`Attribute ${attribute} not found`);
+  }
 
   return Buffer.from(encodedAttr, 'base64').toString('ascii');
 };
