@@ -1,10 +1,13 @@
 {
   "name": "neutronjs",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "license": "Apache-2.0",
   "scripts": {
-    "gen:proto": "bash ./gen-proto.sh",
+    "build": "rimraf ./build && tsc && mkdir ./dist/generated/ -p && cp ./src/generated/* ./dist/generated/ -r",
+    "gen:proto": "mkdir ./src/generated -p && bash ./gen-proto.sh",
+    "gen:proto-ibc-go": "mkdir ./src/generated -p && bash ./gen-proto-ibc-go.sh",
     "lint": "eslint ./src",
     "fmt": "eslint ./src --fix"
   },
@@ -19,6 +22,7 @@
     "@babel/preset-env": "^7.20.2",
     "@babel/preset-typescript": "^7.18.6",
     "@types/express": "^4.17.9",
+    "@types/long": "^5.0.0",
     "@types/node": "^20.4.5",
     "eslint": "^8.13.0",
     "eslint-config-prettier": "^8.5.0",
@@ -26,6 +30,7 @@
     "lint-staged": "^12.3.8",
     "long": "^5.2.1",
     "prettier": "^2.6.2",
+    "rimraf": "5.0.1",
     "ts-node": "^9.1.1",
     "tslint": "^5.20.1",
     "typescript": "^5.1.6"

@@ -1,7 +1,6 @@
 import MerkleTree from 'merkletreejs';
 import crypto from 'crypto';
 import { CosmosWrapper, WalletWrapper, getEventAttribute } from './cosmos';
-import { CodeId } from '../types';
 import {
   NativeToken,
   Token,
@@ -10,6 +9,7 @@ import {
   vestingAccount,
   vestingSchedule,
   vestingSchedulePoint,
+  CodeId,
 } from './types';
 import {
   CreditsVaultConfig,

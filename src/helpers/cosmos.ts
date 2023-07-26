@@ -4,7 +4,6 @@ import { cosmwasmproto } from '@cosmos-client/cosmwasm';
 import { cosmos as AdminProto, ibc as ibcProto } from '../generated/ibc/proto';
 import { neutron } from '../generated/proto';
 import axios from 'axios';
-import { CodeId, Wallet } from '../types';
 import Long from 'long';
 import { BlockWaiter, getWithAttempts } from './wait';
 import {
@@ -28,6 +27,8 @@ import {
   PinnedCodesResponse,
   IcaHostParamsResponse,
   GlobalFeeMinGasPrices,
+  Wallet,
+  CodeId,
 } from './types';
 import { getContractBinary } from './env';
 const adminmodule = AdminProto.adminmodule.adminmodule;
@@ -170,7 +171,7 @@ export class CosmosWrapper {
     }
   }
 
-  async getSeq(address: cosmosclient.AccAddress): Promise<number> {
+  async getSeq(address: cosmosclient.AccAddress): Promise<Long.Long> {
     const account = await rest.auth
       .account(this.sdk, address)
       .then((res) =>
@@ -438,7 +439,7 @@ export class WalletWrapper {
     msgs: T[],
     numAttempts = 10,
     mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
-    sequence: number = this.wallet.account.sequence,
+    sequence: number = this.wallet.account.sequence.toNumber(),
   ): Promise<CosmosTxV1beta1GetTxResponse> {
     const protoMsgs: Array<google.protobuf.IAny> = [];
     msgs.forEach((msg) => {
@@ -456,7 +457,7 @@ export class WalletWrapper {
               mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
             },
           },
-          sequence,
+          sequence: new Long(sequence),
         },
       ],
       fee,
@@ -467,7 +468,7 @@ export class WalletWrapper {
       authInfo,
     );
     const signDocBytes = txBuilder.signDocBytes(
-      this.wallet.account.account_number,
+      this.wallet.account.account_number.toNumber(),
     );
     txBuilder.addSignature(this.wallet.privKey.sign(signDocBytes));
     const res = await rest.tx.broadcastTx(this.chain.sdk as CosmosSDK, {
@@ -490,7 +491,7 @@ export class WalletWrapper {
           return null;
         });
       if (data != null) {
-        this.wallet.account.sequence++;
+        this.wallet.account.sequence = this.wallet.account.sequence.add(1);
         return data.data;
       }
     }
@@ -531,7 +532,7 @@ export class WalletWrapper {
     admin: string = this.wallet.address.toString(),
   ): Promise<Array<Record<string, string>>> {
     const msgInit = new cosmwasmproto.cosmwasm.wasm.v1.MsgInstantiateContract({
-      code_id: codeId + '',
+      code_id: new Long(codeId),
       sender: this.wallet.address.toString(),
       admin: admin,
       label,
@@ -599,7 +600,7 @@ export class WalletWrapper {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: this.chain.denom, amount: '1000' }],
     },
-    sequence: number = this.wallet.account.sequence,
+    sequence: number = this.wallet.account.sequence.toNumber(),
     mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
   ): Promise<InlineResponse20075TxResponse> {
     const { amount, denom = this.chain.denom } =
@@ -621,7 +622,7 @@ export class WalletWrapper {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: this.chain.denom, amount: '1000' }],
     },
-    sequence: number = this.wallet.account.sequence,
+    sequence: number = this.wallet.account.sequence.toNumber(),
     mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
   ): Promise<InlineResponse20075TxResponse> {
     const msg = new adminmodule.MsgSubmitProposal({
@@ -678,7 +679,7 @@ export class WalletWrapper {
   ): Promise<InlineResponse20075TxResponse> {
     const msgRemove =
       new neutron.interchainqueries.MsgRemoveInterchainQueryRequest({
-        query_id: queryId,
+        query_id: new Long(queryId),
         sender,
       });
 
