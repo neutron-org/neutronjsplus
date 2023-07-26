@@ -644,85 +644,6 @@ export class WalletWrapper {
     return res?.tx_response;
   }
 
-  /**
-   * Tests a pausable contract execution control.
-   * @param testingContract is the contract the method tests;
-   * @param execAction is an executable action to be called during a pause and after unpausing
-   * as the main part of the test. Should return the execution response code;
-   * @param actionCheck is called after unpausing to make sure the executable action worked.
-   */
-  async testExecControl(
-    testingContract: string,
-    execAction: () => Promise<number | undefined>,
-    actionCheck: () => Promise<void>,
-  ) {
-    // check contract's pause info before pausing
-    let pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    expect(pauseInfo).toEqual({ unpaused: {} });
-    expect(pauseInfo.paused).toEqual(undefined);
-
-    // pause contract
-    let res = await this.executeContract(
-      testingContract,
-      JSON.stringify({
-        pause: {
-          duration: 50,
-        },
-      }),
-    );
-    expect(res.code).toEqual(0);
-
-    // check contract's pause info after pausing
-    pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    expect(pauseInfo.unpaused).toEqual(undefined);
-    expect(pauseInfo.paused.until_height).toBeGreaterThan(0);
-
-    // execute msgs on paused contract
-    await expect(execAction()).rejects.toThrow(/Contract execution is paused/);
-
-    // unpause contract
-    res = await this.executeContract(
-      testingContract,
-      JSON.stringify({
-        unpause: {},
-      }),
-    );
-    expect(res.code).toEqual(0);
-
-    // check contract's pause info after unpausing
-    pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    expect(pauseInfo).toEqual({ unpaused: {} });
-    expect(pauseInfo.paused).toEqual(undefined);
-
-    // execute msgs on unpaused contract
-    const code = await execAction();
-    expect(code).toEqual(0);
-    await actionCheck();
-
-    // pause contract again for a short period
-    const shortPauseDuration = 5;
-    res = await this.executeContract(
-      testingContract,
-      JSON.stringify({
-        pause: {
-          duration: shortPauseDuration,
-        },
-      }),
-    );
-    expect(res.code).toEqual(0);
-
-    // check contract's pause info after pausing
-    pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    expect(pauseInfo.unpaused).toEqual(undefined);
-    expect(pauseInfo.paused.until_height).toBeGreaterThan(0);
-
-    // wait and check contract's pause info after unpausing
-    await this.chain.blockWaiter.waitBlocks(shortPauseDuration);
-    pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    expect(pauseInfo).toEqual({ unpaused: {} });
-    expect(pauseInfo.paused).toEqual(undefined);
-  }
-
   /* simulateFeeBurning simulates fee burning via send tx.
    */
   async simulateFeeBurning(
@@ -959,7 +880,9 @@ export const getEventAttribute = (
     (attr) => attr.key === Buffer.from(attribute).toString('base64'),
   )?.value as string;
 
-  expect(encodedAttr).toBeDefined();
+  if (encodedAttr === undefined) {
+    throw new Error(`Attribute ${attribute} not found`);
+  }
 
   return Buffer.from(encodedAttr, 'base64').toString('ascii');
 };
