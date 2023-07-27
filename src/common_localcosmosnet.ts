@@ -16,8 +16,6 @@ import { AccAddress } from '@cosmos-client/core/cjs/types';
 import { Coin } from '@cosmos-client/core/cjs/openapi/api';
 import { Wallet } from './helpers/types';
 
-import { crypto as cryptoNoble } from '@noble/hashes/crypto';
-
 export const disconnectValidator = async (name: string) => {
   const { stdout } = exec(`docker stop ${name}`);
   return stdout;
@@ -77,15 +75,6 @@ export class TestStateLocalCosmosTestNet {
   constructor(private config: any) {}
 
   async init() {
-    console.log('init');
-    console.log(cryptoNoble);
-    console.log(globalThis.crypto);
-    const cryptoObj =
-      typeof globalThis === 'object' && 'crypto' in globalThis
-        ? globalThis.crypto
-        : undefined;
-    console.log('cryptoObj');
-    console.log(cryptoObj);
     const neutronPrefix = process.env.NEUTRON_ADDRESS_PREFIX || 'neutron';
     const cosmosPrefix = process.env.COSMOS_ADDRESS_PREFIX || 'cosmos';
 

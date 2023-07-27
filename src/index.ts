@@ -6,9 +6,6 @@ if (typeof global === 'object' && !('crypto' in global)) {
 
 if (typeof global.crypto.getRandomValues !== 'function') {
   global.crypto.getRandomValues = getRandomValues;
-
-  console.log('absent getRandomValues');
-  console.log(global.crypto);
 }
 
 function getRandomValues(array: any) {
