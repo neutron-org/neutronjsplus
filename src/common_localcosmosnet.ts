@@ -192,7 +192,7 @@ export class TestStateLocalCosmosTestNet {
           to.toString(),
           { amount, denom },
           fee,
-          sequence.toNumber(),
+          sequence,
           rest.tx.BroadcastTxMode.Block,
         );
         break;

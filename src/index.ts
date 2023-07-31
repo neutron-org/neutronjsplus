@@ -1,5 +1,9 @@
+/* 
+This code should be inserted BEFORE all imports mostly for bip39 package.
+Because in some cases it can not find crypto.getRandomValues in the global object
+so this polifill will fix it.
+*/
 import crypto from 'crypto';
-
 if (typeof global === 'object' && !('crypto' in global)) {
   global.crypto = crypto;
 }
@@ -23,3 +27,10 @@ export * as tge from './helpers/tge';
 export * as types from './helpers/types';
 export * as wait from './helpers/wait';
 export { TestStateLocalCosmosTestNet } from './common_localcosmosnet';
+export {
+  NEUTRON_DENOM,
+  IBC_ATOM_DENOM,
+  IBC_USDC_DENOM,
+  COSMOS_DENOM,
+  IBC_RELAYER_NEUTRON_ADDRESS,
+} from './helpers/cosmos';

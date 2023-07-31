@@ -66,35 +66,37 @@ export type TotalBurnedNeutronsAmountResponse = {
   };
 };
 
-cosmosclient.codec.register(
-  '/neutron.interchainqueries.MsgRemoveInterchainQueryRequest',
-  neutron.interchainqueries.MsgRemoveInterchainQueryRequest,
-);
-cosmosclient.codec.register(
-  '/cosmos.params.v1beta1.ParameterChangeProposal',
-  proto.cosmos.params.v1beta1.ParameterChangeProposal,
-);
+export function registerCodecs() {
+  cosmosclient.codec.register(
+    '/neutron.interchainqueries.MsgRemoveInterchainQueryRequest',
+    neutron.interchainqueries.MsgRemoveInterchainQueryRequest,
+  );
+  cosmosclient.codec.register(
+    '/cosmos.params.v1beta1.ParameterChangeProposal',
+    proto.cosmos.params.v1beta1.ParameterChangeProposal,
+  );
 
-cosmosclient.codec.register(
-  '/neutron.interchainqueries.MsgRemoveInterchainQueryRequest',
-  neutron.interchainqueries.MsgRemoveInterchainQueryRequest,
-);
-cosmosclient.codec.register(
-  '/cosmos.params.v1beta1.ParameterChangeProposal',
-  proto.cosmos.params.v1beta1.ParameterChangeProposal,
-);
-cosmosclient.codec.register(
-  '/ibc.applications.transfer.v1.MsgTransfer',
-  ibcProto.applications.transfer.v1.MsgTransfer,
-);
-cosmosclient.codec.register(
-  '/cosmos.adminmodule.adminmodule.MsgSubmitProposal',
-  adminmodule.MsgSubmitProposal,
-);
-cosmosclient.codec.register(
-  '/ibc.lightclients.tendermint.v1.ClientState',
-  ibcProto.lightclients.tendermint.v1.ClientState,
-);
+  cosmosclient.codec.register(
+    '/neutron.interchainqueries.MsgRemoveInterchainQueryRequest',
+    neutron.interchainqueries.MsgRemoveInterchainQueryRequest,
+  );
+  cosmosclient.codec.register(
+    '/cosmos.params.v1beta1.ParameterChangeProposal',
+    proto.cosmos.params.v1beta1.ParameterChangeProposal,
+  );
+  cosmosclient.codec.register(
+    '/ibc.applications.transfer.v1.MsgTransfer',
+    ibcProto.applications.transfer.v1.MsgTransfer,
+  );
+  cosmosclient.codec.register(
+    '/cosmos.adminmodule.adminmodule.MsgSubmitProposal',
+    adminmodule.MsgSubmitProposal,
+  );
+  cosmosclient.codec.register(
+    '/ibc.lightclients.tendermint.v1.ClientState',
+    ibcProto.lightclients.tendermint.v1.ClientState,
+  );
+}
 
 export class CosmosWrapper {
   readonly sdk: cosmosclient.CosmosSDK;
@@ -439,7 +441,7 @@ export class WalletWrapper {
     msgs: T[],
     numAttempts = 10,
     mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
-    sequence: number = this.wallet.account.sequence.toNumber(),
+    sequence: Long.Long = this.wallet.account.sequence,
   ): Promise<CosmosTxV1beta1GetTxResponse> {
     const protoMsgs: Array<google.protobuf.IAny> = [];
     msgs.forEach((msg) => {
@@ -457,7 +459,7 @@ export class WalletWrapper {
               mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
             },
           },
-          sequence: new Long(sequence),
+          sequence,
         },
       ],
       fee,
@@ -600,7 +602,7 @@ export class WalletWrapper {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: this.chain.denom, amount: '1000' }],
     },
-    sequence: number = this.wallet.account.sequence.toNumber(),
+    sequence: Long.Long = this.wallet.account.sequence,
     mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
   ): Promise<InlineResponse20075TxResponse> {
     const { amount, denom = this.chain.denom } =
@@ -622,7 +624,7 @@ export class WalletWrapper {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: this.chain.denom, amount: '1000' }],
     },
-    sequence: number = this.wallet.account.sequence.toNumber(),
+    sequence: Long.Long = this.wallet.account.sequence,
     mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
   ): Promise<InlineResponse20075TxResponse> {
     const msg = new adminmodule.MsgSubmitProposal({
@@ -643,6 +645,132 @@ export class WalletWrapper {
     });
     const res = await this.execTx(fee, [msg], 10, mode, sequence);
     return res?.tx_response;
+  }
+
+  /**
+   * Tests a pausable contract execution control.
+   * @param testingContract is the contract the method tests;
+   * @param execAction is an executable action to be called during a pause and after unpausing
+   * as the main part of the test. Should return the execution response code;
+   * @param actionCheck is called after unpausing to make sure the executable action worked.
+   */
+  async testExecControl(
+    testingContract: string,
+    execAction: () => Promise<number | undefined>,
+    actionCheck: () => Promise<void>,
+  ) {
+    // check contract's pause info before pausing
+    let pauseInfo = await this.chain.queryPausedInfo(testingContract);
+    if (pauseInfo?.paused !== undefined) {
+      throw new Error('Contract is already paused');
+    }
+
+    if (pauseInfo?.unpaused === undefined) {
+      throw new Error('Contract is already paused');
+    }
+
+    // pause contract
+    let res = await this.executeContract(
+      testingContract,
+      JSON.stringify({
+        pause: {
+          duration: 50,
+        },
+      }),
+    );
+    if (res.code !== 0) {
+      throw new Error(`pause error: ${res.raw_log}`);
+    }
+
+    // check contract's pause info after pausing
+    pauseInfo = await this.chain.queryPausedInfo(testingContract);
+    if (
+      pauseInfo?.paused?.until_height === undefined ||
+      pauseInfo.paused.until_height <= 0
+    ) {
+      throw new Error('Contract can not be paused until 0 height');
+    }
+
+    if (pauseInfo?.unpaused !== undefined) {
+      throw new Error('Contract should not be unpaused');
+    }
+
+    // execute msgs on paused contract
+    try {
+      await execAction();
+    } catch (e) {
+      const error = e as Error;
+      if (!error.message.includes('Contract execution is paused')) {
+        throw new Error(error.message);
+      }
+    }
+
+    // unpause contract
+    res = await this.executeContract(
+      testingContract,
+      JSON.stringify({
+        unpause: {},
+      }),
+    );
+
+    if (res.code !== 0) {
+      throw new Error(`Contract execution error: ${res.raw_log}`);
+    }
+
+    // check contract's pause info after unpausing
+    pauseInfo = await this.chain.queryPausedInfo(testingContract);
+    if (pauseInfo?.paused !== undefined) {
+      throw new Error('Contract is already paused');
+    }
+
+    if (pauseInfo?.unpaused === undefined) {
+      throw new Error('Contract is already paused');
+    }
+
+    // execute msgs on unpaused contract
+    const code = await execAction();
+    if (code !== 0) {
+      throw new Error(`Contract execution code: ${code}`);
+    }
+    await actionCheck();
+
+    // pause contract again for a short period
+    const shortPauseDuration = 5;
+    res = await this.executeContract(
+      testingContract,
+      JSON.stringify({
+        pause: {
+          duration: shortPauseDuration,
+        },
+      }),
+    );
+    if (res.code !== 0) {
+      throw new Error(`Contract execution error: ${res.raw_log}`);
+    }
+
+    // check contract's pause info after pausing
+    pauseInfo = await this.chain.queryPausedInfo(testingContract);
+    if (
+      pauseInfo?.paused?.until_height === undefined ||
+      pauseInfo.paused.until_height <= 0
+    ) {
+      throw new Error('Contract can not be paused until 0 height');
+    }
+
+    if (pauseInfo?.unpaused !== undefined) {
+      throw new Error('Contract should not be unpaused');
+    }
+
+    // wait and check contract's pause info after unpausing
+    await this.chain.blockWaiter.waitBlocks(shortPauseDuration);
+    pauseInfo = await this.chain.queryPausedInfo(testingContract);
+    if (pauseInfo?.paused !== undefined) {
+      throw new Error('Contract is already paused');
+    }
+
+    if (pauseInfo?.unpaused === undefined) {
+      throw new Error('Contract is already paused');
+    }
   }
 
   /* simulateFeeBurning simulates fee burning via send tx.
@@ -881,7 +1009,7 @@ export const getEventAttribute = (
     (attr) => attr.key === Buffer.from(attribute).toString('base64'),
   )?.value as string;
 
-  if (encodedAttr === undefined) {
+  if (!encodedAttr) {
     throw new Error(`Attribute ${attribute} not found`);
   }
 
