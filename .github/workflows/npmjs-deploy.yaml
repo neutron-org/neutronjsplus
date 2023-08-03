@@ -25,8 +25,12 @@ jobs:
           version: ${{ steps.previoustag.outputs.tag }}
       - name: Apply version bump (patch)
         run: yarn version --new-version ${{ steps.semvers.outputs.patch }}
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
       - name: Git push version bump
-        run: git push origin dev --follow-tags --force
+        run: git push origin ${{ steps.extract_branch.outputs.branch }} --follow-tags --force
       #- uses: actions/setup-node@v3
       #  with:
       #    node-version: '16.x'
