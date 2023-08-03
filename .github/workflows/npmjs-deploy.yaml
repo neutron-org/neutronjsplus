@@ -3,6 +3,7 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: Npmjs
     steps:
       - uses: actions/checkout@v3
         with:
