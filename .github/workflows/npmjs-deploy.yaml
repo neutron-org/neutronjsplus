@@ -12,19 +12,8 @@ jobs:
         run: |
           git config --global user.email "${{ secrets.NEUTRON_EMAIL }}"
           git config --global user.name "${{ secrets.NEUTRON_USER }}"
-      # Setup .npmrc file to publish to npm
-      - name: 'Get Previous tag'
-        id: previoustag
-        uses: 'WyriHaximus/github-action-get-previous-tag@v1'
-        with:
-          fallback: 0.0.0 # Optional fallback tag to use when no tag can be found
-      - name: 'Get next minor version'
-        id: semvers
-        uses: 'WyriHaximus/github-action-next-semvers@v1'
-        with:
-          version: ${{ steps.previoustag.outputs.tag }}
       - name: Apply version bump (patch)
-        run: yarn version --new-version ${{ steps.semvers.outputs.patch }}
+        run: yarn version --patch
       - name: Get branch name
         id: branch-name
         uses: tj-actions/branch-names@v7
