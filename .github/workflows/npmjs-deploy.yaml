@@ -5,6 +5,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.NEUTRON_ACCESS_TOKEN }}
+      - name: Git config
+        run: |
+          git config --global user.email "${{ secrets.NEUTRON_EMAIL }}"
+          git config --global user.name "${{ secrets.NEUTRON_USER }}"
       # Setup .npmrc file to publish to npm
       - name: 'Get Previous tag'
         id: previoustag
@@ -16,13 +22,16 @@ jobs:
         uses: 'WyriHaximus/github-action-next-semvers@v1'
         with:
           version: ${{ steps.previoustag.outputs.tag }}
-      - uses: actions/setup-node@v3
-        with:
-          next-version: ${{ steps.semvers.outputs.patch }}
-          node-version: '16.x'
-          registry-url: 'https://registry.npmjs.org'
-          # Defaults to the user or organization that owns the workflow file
-          scope: '@neutron-org'
+      - name: Apply version bump (patch)
+        run: yarn version --new-version ${{ steps.semvers.outputs.patch }}
+      - name: Git push version bump
+        run: git push origin dev --follow-tags --force
+      #- uses: actions/setup-node@v3
+      #  with:
+      #    node-version: '16.x'
+      #    registry-url: 'https://registry.npmjs.org'
+      #    # Defaults to the user or organization that owns the workflow file
+      #    scope: '@neutron-org'
       #- run: yarn
       #- run: yarn publish
       #  env:
