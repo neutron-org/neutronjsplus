@@ -18,7 +18,7 @@ jobs:
           version: ${{ steps.previoustag.outputs.tag }}
       - uses: actions/setup-node@v3
         with:
-          next-version: ${{ steps.semvers.outputs }}
+          next-version: ${{ steps.semvers.outputs.patch }}
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
           # Defaults to the user or organization that owns the workflow file
