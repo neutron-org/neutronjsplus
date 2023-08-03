@@ -10,7 +10,7 @@ jobs:
         id: previoustag
         uses: 'WyriHaximus/github-action-get-previous-tag@v1'
         with:
-          fallback: 1.0.0 # Optional fallback tag to use when no tag can be found
+          fallback: 0.0.0 # Optional fallback tag to use when no tag can be found
       - name: 'Get next minor version'
         id: semvers
         uses: 'WyriHaximus/github-action-next-semvers@v1'
@@ -18,6 +18,7 @@ jobs:
           version: ${{ steps.previoustag.outputs.tag }}
       - uses: actions/setup-node@v3
         with:
+          next-version: ${{ steps.semvers.outputs }}
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
           # Defaults to the user or organization that owns the workflow file
