@@ -25,19 +25,18 @@ jobs:
           version: ${{ steps.previoustag.outputs.tag }}
       - name: Apply version bump (patch)
         run: yarn version --new-version ${{ steps.semvers.outputs.patch }}
-      - name: Extract branch name
-        shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-        id: extract_branch
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v7
       - name: Git push version bump
-        run: git push origin ${{ steps.extract_branch.outputs.branch }} --follow-tags --force
-      #- uses: actions/setup-node@v3
-      #  with:
-      #    node-version: '16.x'
-      #    registry-url: 'https://registry.npmjs.org'
-      #    # Defaults to the user or organization that owns the workflow file
-      #    scope: '@neutron-org'
-      #- run: yarn
-      #- run: yarn publish
-      #  env:
-      #    NODE_AUTH_TOKEN: ${{ secrets.NPMJS_ACCESS_TOKEN }}
+        run: git push origin ${{ steps.branch-name.outputs.current_branch }} --follow-tags --force
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+          # Defaults to the user or organization that owns the workflow file
+          scope: '@neutron-org'
+      - run: yarn
+      - run: yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_ACCESS_TOKEN }}
