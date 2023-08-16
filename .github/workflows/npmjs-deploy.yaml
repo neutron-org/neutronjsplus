@@ -28,6 +28,7 @@ jobs:
           # Defaults to the user or organization that owns the workflow file
           scope: '@neutron-org'
       - run: yarn
+      - run: yarn build
       - run: yarn publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPMJS_ACCESS_TOKEN }}
