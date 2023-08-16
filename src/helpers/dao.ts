@@ -623,7 +623,10 @@ export class DaoMember {
 
     const proposalId = parseInt(attribute);
     if (proposalId < 0) {
-      throw new Error('proposalId < 0');
+      throw new Error(
+        'failed to get proposal ID from the proposal creation tx attributes: ' +
+          proposalTx.raw_log,
+      );
     }
     return proposalId;
   }
@@ -812,7 +815,10 @@ export class DaoMember {
 
     const proposalId = parseInt(attribute);
     if (proposalId < 0) {
-      throw new Error('proposalId < 0');
+      throw new Error(
+        'failed to get proposal ID from the proposal creation tx attributes: ' +
+          proposalTx.raw_log,
+      );
     }
 
     return proposalId;
@@ -959,7 +965,10 @@ export class DaoMember {
 
     const proposalId1 = parseInt(attribute);
     if (proposalId1 < 0) {
-      throw new Error('proposalId < 0');
+      throw new Error(
+        'failed to get proposal ID from the proposal creation tx attributes: ' +
+          proposalTx.raw_log,
+      );
     }
     return proposalId1;
   }

@@ -1,17 +1,11 @@
-import { rest, websocket } from '@cosmos-client/core';
-import { CosmosSDK } from '@cosmos-client/core/cjs/sdk';
+import { websocket } from '@cosmos-client/core';
 
 global.WebSocket = require('ws');
 
-export const wait = async (seconds: number) =>
+export const waitSeconds = async (seconds: number) =>
   new Promise((r) => {
     setTimeout(() => r(true), 1000 * seconds);
   });
-
-export const getHeight = async (sdk: CosmosSDK) => {
-  const block = await rest.tendermint.getLatestBlock(sdk);
-  return +block.data.block.header.height;
-};
 
 export class BlockWaiter {
   url: string;

@@ -149,9 +149,6 @@ export const registerTransfersQuery = async (
       },
     }),
   );
-  if (res.code != 0) {
-    throw new Error('res.code != 0');
-  }
 
   const tx = await rest.tx.getTx(
     cm.chain.sdk as CosmosSDK,

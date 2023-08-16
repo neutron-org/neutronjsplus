@@ -268,9 +268,6 @@ export class Tge {
         },
       }),
     );
-    if (res.code != 0) {
-      throw new Error('res.code != 0');
-    }
 
     this.contracts.astroFactory = await instantiateAstroFactory(
       this.instantiator,
@@ -336,9 +333,6 @@ export class Tge {
         denom,
         this.neutronDenom,
       );
-      if (res.code != 0) {
-        throw new Error('res.code != 0');
-      }
     }
 
     const pairs = (
@@ -392,9 +386,6 @@ export class Tge {
         contract,
         liquidity,
       );
-      if (res.code != 0) {
-        throw new Error('res.code != 0');
-      }
     }
   }
 
@@ -426,9 +417,6 @@ export class Tge {
       this.atomDenom,
       this.usdcDenom,
     );
-    if (res.code != 0) {
-      throw new Error('res.code != 0');
-    }
   }
 
   async deployLockdrop() {
@@ -458,9 +446,6 @@ export class Tge {
       this.pairs.usdc_ntrn.liquidity,
       this.contracts.astroGenerator,
     );
-    if (res.code != 0) {
-      throw new Error('res.code != 0');
-    }
 
     res = await executeAuctionUpdateConfig(
       this.instantiator,
@@ -473,9 +458,6 @@ export class Tge {
         ntrn_atom_lp_token_address: this.pairs.atom_ntrn.liquidity,
       },
     );
-    if (res.code != 0) {
-      throw new Error('res.code != 0');
-    }
 
     for (const contract of [
       this.contracts.vestingAtomLp,
@@ -486,9 +468,6 @@ export class Tge {
         contract,
         [this.contracts.auction],
       );
-      if (res.code != 0) {
-        throw new Error('res.code != 0');
-      }
     }
 
     res = await executeCreditsUpdateConfig(
@@ -497,9 +476,6 @@ export class Tge {
       this.contracts.airdrop,
       this.contracts.lockdrop,
     );
-    if (res.code != 0) {
-      throw new Error('res.code != 0');
-    }
     // 4000100 - users
     // 10000000 - extra to test its ignored in credits vault voting power
     res = await executeCreditsMint(
@@ -508,9 +484,6 @@ export class Tge {
       this.neutronDenom,
       '14000100',
     );
-    if (res.code != 0) {
-      throw new Error('res.code != 0');
-    }
   }
 
   async deployLockdropVault() {
@@ -541,9 +514,6 @@ export class Tge {
         denom1,
         denom2,
       );
-      if (res.code != 0) {
-        throw new Error('res.code != 0');
-      }
     }
 
     this.contracts.lockdropVault = await instantiateLockdropVault(

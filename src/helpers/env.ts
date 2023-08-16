@@ -1,7 +1,9 @@
+import { rest } from '@cosmos-client/core';
+import { CosmosSDK } from '@cosmos-client/core/cjs/sdk';
 import axios from 'axios';
 import { execSync } from 'child_process';
 import { ChannelsList, NeutronContract } from './types';
-import { wait } from './wait';
+import { waitSeconds } from './wait';
 import { promises as fsPromise } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
@@ -76,7 +78,7 @@ const waitForHTTP = async (
       }
       // eslint-disable-next-line no-empty
     } catch (e) {}
-    await wait(1);
+    await waitSeconds(1);
   }
   throw new Error('No port opened');
 };
@@ -101,12 +103,12 @@ export const waitForChannel = async (
           (channel) => channel.counterparty.channel_id !== '',
         )
       ) {
-        await wait(20);
+        await waitSeconds(20);
         return;
       }
       // eslint-disable-next-line no-empty
     } catch (e) {}
-    await wait(1);
+    await waitSeconds(1);
   }
 
   throw new Error('No channel opened');
@@ -164,4 +166,9 @@ const showContractsHashes = async () => {
   }
 
   console.log(result);
+};
+
+export const getHeight = async (sdk: CosmosSDK) => {
+  const block = await rest.tendermint.getLatestBlock(sdk);
+  return +block.data.block.header.height;
 };
