@@ -1,12 +1,12 @@
 {
-  "name": "@neutron-org/neutronjs",
+  "name": "@neutron-org/neutronjsplus",
   "version": "0.0.4",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "hhttps://github.com/neutron-org/neutronjs.git"
+    "url": "hhttps://github.com/neutron-org/neutronjsplus.git"
   },
   "scripts": {
     "build": "rimraf ./build && tsc && mkdir ./dist/generated/ -p && cp ./src/generated/* ./dist/generated/ -r",
