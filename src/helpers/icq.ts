@@ -149,12 +149,14 @@ export const registerTransfersQuery = async (
       },
     }),
   );
-  expect(res.code).toEqual(0);
+
   const tx = await rest.tx.getTx(
     cm.chain.sdk as CosmosSDK,
     res.txhash as string,
   );
-  expect(tx?.data.tx_response?.code).toEqual(0);
+  if (tx?.data.tx_response?.code != 0) {
+    throw new Error('tx?.data.tx_response?.code != 0');
+  }
 };
 
 /**

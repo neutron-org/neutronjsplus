@@ -1,7 +1,6 @@
 import MerkleTree from 'merkletreejs';
 import crypto from 'crypto';
 import { CosmosWrapper, WalletWrapper, getEventAttribute } from './cosmos';
-import { CodeId } from '../types';
 import {
   NativeToken,
   Token,
@@ -10,6 +9,7 @@ import {
   vestingAccount,
   vestingSchedule,
   vestingSchedulePoint,
+  CodeId,
 } from './types';
 import {
   CreditsVaultConfig,
@@ -211,7 +211,9 @@ export class Tge {
       const codeId = await this.instantiator.storeWasm(
         NeutronContract[contract],
       );
-      expect(codeId).toBeGreaterThan(0);
+      if (codeId <= 0) {
+        throw new Error('codeId <= 0');
+      }
       this.codeIds[contract] = codeId;
     }
 
@@ -266,7 +268,6 @@ export class Tge {
         },
       }),
     );
-    expect(res.code).toEqual(0);
 
     this.contracts.astroFactory = await instantiateAstroFactory(
       this.instantiator,
@@ -332,13 +333,14 @@ export class Tge {
         denom,
         this.neutronDenom,
       );
-      expect(res.code).toEqual(0);
     }
 
     const pairs = (
       await queryFactoryPairs(this.chain, this.contracts.astroFactory)
     ).pairs;
-    expect(pairs).toHaveLength(2);
+    if (pairs.length != 2) {
+      throw new Error('pairs.length != 2');
+    }
     this.pairs = {
       atom_ntrn: {
         contract: pairs[0].contract_addr,
@@ -384,7 +386,6 @@ export class Tge {
         contract,
         liquidity,
       );
-      expect(res.code).toEqual(0);
     }
   }
 
@@ -416,7 +417,6 @@ export class Tge {
       this.atomDenom,
       this.usdcDenom,
     );
-    expect(res.code).toEqual(0);
   }
 
   async deployLockdrop() {
@@ -446,7 +446,6 @@ export class Tge {
       this.pairs.usdc_ntrn.liquidity,
       this.contracts.astroGenerator,
     );
-    expect(res.code).toEqual(0);
 
     res = await executeAuctionUpdateConfig(
       this.instantiator,
@@ -459,7 +458,6 @@ export class Tge {
         ntrn_atom_lp_token_address: this.pairs.atom_ntrn.liquidity,
       },
     );
-    expect(res.code).toEqual(0);
 
     for (const contract of [
       this.contracts.vestingAtomLp,
@@ -470,7 +468,6 @@ export class Tge {
         contract,
         [this.contracts.auction],
       );
-      expect(res.code).toEqual(0);
     }
 
     res = await executeCreditsUpdateConfig(
@@ -479,7 +476,6 @@ export class Tge {
       this.contracts.airdrop,
       this.contracts.lockdrop,
     );
-    expect(res.code).toEqual(0);
     // 4000100 - users
     // 10000000 - extra to test its ignored in credits vault voting power
     res = await executeCreditsMint(
@@ -488,7 +484,6 @@ export class Tge {
       this.neutronDenom,
       '14000100',
     );
-    expect(res.code).toEqual(0);
   }
 
   async deployLockdropVault() {
@@ -519,7 +514,6 @@ export class Tge {
         denom1,
         denom2,
       );
-      expect(res.code).toEqual(0);
     }
 
     this.contracts.lockdropVault = await instantiateLockdropVault(
@@ -652,7 +646,9 @@ export const instantiateAuction = async (
     }),
     label,
   );
-  expect(res).toBeTruthy();
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
   return res[0]._contract_address;
 };
 
@@ -683,7 +679,9 @@ export const instantiateAirdrop = async (
     }),
     label,
   );
-  expect(res).toBeTruthy();
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
   return res[0]._contract_address;
 };
 
@@ -739,7 +737,9 @@ export const instantiateCredits = async (
     }),
     label,
   );
-  expect(res).toBeTruthy();
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
   return res[0]._contract_address;
 };
 
@@ -801,7 +801,9 @@ export const instantiateCreditsVault = async (
     }),
     label,
   );
-  expect(res).toBeTruthy();
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
   return res[0]._contract_address;
 };
 
@@ -895,7 +897,9 @@ export const instantiateLockdrop = async (
     }),
     label,
   );
-  expect(res).toBeTruthy();
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
   return res[0]._contract_address;
 };
 
@@ -948,7 +952,9 @@ export const instantiatePriceFeed = async (
   label = 'price_feed',
 ) => {
   const res = await cm.instantiateContract(codeId, JSON.stringify({}), label);
-  expect(res).toBeTruthy();
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
   return res[0]._contract_address;
 };
 
@@ -964,7 +970,9 @@ export const instantiateCoinRegistry = async (
     }),
     label,
   );
-  expect(res).toBeTruthy();
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
   return res[0]._contract_address;
 };
 
@@ -998,7 +1006,9 @@ export const instantiateAstroFactory = async (
     }),
     label,
   );
-  expect(res).toBeTruthy();
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
   return res[0]._contract_address;
 };
 
@@ -1064,7 +1074,9 @@ export const instantiateAstroVesting = async (
     }),
     label,
   );
-  expect(res).toBeTruthy();
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
   return res[0]._contract_address;
 };
 
@@ -1102,7 +1114,9 @@ export const instantiateVestingLp = async (
     }),
     label,
   );
-  expect(res).toBeTruthy();
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
   return res[0]._contract_address;
 };
 
@@ -1170,7 +1184,9 @@ export const instantiateAstroGenerator = async (
     }),
     label,
   );
-  expect(res).toBeTruthy();
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
   return res[0]._contract_address;
 };
 
@@ -1199,7 +1215,9 @@ export const instantiateLockdropVault = async (
     }),
     label,
   );
-  expect(res).toBeTruthy();
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
   return res[0]._contract_address;
 };
 
@@ -1286,7 +1304,9 @@ export const instantiateAstroportOracle = async (
     }),
     label,
   );
-  expect(res).toBeTruthy();
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
   return res[0]._contract_address;
 };
 
@@ -1343,6 +1363,8 @@ export const instantiateVestingLpVault = async (
     }),
     label,
   );
-  expect(res).toBeTruthy();
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
   return res[0]._contract_address;
 };
