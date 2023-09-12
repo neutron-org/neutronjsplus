@@ -31,6 +31,7 @@ import {
   CodeId,
 } from './types';
 import { getContractBinary } from './env';
+
 const adminmodule = AdminProto.adminmodule.adminmodule;
 
 export const NEUTRON_DENOM = process.env.NEUTRON_DENOM || 'untrn';

@@ -20,9 +20,9 @@ yarn add @neutron-org/neutronjsplus
 
 ## Features
 
-- Contracts management
-- Sending and receiving transactions
-- Interaction with the Neutron blockchain, and much more
+- Contracts management;
+- Sending and receiving transactions;
+- Interaction with the Neutron blockchain, and much more.
 
 ## Usage Example
 
