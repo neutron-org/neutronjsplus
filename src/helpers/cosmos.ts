@@ -174,7 +174,7 @@ export class CosmosWrapper {
     }
   }
 
-  async getSeq(address: cosmosclient.AccAddress): Promise<Long.Long> {
+  async getSeq(address: cosmosclient.AccAddress): Promise<any> {
     const account = await rest.auth
       .account(this.sdk, address)
       .then((res) =>
@@ -442,7 +442,7 @@ export class WalletWrapper {
     msgs: T[],
     numAttempts = 10,
     mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
-    sequence: Long.Long = this.wallet.account.sequence,
+    sequence = this.wallet.account.sequence,
   ): Promise<CosmosTxV1beta1GetTxResponse> {
     const protoMsgs: Array<google.protobuf.IAny> = [];
     msgs.forEach((msg) => {
@@ -630,7 +630,7 @@ export class WalletWrapper {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: this.chain.denom, amount: '1000' }],
     },
-    sequence: Long.Long = this.wallet.account.sequence,
+    sequence = this.wallet.account.sequence,
     mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
   ): Promise<InlineResponse20075TxResponse> {
     const { amount, denom = this.chain.denom } =
@@ -652,7 +652,7 @@ export class WalletWrapper {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: this.chain.denom, amount: '1000' }],
     },
-    sequence: Long.Long = this.wallet.account.sequence,
+    sequence = this.wallet.account.sequence,
     mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
   ): Promise<InlineResponse20075TxResponse> {
     const msg = new adminmodule.MsgSubmitProposal({
