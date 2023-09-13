@@ -16,6 +16,7 @@
     "fmt": "eslint ./src --fix"
   },
   "dependencies": {
+    "@cosmjs/cosmwasm-stargate": "^0.31.1",
     "@cosmos-client/core": "0.45.13",
     "@cosmos-client/cosmwasm": "^0.20.1",
     "@cosmos-client/ibc": "^1.2.1",

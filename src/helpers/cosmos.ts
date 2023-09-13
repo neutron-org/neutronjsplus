@@ -5,6 +5,8 @@ import { cosmos as AdminProto, ibc as ibcProto } from '../generated/ibc/proto';
 import { neutron } from '../generated/proto';
 import axios from 'axios';
 import Long from 'long';
+import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { BlockWaiter, getWithAttempts } from './wait';
 import {
   Coin,
@@ -826,6 +828,10 @@ export const mnemonicToWallet = async (
   const privKey = new proto.cosmos.crypto.secp256k1.PrivKey({
     key: await cosmosclient.generatePrivKeyFromMnemonic(mnemonic),
   });
+  const cwClient = await SigningCosmWasmClient.connectWithSigner(
+    sdk.url,
+    await DirectSecp256k1HdWallet.fromMnemonic(mnemonic),
+  );
 
   const pubKey = privKey.pubKey();
   let account = null;
@@ -856,7 +862,7 @@ export const mnemonicToWallet = async (
       throw new Error("can't get account");
     }
   }
-  return new Wallet(address, account, pubKey, privKey, addrPrefix);
+  return new Wallet(address, account, pubKey, privKey, addrPrefix, cwClient);
 };
 
 export const getSequenceId = (rawLog: string | undefined): number => {
