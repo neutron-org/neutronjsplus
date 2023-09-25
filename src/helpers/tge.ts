@@ -10,6 +10,7 @@ import {
   vestingSchedule,
   vestingSchedulePoint,
   CodeId,
+  VotingPowerAtHeightResponse,
 } from './types';
 import {
   CreditsVaultConfig,
@@ -117,6 +118,10 @@ export class Tge {
     atom_ntrn: { contract: string; liquidity: string };
     usdc_ntrn: { contract: string; liquidity: string };
   };
+  old_pairs: {
+    atom_ntrn: { contract: string; liquidity: string };
+    usdc_ntrn: { contract: string; liquidity: string };
+  };
   times: Record<string, number>;
   lockdropVaultName: string;
   lockdropVaultDescription: string;
@@ -192,17 +197,22 @@ export class Tge {
     for (const contract of [
       'TGE_CREDITS',
       'TGE_AUCTION',
-      'TGE_LOCKDROP',
+      'TGE_LOCKDROP_CURRENT',
+      'TGE_LOCKDROP_NEW',
       'TGE_AIRDROP',
       'TGE_PRICE_FEED_MOCK',
       'ASTRO_PAIR',
+      'ASTRO_PAIR_CL',
       'ASTRO_FACTORY',
       'ASTRO_TOKEN',
+      'ASTRO_XASTRO_TOKEN',
       'ASTRO_GENERATOR',
       'ASTRO_WHITELIST',
       'ASTRO_VESTING',
       'ASTRO_COIN_REGISTRY',
       'VESTING_LP',
+      'VESTING_LP_CURRENT',
+      'VESTING_LP_NEW',
       'LOCKDROP_VAULT',
       'CREDITS_VAULT',
       'VESTING_LP_VAULT',
@@ -272,8 +282,11 @@ export class Tge {
     this.contracts.astroFactory = await instantiateAstroFactory(
       this.instantiator,
       this.codeIds.ASTRO_FACTORY,
-      this.codeIds.ASTRO_PAIR,
-      this.codeIds.ASTRO_TOKEN,
+      {
+        xyk: this.codeIds.ASTRO_PAIR,
+        concentrated: this.codeIds.ASTRO_PAIR_CL,
+      },
+      this.codeIds.ASTRO_XASTRO_TOKEN,
       this.contracts.coinRegistry,
     );
 
@@ -366,13 +379,13 @@ export class Tge {
 
     this.contracts.vestingAtomLp = await instantiateVestingLp(
       this.instantiator,
-      this.codeIds.VESTING_LP,
+      this.codeIds.VESTING_LP_CURRENT,
       this.tokenInfoManager.wallet.address.toString(),
       'vesting_atom_lp',
     );
     this.contracts.vestingUsdcLp = await instantiateVestingLp(
       this.instantiator,
-      this.codeIds.VESTING_LP,
+      this.codeIds.VESTING_LP_CURRENT,
       this.tokenInfoManager.wallet.address.toString(),
       'vesting_usdc_lp',
     );
@@ -422,7 +435,7 @@ export class Tge {
   async deployLockdrop() {
     this.contracts.lockdrop = await instantiateLockdrop(
       this.instantiator,
-      this.codeIds.TGE_LOCKDROP,
+      this.codeIds.TGE_LOCKDROP_CURRENT,
       null,
       this.tokenInfoManager.wallet.address.toString(),
       this.contracts.credits,
@@ -602,6 +615,36 @@ export class Tge {
       atomNtrnLpTokenBalance: +atomNtrnLpTokenBalance.balance,
       usdcNtrnLpTokenBalance: +usdcNtrnLpTokenBalance.balance,
     };
+  }
+
+  /**
+   * retrieves user's voting power from lp vault.
+   */
+  async lpVotingPower(user: string): Promise<VotingPowerAtHeightResponse> {
+    return await this.chain.queryContract<VotingPowerAtHeightResponse>(
+      this.contracts.vestingLpVault,
+      {
+        voting_power_at_height: {
+          address: user,
+        },
+      },
+    );
+  }
+
+  /**
+   * retrieves user's voting power from lockdrop vault.
+   */
+  async lockdropVotingPower(
+    user: string,
+  ): Promise<VotingPowerAtHeightResponse> {
+    return await this.chain.queryContract<VotingPowerAtHeightResponse>(
+      this.contracts.lockdropVault,
+      {
+        voting_power_at_height: {
+          address: user,
+        },
+      },
+    );
   }
 }
 
@@ -979,31 +1022,44 @@ export const instantiateCoinRegistry = async (
 export const instantiateAstroFactory = async (
   cm: WalletWrapper,
   codeId: CodeId,
-  astroPairCodeId: CodeId,
+  astroPairCodeId: CodeId | Record<string, CodeId>,
   astroTokenCodeId: CodeId,
   coinRegistryAddress: string,
   label = 'astro_factory',
 ) => {
+  const config = {
+    pair_configs:
+      typeof astroPairCodeId === 'number'
+        ? [
+            {
+              code_id: astroPairCodeId,
+              pair_type: {
+                xyk: {},
+              },
+              total_fee_bps: 0,
+              maker_fee_bps: 0,
+              is_disabled: false,
+              is_generator_disabled: false,
+            },
+          ]
+        : Object.entries(astroPairCodeId).map(([pairType, codeId]) => ({
+            code_id: codeId,
+            pair_type: {
+              ...(pairType === 'xyk' ? { xyk: {} } : { custom: pairType }),
+            },
+            total_fee_bps: 0,
+            maker_fee_bps: 0,
+            is_disabled: false,
+            is_generator_disabled: false,
+          })),
+    token_code_id: astroTokenCodeId,
+    owner: cm.wallet.address.toString(),
+    whitelist_code_id: 0,
+    coin_registry_address: coinRegistryAddress,
+  };
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
-      pair_configs: [
-        {
-          code_id: astroPairCodeId,
-          pair_type: {
-            xyk: {},
-          },
-          total_fee_bps: 0,
-          maker_fee_bps: 0,
-          is_disabled: false,
-          is_generator_disabled: false,
-        },
-      ],
-      token_code_id: astroTokenCodeId,
-      owner: cm.wallet.address.toString(),
-      whitelist_code_id: 0,
-      coin_registry_address: coinRegistryAddress,
-    }),
+    JSON.stringify(config),
     label,
   );
   if (!res) {
@@ -1012,40 +1068,85 @@ export const instantiateAstroFactory = async (
   return res[0]._contract_address;
 };
 
+export const executeDeregisterPair = async (
+  cm: WalletWrapper,
+  contractAddress: string,
+  denom1: string,
+  denom2: string,
+) => {
+  const config = {
+    deregister: {
+      asset_infos: [
+        {
+          native_token: {
+            denom: denom1,
+          },
+        },
+        {
+          native_token: {
+            denom: denom2,
+          },
+        },
+      ],
+    },
+  };
+  return cm.executeContract(contractAddress, JSON.stringify(config));
+};
+
 export const executeFactoryCreatePair = async (
   cm: WalletWrapper,
   contractAddress: string,
   denom1: string,
   denom2: string,
-) =>
-  cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      create_pair: {
-        pair_type: {
-          xyk: {},
-        },
-        asset_infos: [
-          {
-            native_token: {
-              denom: denom1,
-            },
-          },
-          {
-            native_token: {
-              denom: denom2,
-            },
-          },
-        ],
+  type = 'xyk',
+  initParams = '',
+) => {
+  const config = {
+    create_pair: {
+      pair_type: {
+        ...(type === 'xyk' ? { [type]: {} } : { custom: type }),
       },
-    }),
-  );
+      asset_infos: [
+        {
+          native_token: {
+            denom: denom1,
+          },
+        },
+        {
+          native_token: {
+            denom: denom2,
+          },
+        },
+      ],
+      ...(initParams ? { init_params: initParams } : {}),
+    },
+  };
+  return cm.executeContract(contractAddress, JSON.stringify(config));
+};
+
+export const executeGeneratorSetupPools = async (
+  cm: WalletWrapper,
+  contractAddress: string,
+  pools: string[],
+  allocPoint: string,
+) => {
+  const config = {
+    setup_pools: {
+      pools: pools.map((p) => [p, allocPoint]),
+    },
+  };
+  return cm.executeContract(contractAddress, JSON.stringify(config));
+};
 
 export type PairInfo = {
   asset_infos: Record<'native_token' | 'token', { denom: string }>[];
   contract_addr: string;
   liquidity_token: string;
   pair_type: Record<string, object>;
+};
+
+export type RewardInfoResponse = {
+  base_reward_token: string;
 };
 
 export type FactoryPairsResponse = {
@@ -1059,7 +1160,66 @@ export const queryFactoryPairs = async (
   chain.queryContract<FactoryPairsResponse>(contractAddress, {
     pairs: {},
   });
-
+  
+  export const queryTotalUnclaimedAmountAtHeight = async (
+    chain: CosmosWrapper,
+    address: string,
+    height: number,
+  ) =>
+    chain.queryContract<string>(address, {
+      historical_extension: {
+        msg: {
+          unclaimed_total_amount_at_height: {
+            height: height,
+          },
+        },
+      },
+    });
+  
+  export const queryNtrnCLBalanceAtHeight = async (
+    chain: CosmosWrapper,
+    address: string,
+    height: string,
+  ) =>
+    chain.queryContract<string>(address, {
+      asset_balance_at: {
+        asset_info: {
+          native_token: {
+            denom: 'untrn',
+          },
+        },
+        block_height: height,
+      },
+    });
+  
+  export const queryUnclaimmedAmountAtHeight = async (
+    chain: CosmosWrapper,
+    address: string,
+    height: number,
+    user: string,
+  ) =>
+    chain.queryContract<string>(address, {
+      historical_extension: {
+        msg: {
+          unclaimed_amount_at_height: {
+            address: user,
+            height: height,
+          },
+        },
+      },
+    });
+  
+  export const queryAvialableAmount = async (
+    chain: CosmosWrapper,
+    address: string,
+    user: string,
+  ) =>
+    chain.queryContract<string>(address, {
+      available_amount: {
+        address: user,
+      },
+    });
+  
 export const instantiateAstroVesting = async (
   cm: WalletWrapper,
   codeId: CodeId,
