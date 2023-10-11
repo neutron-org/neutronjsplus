@@ -121,6 +121,22 @@ export type ProposalModule = {
   };
 };
 
+export type SubdaoProposalConfig = {
+  threshold: any;
+  max_voting_period: Duration;
+  min_voting_period: Duration;
+  allow_revoting: boolean;
+  dao: string;
+  close_proposal_on_execution_failure: boolean;
+};
+
+export type Duration = {
+  height: number | null;
+  time: number | null;
+};
+
+export type ProposalFailedExecutionErrorResponse = string;
+
 export const DaoContractLabels = {
   DAO_CORE: 'neutron.core',
   NEUTRON_VAULT: 'neutron.voting.vaults.neutron',
@@ -448,6 +464,20 @@ export class Dao {
       this.contracts.proposals[customModule].pre_propose.timelock.address,
       {
         proposal: {
+          proposal_id: proposalId,
+        },
+      },
+    );
+  }
+
+  async getTimelockedProposalError(
+    proposalId: number,
+    customModule = 'single',
+  ): Promise<ProposalFailedExecutionErrorResponse> {
+    return this.chain.queryContract<ProposalFailedExecutionErrorResponse>(
+      this.contracts.proposals[customModule].pre_propose.timelock.address,
+      {
+        proposal_execution_error: {
           proposal_id: proposalId,
         },
       },
@@ -891,10 +921,17 @@ export class DaoMember {
   async supportAndExecuteProposal(
     proposalId: number,
     customModule = 'single',
+    attempts = 5,
   ): Promise<TimeLockSingleChoiceProposal> {
     await this.voteYes(proposalId, customModule);
     await this.executeProposal(proposalId, customModule);
-    return await this.dao.getTimelockedProposal(proposalId, customModule);
+    return await getWithAttempts(
+      this.dao.chain.blockWaiter,
+      async () =>
+        await this.dao.getTimelockedProposal(proposalId, customModule),
+      async (response) => response.id && +response.id > 0,
+      attempts,
+    );
   }
 
   async executeTimelockedProposal(
@@ -908,6 +945,33 @@ export class DaoMember {
           proposal_id: proposalId,
         },
       }),
+    );
+  }
+
+  async submitUpdateConfigProposal(
+    title: string,
+    description: string,
+    config: SubdaoProposalConfig,
+    deposit: string,
+    customModule = 'single',
+  ): Promise<number> {
+    const msg = {
+      update_config: config,
+    };
+    const message = {
+      wasm: {
+        execute: {
+          contract_addr: this.dao.contracts.proposals[customModule].address,
+          msg: Buffer.from(JSON.stringify(msg)).toString('base64'),
+          funds: [],
+        },
+      },
+    };
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      deposit,
     );
   }
 
@@ -1318,6 +1382,7 @@ export const deploySubdao = async (
   mainDaoCoreAddress: string,
   overrulePreProposeAddress: string,
   securityDaoAddr: string,
+  closeProposalOnExecutionFailure = true,
 ): Promise<Dao> => {
   const coreCodeId = await cm.storeWasm(NeutronContract.SUBDAO_CORE);
   const cw4VotingCodeId = await cm.storeWasm(NeutronContract.CW4_VOTING);
@@ -1367,7 +1432,7 @@ export const deploySubdao = async (
         },
       },
     },
-    close_proposal_on_execution_failure: false,
+    close_proposal_on_execution_failure: closeProposalOnExecutionFailure,
   };
   const proposalModuleInstantiateInfo = {
     code_id: proposeCodeId,
@@ -1461,6 +1526,7 @@ export const setupSubDaoTimelockSet = async (
   mainDaoAddress: string,
   securityDaoAddr: string,
   mockMainDao: boolean,
+  closeProposalOnExecutionFailure = true,
 ): Promise<Dao> => {
   const daoContracts = await getDaoContracts(cm.chain, mainDaoAddress);
   const subDao = await deploySubdao(
@@ -1468,6 +1534,7 @@ export const setupSubDaoTimelockSet = async (
     mockMainDao ? cm.wallet.address.toString() : daoContracts.core.address,
     daoContracts.proposals.overrule.pre_propose.address,
     securityDaoAddr,
+    closeProposalOnExecutionFailure,
   );
 
   const mainDaoMember = new DaoMember(cm, new Dao(cm.chain, daoContracts));
