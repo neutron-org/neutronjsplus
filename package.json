@@ -1,6 +1,6 @@
 {
   "name": "@neutron-org/neutronjsplus",
-  "version": "0.0.16",
+  "version": "0.0.15",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "Apache-2.0",
@@ -9,7 +9,7 @@
     "url": "hhttps://github.com/neutron-org/neutronjsplus.git"
   },
   "scripts": {
-    "build": "rimraf ./build && tsc && mkdir ./dist/generated/ -p && cp ./src/generated/* ./dist/generated/ -r",
+    "build": "rimraf ./build && tsc && mkdir -p ./dist/generated/ && cp -r ./src/generated/* ./dist/generated/",
     "gen:proto": "mkdir ./src/generated -p && bash ./gen-proto.sh",
     "gen:proto-ibc-go": "mkdir ./src/generated -p && bash ./gen-proto-ibc-go.sh",
     "lint": "eslint ./src",
@@ -32,12 +32,18 @@
     "eslint": "^8.13.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^8.0.3",
     "lint-staged": "^12.3.8",
     "prettier": "^2.6.2",
     "rimraf": "5.0.1",
     "ts-node": "^9.1.1",
     "tslint": "^5.20.1",
     "typescript": "^5.1.6"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn build"
+    }
   },
   "lint-staged": {
     "./**/src/**/*.{ts,tsx}": [
