@@ -193,10 +193,11 @@ export class TestStateLocalCosmosTestNet {
           { amount, denom },
           fee,
           sequence,
-          cosmosclient.rest.tx.BroadcastTxMode.Block,
+          cosmosclient.rest.tx.BroadcastTxMode.Async,
         );
         break;
       } catch (e) {
+        console.log(e);
         await cm.chain.blockWaiter.waitBlocks(1);
         attemptCount++;
       }

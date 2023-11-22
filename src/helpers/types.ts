@@ -1,5 +1,4 @@
 import cosmosclient from '@cosmos-client/core';
-import { cosmos } from '@cosmos-client/core/cjs/proto';
 import bech32 from 'bech32';
 
 export type AcknowledgementResult =
@@ -81,9 +80,8 @@ export type AckFailuresResponse = {
 // Failure represents a single contractmanager failure
 type Failure = {
   address: string;
-  id: number;
-  ack_id: number;
-  ack_type: string;
+  id: string;
+  sudo_payload: string; // base64 encoded json bytes
 };
 
 export type ScheduleResponse = {
@@ -128,8 +126,7 @@ export const NeutronContract = {
   RESERVE: 'neutron_reserve.wasm',
   SUBDAO_CORE: 'cwd_subdao_core.wasm',
   SUBDAO_PREPROPOSE: 'cwd_subdao_pre_propose_single.wasm',
-  SUBDAO_PREPROPOSE_NO_TIMELOCK:
-    'cwd_security_subdao_pre_propose.wasm',
+  SUBDAO_PREPROPOSE_NO_TIMELOCK: 'cwd_security_subdao_pre_propose.wasm',
   SUBDAO_PROPOSAL: 'cwd_subdao_proposal_single.wasm',
   SUBDAO_TIMELOCK: 'cwd_subdao_timelock_single.wasm',
   LOCKDROP_VAULT: 'lockdrop_vault.wasm',
@@ -156,6 +153,7 @@ export const NeutronContract = {
   VESTING_INVESTORS: 'vesting_investors.wasm',
   INVESTORS_VESTING_VAULT: 'investors_vesting_vault.wasm',
   TOKENFACTORY: 'tokenfactory.wasm',
+  BEFORE_SEND_HOOK_TEST: 'before_send_hook_test.wasm',
 };
 
 export type MultiChoiceOption = {
@@ -268,8 +266,23 @@ export type IcaHostParamsResponse = {
   };
 };
 
-export type GlobalFeeMinGasPrices = {
-  minimum_gas_prices: cosmos.base.v1beta1.ICoin[];
+export type InterchainqueriesParamsResponse = {
+  params: {
+    query_submit_timeout: number;
+    tx_query_removal_limit: number;
+  };
+};
+
+export type InterchaintxsParamsResponse = {
+  params: {
+    msg_submit_tx_max_messages: string;
+  };
+};
+
+export type GlobalfeeParamsResponse = {
+  minimum_gas_prices: cosmosclient.proto.cosmos.base.v1beta1.ICoin[];
+  bypass_min_fee_msg_types: string[];
+  max_total_bypass_min_fee_msg_gas_usage: string;
 };
 
 export type ContractAdminResponse = {
@@ -278,6 +291,7 @@ export type ContractAdminResponse = {
   };
 };
 
+// TODO: is this the right place?
 export class Wallet {
   address: cosmosclient.AccAddress | cosmosclient.ValAddress;
   account: cosmosclient.proto.cosmos.auth.v1beta1.BaseAccount | null;

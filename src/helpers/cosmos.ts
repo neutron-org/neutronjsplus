@@ -1,6 +1,6 @@
 import cosmosclient from '@cosmos-client/core';
 import { AccAddress, ValAddress } from '@cosmos-client/core/cjs/types';
-import { proto as cosmwasmproto } from '@cosmos-client/cosmwasm/cjs/module';
+import cosmwasmclient from '@cosmos-client/cosmwasm';
 import { cosmos as AdminProto, ibc as ibcProto } from '../generated/ibc/proto';
 import { neutron } from '../generated/proto';
 import axios from 'axios';
@@ -11,11 +11,10 @@ import {
   CosmosTxV1beta1GetTxResponse,
   BroadcastTx200ResponseTxResponse,
 } from '@cosmos-client/core/cjs/openapi/api';
-import { cosmos, google } from '@cosmos-client/core/cjs/proto';
 import { CosmosSDK } from '@cosmos-client/core/cjs/sdk';
 import { ibc } from '@cosmos-client/ibc/cjs/proto';
 import crypto from 'crypto';
-import ICoin = cosmos.base.v1beta1.ICoin;
+import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 import IHeight = ibc.core.client.v1.IHeight;
 import {
   AckFailuresResponse,
@@ -26,13 +25,13 @@ import {
   CurrentPlanResponse,
   PinnedCodesResponse,
   IcaHostParamsResponse,
-  GlobalFeeMinGasPrices,
   Wallet,
   CodeId,
 } from './types';
 import { getContractBinary } from './env';
 import { MsgTransfer } from '../generated/neutron/neutron/transfer/v1/tx_pb';
 import { Height } from '../generated/neutron/ibc/core/client/v1/client_pb';
+import { Message } from '@bufbuild/protobuf';
 
 const adminmodule = AdminProto.adminmodule.adminmodule;
 
@@ -391,21 +390,6 @@ export class CosmosWrapper {
     }
   }
 
-  async queryMinGasPrices(): Promise<ICoin[]> {
-    try {
-      const req = await axios.get<GlobalFeeMinGasPrices>(
-        `${this.sdk.url}/gaia/globalfee/v1beta1/minimum_gas_prices`,
-        {},
-      );
-      return req.data.minimum_gas_prices;
-    } catch (e) {
-      if (e.response?.data?.message !== undefined) {
-        throw new Error(e.response?.data?.message);
-      }
-      throw e;
-    }
-  }
-
   async queryContractAdmin(address: string): Promise<string> {
     const resp = await this.getContractInfo(address);
     return resp.contract_info.admin;
@@ -439,23 +423,111 @@ export class WalletWrapper {
     fee: cosmosclient.proto.cosmos.tx.v1beta1.IFee,
     msgs: T[],
     numAttempts = 10,
-    mode: cosmosclient.rest.tx.BroadcastTxMode = cosmosclient.rest.tx.BroadcastTxMode.Async,
-    sequence = this.wallet.account.sequence,
+    mode: cosmosclient.rest.tx.BroadcastTxMode = cosmosclient.rest.tx
+      .BroadcastTxMode.Sync,
+    sequence: number = this.wallet.account.sequence,
+    txTimeoutHeight?: number,
   ): Promise<CosmosTxV1beta1GetTxResponse> {
-    const protoMsgs: Array<google.protobuf.IAny> = [];
+    // console.log('before buildTx')
+    const txBuilder = this.buildTx(fee, msgs, sequence, txTimeoutHeight);
+    // console.log('before broadcastTx')
+    const txhash = await this.broadcastTx(txBuilder, mode);
+    // if (DEBUG_SUBMIT_TX) {
+      // console.log('tx hash: ', txhash);
+    // }
+    let error = null;
+    while (numAttempts > 0) {
+      await this.chain.blockWaiter.waitBlocks(1);
+      numAttempts--;
+      const data = await cosmosclient.rest.tx
+        .getTx(this.chain.sdk as CosmosSDK, txhash)
+        .catch((reason) => {
+          error = reason;
+          return null;
+        });
+      if (data != null) {
+        // if (DEBUG_SUBMIT_TX) {
+          const code = +data.data?.tx_response.code;
+        //   console.log('response code: ', code);
+          // if (code > 0) {
+            // console.log('\x1b[31m error log: ', data.data?.tx_response.raw_log);
+          // }
+          // console.log('response: ', JSON.stringify(data.data));
+        // }
+        return data.data;
+      }
+    }
+    error = error ?? new Error('failed to submit tx');
+    throw error;
+  }
+
+  /**
+   * execTx broadcasts messages and returns the transaction result.
+   */
+  async execTxNew<T>(
+    fee: cosmosclient.proto.cosmos.tx.v1beta1.IFee,
+    msgs: cosmosclient.proto.google.protobuf.Any[],
+    numAttempts = 10,
+    mode: cosmosclient.rest.tx.BroadcastTxMode = cosmosclient.rest.tx
+      .BroadcastTxMode.Sync,
+    sequence: number = this.wallet.account.sequence,
+    txTimeoutHeight?: number,
+  ): Promise<CosmosTxV1beta1GetTxResponse> {
+    const txBuilder = this.buildTxNew(fee, msgs, sequence, txTimeoutHeight);
+    const txhash = await this.broadcastTx(txBuilder, mode);
+    // if (DEBUG_SUBMIT_TX) {
+      // console.log('tx hash: ', txhash);
+    // }
+    let error = null;
+    while (numAttempts > 0) {
+      await this.chain.blockWaiter.waitBlocks(1);
+      numAttempts--;
+      const data = await cosmosclient.rest.tx
+        .getTx(this.chain.sdk as CosmosSDK, txhash)
+        .catch((reason) => {
+          error = reason;
+          return null;
+        });
+      if (data != null) {
+        // if (DEBUG_SUBMIT_TX) {
+          const code = +data.data?.tx_response.code;
+        //   console.log('response code: ', code);
+          if (code > 0) {
+            // console.log('\x1b[31m error log: ', data.data?.tx_response.raw_log);
+          }
+          // console.log('response: ', JSON.stringify(data.data));
+        // }
+        return data.data;
+      }
+    }
+    error = error ?? new Error('failed to submit tx');
+    throw error;
+  }
+
+  buildTx<T>(
+    fee: cosmosclient.proto.cosmos.tx.v1beta1.IFee,
+    msgs: T[],
+    sequence: number = this.wallet.account.sequence,
+    txTimeoutHeight?: number,
+  ): cosmosclient.TxBuilder {
+    const protoMsgs: Array<cosmosclient.proto.google.protobuf.IAny> = [];
     msgs.forEach((msg) => {
       protoMsgs.push(cosmosclient.codec.instanceToProtoAny(msg));
     });
     const txBody = new cosmosclient.proto.cosmos.tx.v1beta1.TxBody({
       messages: protoMsgs,
     });
+    if (txTimeoutHeight != undefined) {
+      txBody.timeout_height = txTimeoutHeight;
+    }
     const authInfo = new cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo({
       signer_infos: [
         {
           public_key: cosmosclient.codec.instanceToProtoAny(this.wallet.pubKey),
           mode_info: {
             single: {
-              mode: cosmosclient.proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+              mode: cosmosclient.proto.cosmos.tx.signing.v1beta1.SignMode
+                .SIGN_MODE_DIRECT,
             },
           },
           sequence,
@@ -469,40 +541,98 @@ export class WalletWrapper {
       authInfo,
     );
     const signDocBytes = txBuilder.signDocBytes(
-      this.wallet.account.account_number.toNumber(),
+      this.wallet.account.account_number,
     );
     txBuilder.addSignature(this.wallet.privKey.sign(signDocBytes));
-    const res = await cosmosclient.rest.tx.broadcastTx(this.chain.sdk as CosmosSDK, {
-      tx_bytes: txBuilder.txBytes(),
-      mode,
+    return txBuilder;
+  }
+
+  buildTxNew<T>(
+    fee: cosmosclient.proto.cosmos.tx.v1beta1.IFee,
+    protoMsgs: cosmosclient.proto.google.protobuf.Any[],
+    sequence: number = this.wallet.account.sequence,
+    txTimeoutHeight?: number,
+  ): cosmosclient.TxBuilder {
+    const txBody = new cosmosclient.proto.cosmos.tx.v1beta1.TxBody({
+      messages: protoMsgs,
     });
+    if (txTimeoutHeight != undefined) {
+      txBody.timeout_height = txTimeoutHeight;
+    }
+    const authInfo = new cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo({
+      signer_infos: [
+        {
+          public_key: cosmosclient.codec.instanceToProtoAny(this.wallet.pubKey),
+          mode_info: {
+            single: {
+              mode: cosmosclient.proto.cosmos.tx.signing.v1beta1.SignMode
+                .SIGN_MODE_DIRECT,
+            },
+          },
+          sequence,
+        },
+      ],
+      fee,
+    });
+    const txBuilder = new cosmosclient.TxBuilder(
+      this.chain.sdk as CosmosSDK,
+      txBody,
+      authInfo,
+    );
+    const signDocBytes = txBuilder.signDocBytes(
+      this.wallet.account.account_number,
+    );
+    txBuilder.addSignature(this.wallet.privKey.sign(signDocBytes));
+    return txBuilder;
+  }
+
+  async broadcastTx(
+    txBuilder: cosmosclient.TxBuilder,
+    mode: cosmosclient.rest.tx.BroadcastTxMode = cosmosclient.rest.tx
+      .BroadcastTxMode.Sync,
+  ): Promise<string> {
+    try {
+    // if (DEBUG_SUBMIT_TX) {
+    //   console.log('\n\n\nStart broadcasting tx: ----------------------');
+      try {
+        // console.log(JSON.stringify(txBuilder.toProtoJSON()));
+      } catch (error) {
+        // console.log('failed to serrialize tx');
+      }
+    // }
+
+      const res = await cosmosclient.rest.tx.broadcastTx(
+        this.chain.sdk as CosmosSDK,
+        {
+          tx_bytes: txBuilder.txBytes(),
+          mode,
+        },
+      );
+
     const code = res.data?.tx_response.code;
+    // if (DEBUG_SUBMIT_TX) {
+    //   console.log('async response code: ', code);
+    // }
     if (code !== 0) {
+      // if (DEBUG_SUBMIT_TX) {
+      //   console.log(`broadcast error: ${res.data?.tx_response.raw_log}`);
+      // }
       throw new Error(`broadcast error: ${res.data?.tx_response.raw_log}`);
     }
     const txhash = res.data?.tx_response.txhash;
-    let error = null;
-    while (numAttempts > 0) {
-      await this.chain.blockWaiter.waitBlocks(1);
-      numAttempts--;
-      const data = await cosmosclient.rest.tx
-        .getTx(this.chain.sdk as CosmosSDK, txhash)
-        .catch((reason) => {
-          error = reason;
-          return null;
-        });
-      if (data != null) {
-        this.wallet.account.sequence = this.wallet.account.sequence.add(1);
-        return data.data;
-      }
+    this.wallet.account.sequence++;
+    return txhash;
+
+    } catch (e) {
+      console.log('broadcast error: ' + JSON.stringify(e));
+      throw e;
     }
-    error = error ?? new Error('failed to submit tx');
-    throw error;
   }
+
 
   // storeWasm stores the wasm code by the passed path on the blockchain.
   async storeWasm(fileName: string): Promise<CodeId> {
-    const msg = new cosmwasmproto.cosmwasm.wasm.v1.MsgStoreCode({
+    const msg = new cosmwasmclient.proto.cosmwasm.wasm.v1.MsgStoreCode({
       sender: this.wallet.address.toString(),
       wasm_byte_code: await getContractBinary(fileName),
       instantiate_permission: null,
@@ -532,7 +662,7 @@ export class WalletWrapper {
     label: string,
     admin: string = this.wallet.address.toString(),
   ): Promise<Array<Record<string, string>>> {
-    const msgInit = new cosmwasmproto.cosmwasm.wasm.v1.MsgInstantiateContract({
+    const msgInit = new cosmwasmclient.proto.cosmwasm.wasm.v1.MsgInstantiateContract({
       code_id: new Long(codeId),
       sender: this.wallet.address.toString(),
       admin: admin,
@@ -547,7 +677,7 @@ export class WalletWrapper {
       },
       [msgInit],
       10,
-      cosmosclient.rest.tx.BroadcastTxMode.Block,
+      cosmosclient.rest.tx.BroadcastTxMode.Async,
     );
 
     if (data.tx_response.code !== 0) {
@@ -566,7 +696,7 @@ export class WalletWrapper {
     msg: string | Record<string, unknown>,
   ): Promise<BroadcastTx200ResponseTxResponse> {
     const sender = this.wallet.address.toString();
-    const msgMigrate = new cosmwasmproto.cosmwasm.wasm.v1.MsgMigrateContract({
+    const msgMigrate = new cosmwasmclient.proto.cosmwasm.wasm.v1.MsgMigrateContract({
       sender,
       contract,
       code_id: new Long(codeId),
@@ -597,7 +727,7 @@ export class WalletWrapper {
     },
   ): Promise<BroadcastTx200ResponseTxResponse> {
     const sender = this.wallet.address.toString();
-    const msgExecute = new cosmwasmproto.cosmwasm.wasm.v1.MsgExecuteContract({
+    const msgExecute = new cosmwasmclient.proto.cosmwasm.wasm.v1.MsgExecuteContract({
       sender,
       contract,
       msg: Buffer.from(msg),
@@ -732,6 +862,7 @@ export class WalletWrapper {
     timeoutHeight: IHeight,
     memo?: string,
   ): Promise<BroadcastTx200ResponseTxResponse> {
+    console.log('New transfer');
     const newMsgSend = new MsgTransfer({
       sourcePort: sourcePort,
       sourceChannel: sourceChannel,
@@ -745,13 +876,13 @@ export class WalletWrapper {
       memo: memo,
     });
     // newMsgSend.memo = memo; // TODO: check if needed
-    const packedMsg = new google.protobuf.Any({ type_url: '/ibc.applications.transfer.v1.MsgTransfer', value: newMsgSend.toBinary() })
-    const res = await this.execTx(
+
+    const res = await this.execTxNew(
       {
         gas_limit: Long.fromString('200000'),
         amount: [{ denom: this.chain.denom, amount: '1000' }],
       },
-      [packedMsg],
+      [packAnyMsg('/ibc.applications.transfer.v1.MsgTransfer', newMsgSend)],
     );
     return res?.tx_response;
   }
@@ -850,7 +981,6 @@ export const mnemonicToWallet = async (
         ),
       )
       .catch((e) => {
-        console.log(e);
         throw e;
       });
 
@@ -927,3 +1057,7 @@ export const filterIBCDenoms = (list: CosmosBaseV1beta1Coin[]) =>
   );
 
 export const wrapMsg = (x) => Buffer.from(JSON.stringify(x)).toString('base64');
+
+export const packAnyMsg = (typeUrl: string, msg: Message): cosmosclient.proto.google.protobuf.Any => {
+  return new cosmosclient.proto.google.protobuf.Any({ type_url: typeUrl, value: msg.toBinary() })
+}
