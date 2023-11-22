@@ -1,5 +1,5 @@
 import { exec } from 'child_process';
-import { cosmosclient, rest } from '@cosmos-client/core';
+import cosmosclient from '@cosmos-client/core';
 import {
   COSMOS_DENOM,
   CosmosWrapper,
@@ -13,7 +13,7 @@ import { BlockWaiter } from './helpers/wait';
 import { generateMnemonic } from 'bip39';
 import Long from 'long';
 import { AccAddress } from '@cosmos-client/core/cjs/types';
-import { Coin } from '@cosmos-client/core/cjs/openapi/api';
+import { CosmosBaseV1beta1Coin } from '@cosmos-client/core/cjs/openapi/api';
 import { Wallet } from './helpers/types';
 
 export const disconnectValidator = async (name: string) => {
@@ -193,7 +193,7 @@ export class TestStateLocalCosmosTestNet {
           { amount, denom },
           fee,
           sequence,
-          rest.tx.BroadcastTxMode.Block,
+          cosmosclient.rest.tx.BroadcastTxMode.Block,
         );
         break;
       } catch (e) {
@@ -212,7 +212,7 @@ export class TestStateLocalCosmosTestNet {
     blockWaiter: BlockWaiter,
     wallet: Wallet,
     denom: string,
-    balances: Coin[] = [],
+    balances: CosmosBaseV1beta1Coin[] = [],
   ) {
     if (balances.length === 0) {
       balances = [

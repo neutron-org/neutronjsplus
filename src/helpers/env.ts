@@ -1,4 +1,4 @@
-import { rest } from '@cosmos-client/core';
+import cosmosclient from '@cosmos-client/core';
 import { CosmosSDK } from '@cosmos-client/core/cjs/sdk';
 import axios from 'axios';
 import { execSync } from 'child_process';
@@ -169,6 +169,6 @@ const showContractsHashes = async () => {
 };
 
 export const getHeight = async (sdk: CosmosSDK) => {
-  const block = await rest.tendermint.getLatestBlock(sdk);
+  const block = await cosmosclient.rest.tendermint.getLatestBlock(sdk);
   return +block.data.block.header.height;
 };

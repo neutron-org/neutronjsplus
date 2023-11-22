@@ -1,4 +1,4 @@
-import { websocket } from '@cosmos-client/core';
+import cosmosclient from '@cosmos-client/core';
 
 global.WebSocket = require('ws');
 
@@ -23,14 +23,14 @@ export class BlockWaiter {
         }
         reject(new Error('waitBlocks: timeout'));
       }, timeout);
-      ws = websocket.connect(this.url);
+      ws = cosmosclient.websocket.connect(this.url);
       ws.next({
         id: '1',
         jsonrpc: '2.0',
         method: 'subscribe',
         params: ["tm.event='NewBlock'"],
       });
-      ws.subscribe((res: websocket.ResponseSchema) => {
+      ws.subscribe((res: cosmosclient.websocket.ResponseSchema) => {
         if (Object.entries(res.result).length !== 0) {
           n--;
           if (n == 0) {

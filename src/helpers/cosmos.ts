@@ -1,15 +1,15 @@
-import { cosmosclient, proto, rest } from '@cosmos-client/core';
+import cosmosclient from '@cosmos-client/core';
 import { AccAddress, ValAddress } from '@cosmos-client/core/cjs/types';
-import { cosmwasmproto } from '@cosmos-client/cosmwasm';
+import { proto as cosmwasmproto } from '@cosmos-client/cosmwasm/cjs/module';
 import { cosmos as AdminProto, ibc as ibcProto } from '../generated/ibc/proto';
 import { neutron } from '../generated/proto';
 import axios from 'axios';
 import Long from 'long';
 import { BlockWaiter, getWithAttempts } from './wait';
 import {
-  Coin,
+  CosmosBaseV1beta1Coin,
   CosmosTxV1beta1GetTxResponse,
-  InlineResponse20075TxResponse,
+  BroadcastTx200ResponseTxResponse,
 } from '@cosmos-client/core/cjs/openapi/api';
 import { cosmos, google } from '@cosmos-client/core/cjs/proto';
 import { CosmosSDK } from '@cosmos-client/core/cjs/sdk';
@@ -74,7 +74,7 @@ export function registerCodecs() {
   );
   cosmosclient.codec.register(
     '/cosmos.params.v1beta1.ParameterChangeProposal',
-    proto.cosmos.params.v1beta1.ParameterChangeProposal,
+    cosmosclient.proto.cosmos.params.v1beta1.ParameterChangeProposal,
   );
 
   cosmosclient.codec.register(
@@ -83,7 +83,7 @@ export function registerCodecs() {
   );
   cosmosclient.codec.register(
     '/cosmos.params.v1beta1.ParameterChangeProposal',
-    proto.cosmos.params.v1beta1.ParameterChangeProposal,
+    cosmosclient.proto.cosmos.params.v1beta1.ParameterChangeProposal,
   );
   cosmosclient.codec.register(
     '/ibc.applications.transfer.v1.MsgTransfer',
@@ -175,8 +175,8 @@ export class CosmosWrapper {
   }
 
   async getSeq(address: cosmosclient.AccAddress): Promise<any> {
-    const account = await rest.auth
-      .account(this.sdk, address)
+    const account = await cosmosclient.rest.auth
+      .account(this.sdk, address.toString()) // TODO: check
       .then((res) =>
         cosmosclient.codec.protoJSONToInstance(
           cosmosclient.codec.castProtoJSONOfProtoAny(res.data.account),
@@ -187,7 +187,7 @@ export class CosmosWrapper {
         throw e;
       });
 
-    if (!(account instanceof proto.cosmos.auth.v1beta1.BaseAccount)) {
+    if (!(account instanceof cosmosclient.proto.cosmos.auth.v1beta1.BaseAccount)) {
       throw new Error("can't get account");
     }
 
@@ -203,7 +203,7 @@ export class CosmosWrapper {
   }
 
   async queryDelegations(delegatorAddr: cosmosclient.AccAddress): Promise<any> {
-    const balances = await rest.staking.delegatorDelegations(
+    const balances = await cosmosclient.rest.staking.delegatorDelegations(
       this.sdk,
       delegatorAddr,
     );
@@ -211,9 +211,9 @@ export class CosmosWrapper {
   }
 
   async queryBalances(addr: string): Promise<BalancesResponse> {
-    const balances = await rest.bank.allBalances(
+    const balances = await cosmosclient.rest.bank.allBalances(
       this.sdk,
-      addr as unknown as AccAddress,
+      addr.toString(),
     );
     return balances.data as BalancesResponse;
   }
@@ -222,9 +222,9 @@ export class CosmosWrapper {
     addr: string | AccAddress | ValAddress,
     denom: string,
   ): Promise<number> {
-    const { data } = await rest.bank.allBalances(
+    const { data } = await cosmosclient.rest.bank.allBalances(
       this.sdk,
-      addr.toString() as unknown as AccAddress,
+      addr.toString(),
     );
     const balance = data.balances.find((b) => b.denom === denom);
     return parseInt(balance?.amount ?? '0', 10);
@@ -438,26 +438,26 @@ export class WalletWrapper {
    * execTx broadcasts messages and returns the transaction result.
    */
   async execTx<T>(
-    fee: proto.cosmos.tx.v1beta1.IFee,
+    fee: cosmosclient.proto.cosmos.tx.v1beta1.IFee,
     msgs: T[],
     numAttempts = 10,
-    mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
+    mode: cosmosclient.rest.tx.BroadcastTxMode = cosmosclient.rest.tx.BroadcastTxMode.Async,
     sequence = this.wallet.account.sequence,
   ): Promise<CosmosTxV1beta1GetTxResponse> {
     const protoMsgs: Array<google.protobuf.IAny> = [];
     msgs.forEach((msg) => {
       protoMsgs.push(cosmosclient.codec.instanceToProtoAny(msg));
     });
-    const txBody = new proto.cosmos.tx.v1beta1.TxBody({
+    const txBody = new cosmosclient.proto.cosmos.tx.v1beta1.TxBody({
       messages: protoMsgs,
     });
-    const authInfo = new proto.cosmos.tx.v1beta1.AuthInfo({
+    const authInfo = new cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo({
       signer_infos: [
         {
           public_key: cosmosclient.codec.instanceToProtoAny(this.wallet.pubKey),
           mode_info: {
             single: {
-              mode: proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+              mode: cosmosclient.proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
             },
           },
           sequence,
@@ -474,7 +474,7 @@ export class WalletWrapper {
       this.wallet.account.account_number.toNumber(),
     );
     txBuilder.addSignature(this.wallet.privKey.sign(signDocBytes));
-    const res = await rest.tx.broadcastTx(this.chain.sdk as CosmosSDK, {
+    const res = await cosmosclient.rest.tx.broadcastTx(this.chain.sdk as CosmosSDK, {
       tx_bytes: txBuilder.txBytes(),
       mode,
     });
@@ -487,7 +487,7 @@ export class WalletWrapper {
     while (numAttempts > 0) {
       await this.chain.blockWaiter.waitBlocks(1);
       numAttempts--;
-      const data = await rest.tx
+      const data = await cosmosclient.rest.tx
         .getTx(this.chain.sdk as CosmosSDK, txhash)
         .catch((reason) => {
           error = reason;
@@ -549,7 +549,7 @@ export class WalletWrapper {
       },
       [msgInit],
       10,
-      rest.tx.BroadcastTxMode.Block,
+      cosmosclient.rest.tx.BroadcastTxMode.Block,
     );
 
     if (data.tx_response.code !== 0) {
@@ -566,7 +566,7 @@ export class WalletWrapper {
     contract: string,
     codeId: number,
     msg: string | Record<string, unknown>,
-  ): Promise<InlineResponse20075TxResponse> {
+  ): Promise<BroadcastTx200ResponseTxResponse> {
     const sender = this.wallet.address.toString();
     const msgMigrate = new cosmwasmproto.cosmwasm.wasm.v1.MsgMigrateContract({
       sender,
@@ -592,12 +592,12 @@ export class WalletWrapper {
   async executeContract(
     contract: string,
     msg: string,
-    funds: proto.cosmos.base.v1beta1.ICoin[] = [],
+    funds: cosmosclient.proto.cosmos.base.v1beta1.ICoin[] = [],
     fee = {
       gas_limit: Long.fromString('4000000'),
       amount: [{ denom: this.chain.denom, amount: '10000' }],
     },
-  ): Promise<InlineResponse20075TxResponse> {
+  ): Promise<BroadcastTx200ResponseTxResponse> {
     const sender = this.wallet.address.toString();
     const msgExecute = new cosmwasmproto.cosmwasm.wasm.v1.MsgExecuteContract({
       sender,
@@ -631,11 +631,11 @@ export class WalletWrapper {
       amount: [{ denom: this.chain.denom, amount: '1000' }],
     },
     sequence = this.wallet.account.sequence,
-    mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
-  ): Promise<InlineResponse20075TxResponse> {
+    mode: cosmosclient.rest.tx.BroadcastTxMode = cosmosclient.rest.tx.BroadcastTxMode.Async,
+  ): Promise<BroadcastTx200ResponseTxResponse> {
     const { amount, denom = this.chain.denom } =
       typeof coin === 'string' ? { amount: coin } : coin;
-    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+    const msgSend = new cosmosclient.proto.cosmos.bank.v1beta1.MsgSend({
       from_address: this.wallet.address.toString(),
       to_address: to,
       amount: [{ denom, amount }],
@@ -653,15 +653,15 @@ export class WalletWrapper {
       amount: [{ denom: this.chain.denom, amount: '1000' }],
     },
     sequence = this.wallet.account.sequence,
-    mode: rest.tx.BroadcastTxMode = rest.tx.BroadcastTxMode.Async,
-  ): Promise<InlineResponse20075TxResponse> {
+    mode: cosmosclient.rest.tx.BroadcastTxMode = cosmosclient.rest.tx.BroadcastTxMode.Async,
+  ): Promise<BroadcastTx200ResponseTxResponse> {
     const msg = new adminmodule.MsgSubmitProposal({
       content: cosmosclient.codec.instanceToProtoAny(
-        new proto.cosmos.params.v1beta1.ParameterChangeProposal({
+        new cosmosclient.proto.cosmos.params.v1beta1.ParameterChangeProposal({
           title: 'mock',
           description: 'mock',
           changes: [
-            new proto.cosmos.params.v1beta1.ParamChange({
+            new cosmosclient.proto.cosmos.params.v1beta1.ParamChange({
               key: key,
               subspace: subspace,
               value: value,
@@ -679,8 +679,8 @@ export class WalletWrapper {
    */
   async simulateFeeBurning(
     amount: number,
-  ): Promise<InlineResponse20075TxResponse> {
-    const msgSend = new proto.cosmos.bank.v1beta1.MsgSend({
+  ): Promise<BroadcastTx200ResponseTxResponse> {
+    const msgSend = new cosmosclient.proto.cosmos.bank.v1beta1.MsgSend({
       from_address: this.wallet.address.toString(),
       to_address: this.wallet.address.toString(),
       amount: [{ denom: this.chain.denom, amount: '1' }],
@@ -706,7 +706,7 @@ export class WalletWrapper {
   async msgRemoveInterchainQuery(
     queryId: number,
     sender: string,
-  ): Promise<InlineResponse20075TxResponse> {
+  ): Promise<BroadcastTx200ResponseTxResponse> {
     const msgRemove =
       new neutron.interchainqueries.MsgRemoveInterchainQueryRequest({
         query_id: new Long(queryId),
@@ -733,7 +733,7 @@ export class WalletWrapper {
     receiver: string,
     timeoutHeight: IHeight,
     memo?: string,
-  ): Promise<InlineResponse20075TxResponse> {
+  ): Promise<BroadcastTx200ResponseTxResponse> {
     const msgSend = new ibcProto.applications.transfer.v1.MsgTransfer({
       source_port: sourcePort,
       source_channel: sourceChannel,
@@ -758,8 +758,8 @@ export class WalletWrapper {
     delegatorAddress: string,
     validatorAddress: string,
     amount: string,
-  ): Promise<InlineResponse20075TxResponse> {
-    const msgDelegate = new proto.cosmos.staking.v1beta1.MsgDelegate({
+  ): Promise<BroadcastTx200ResponseTxResponse> {
+    const msgDelegate = new cosmosclient.proto.cosmos.staking.v1beta1.MsgDelegate({
       delegator_address: delegatorAddress,
       validator_address: validatorAddress,
       amount: { denom: this.chain.denom, amount: amount },
@@ -775,7 +775,7 @@ export class WalletWrapper {
   }
 }
 
-type TxResponseType = Awaited<ReturnType<typeof rest.tx.getTx>>;
+type TxResponseType = Awaited<ReturnType<typeof cosmosclient.rest.tx.getTx>>;
 
 export const getEventAttributesFromTx = (
   data: TxResponseType['data'],
@@ -823,7 +823,7 @@ export const mnemonicToWallet = async (
   addrPrefix: string,
   validate = true,
 ): Promise<Wallet> => {
-  const privKey = new proto.cosmos.crypto.secp256k1.PrivKey({
+  const privKey = new cosmosclient.proto.cosmos.crypto.secp256k1.PrivKey({
     key: await cosmosclient.generatePrivKeyFromMnemonic(mnemonic),
   });
 
@@ -840,8 +840,8 @@ export const mnemonicToWallet = async (
   const address = walletType.fromPublicKey(pubKey);
   // eslint-disable-next-line no-prototype-builtins
   if (cosmosclient.ValAddress !== walletType && validate) {
-    account = await rest.auth
-      .account(sdk, address)
+    account = await cosmosclient.rest.auth
+      .account(sdk, address.toString())
       .then((res) =>
         cosmosclient.codec.protoJSONToInstance(
           cosmosclient.codec.castProtoJSONOfProtoAny(res.data.account),
@@ -852,7 +852,7 @@ export const mnemonicToWallet = async (
         throw e;
       });
 
-    if (!(account instanceof proto.cosmos.auth.v1beta1.BaseAccount)) {
+    if (!(account instanceof cosmosclient.proto.cosmos.auth.v1beta1.BaseAccount)) {
       throw new Error("can't get account");
     }
   }
@@ -918,7 +918,7 @@ export const getEventAttribute = (
   return Buffer.from(encodedAttr, 'base64').toString('ascii');
 };
 
-export const filterIBCDenoms = (list: Coin[]) =>
+export const filterIBCDenoms = (list: CosmosBaseV1beta1Coin[]) =>
   list.filter(
     (coin) =>
       coin.denom && ![IBC_ATOM_DENOM, IBC_USDC_DENOM].includes(coin.denom),
