@@ -31,6 +31,8 @@ import {
   CodeId,
 } from './types';
 import { getContractBinary } from './env';
+import { MsgTransfer } from '../generated/neutron/neutron/transfer/v1/tx_pb';
+import { Height } from '../generated/neutron/ibc/core/client/v1/client_pb';
 
 const adminmodule = AdminProto.adminmodule.adminmodule;
 
@@ -69,10 +71,6 @@ export type TotalBurnedNeutronsAmountResponse = {
 
 export function registerCodecs() {
   cosmosclient.codec.register(
-    '/neutron.interchainqueries.MsgRemoveInterchainQueryRequest',
-    neutron.interchainqueries.MsgRemoveInterchainQueryRequest,
-  );
-  cosmosclient.codec.register(
     '/cosmos.params.v1beta1.ParameterChangeProposal',
     cosmosclient.proto.cosmos.params.v1beta1.ParameterChangeProposal,
   );
@@ -85,10 +83,10 @@ export function registerCodecs() {
     '/cosmos.params.v1beta1.ParameterChangeProposal',
     cosmosclient.proto.cosmos.params.v1beta1.ParameterChangeProposal,
   );
-  cosmosclient.codec.register(
-    '/ibc.applications.transfer.v1.MsgTransfer',
-    ibcProto.applications.transfer.v1.MsgTransfer,
-  );
+  // cosmosclient.codec.register(
+  //   '/ibc.applications.transfer.v1.MsgTransfer',
+  //   ibcProto.applications.transfer.v1.MsgTransfer,
+  // );
   cosmosclient.codec.register(
     '/cosmos.adminmodule.adminmodule.MsgSubmitProposal',
     adminmodule.MsgSubmitProposal,
@@ -734,22 +732,26 @@ export class WalletWrapper {
     timeoutHeight: IHeight,
     memo?: string,
   ): Promise<BroadcastTx200ResponseTxResponse> {
-    const msgSend = new ibcProto.applications.transfer.v1.MsgTransfer({
-      source_port: sourcePort,
-      source_channel: sourceChannel,
+    const newMsgSend = new MsgTransfer({
+      sourcePort: sourcePort,
+      sourceChannel: sourceChannel,
       token: token,
       sender: this.wallet.address.toString(),
       receiver: receiver,
-      timeout_height: timeoutHeight,
+      timeoutHeight: new Height({
+        revisionHeight: timeoutHeight.revision_height,
+        revisionNumber: timeoutHeight.revision_number,
+      }),
       memo: memo,
     });
-    msgSend.memo = memo;
+    // newMsgSend.memo = memo; // TODO: check if needed
+    const packedMsg = new google.protobuf.Any({ type_url: '/ibc.applications.transfer.v1.MsgTransfer', value: newMsgSend.toBinary() })
     const res = await this.execTx(
       {
         gas_limit: Long.fromString('200000'),
         amount: [{ denom: this.chain.denom, amount: '1000' }],
       },
-      [msgSend],
+      [packedMsg],
     );
     return res?.tx_response;
   }
