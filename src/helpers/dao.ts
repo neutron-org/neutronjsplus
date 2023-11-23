@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {
+  ADMIN_MODULE_ADDRESS,
   CosmosWrapper,
   createBankMessage,
   getEventAttribute,
@@ -32,6 +33,22 @@ import {
 import { ibc } from '../generated/ibc/proto';
 import cosmosclient from '@cosmos-client/core';
 import Long from 'long';
+
+export type SubdaoProposalConfig = {
+  threshold: any;
+  max_voting_period: Duration;
+  min_voting_period: Duration;
+  allow_revoting: boolean;
+  dao: string;
+  close_proposal_on_execution_failure: boolean;
+};
+
+export type Duration = {
+  height: number | null;
+  time: number | null;
+};
+
+export type ProposalFailedExecutionErrorResponse = string;
 
 export type GetSubdaoResponse = { addr: string; charter: string };
 
@@ -120,22 +137,6 @@ export type ProposalModule = {
     };
   };
 };
-
-export type SubdaoProposalConfig = {
-  threshold: any;
-  max_voting_period: Duration;
-  min_voting_period: Duration;
-  allow_revoting: boolean;
-  dao: string;
-  close_proposal_on_execution_failure: boolean;
-};
-
-export type Duration = {
-  height: number | null;
-  time: number | null;
-};
-
-export type ProposalFailedExecutionErrorResponse = string;
 
 export const DaoContractLabels = {
   DAO_CORE: 'neutron.core',
@@ -327,11 +328,11 @@ export const getSubDaoContracts = async (
 export const getTreasuryContract = async (
   cm: CosmosWrapper,
 ): Promise<string> => {
-  const url = `${cm.sdk.url}/cosmos/params/v1beta1/params?subspace=feeburner&key=TreasuryAddress`;
+  const url = `${cm.sdk.url}/neutron/feeburner/params`;
   const resp = await axios.get<{
-    param: { value: string };
+    params: { treasury_address: string };
   }>(url);
-  return JSON.parse(resp.data.param.value);
+  return resp.data.params.treasury_address;
 };
 
 export class Dao {
@@ -408,34 +409,22 @@ export class Dao {
     );
   }
 
-  async queryTotalVotingPower(
-    height?: number,
-  ): Promise<TotalPowerAtHeightResponse> {
+  async queryTotalVotingPower(): Promise<TotalPowerAtHeightResponse> {
     return await this.chain.queryContract<TotalPowerAtHeightResponse>(
       this.contracts.core.address,
       {
-        total_power_at_height:
-          typeof height === 'undefined' ? {} : { height: height },
+        total_power_at_height: {},
       },
     );
   }
 
-  async queryVotingPower(
-    addr: string,
-    height?: number,
-  ): Promise<VotingPowerAtHeightResponse> {
+  async queryVotingPower(addr: string): Promise<VotingPowerAtHeightResponse> {
     return await this.chain.queryContract<VotingPowerAtHeightResponse>(
       this.contracts.core.address,
       {
-        voting_power_at_height:
-          typeof height === 'undefined'
-            ? {
-                address: addr,
-              }
-            : {
-                address: addr,
-                height: height,
-              },
+        voting_power_at_height: {
+          address: addr,
+        },
       },
     );
   }
@@ -476,20 +465,6 @@ export class Dao {
       this.contracts.proposals[customModule].pre_propose.timelock.address,
       {
         proposal: {
-          proposal_id: proposalId,
-        },
-      },
-    );
-  }
-
-  async getTimelockedProposalError(
-    proposalId: number,
-    customModule = 'single',
-  ): Promise<ProposalFailedExecutionErrorResponse> {
-    return this.chain.queryContract<ProposalFailedExecutionErrorResponse>(
-      this.contracts.proposals[customModule].pre_propose.timelock.address,
-      {
-        proposal_execution_error: {
           proposal_id: proposalId,
         },
       },
@@ -862,7 +837,6 @@ export class DaoMember {
           proposalTx.raw_log,
       );
     }
-
     return proposalId;
   }
 
@@ -881,14 +855,16 @@ export class DaoMember {
       custom: {
         submit_admin_proposal: {
           admin_proposal: {
-            software_upgrade_proposal: {
-              title,
-              description,
-              plan: {
-                name,
-                height,
-                info,
-              },
+            proposal_execute_message: {
+              message: JSON.stringify({
+                '@type': '/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade',
+                authority: ADMIN_MODULE_ADDRESS,
+                plan: {
+                  name,
+                  height,
+                  info,
+                },
+              }),
             },
           },
         },
@@ -914,9 +890,42 @@ export class DaoMember {
       custom: {
         submit_admin_proposal: {
           admin_proposal: {
-            cancel_software_upgrade_proposal: {
-              title,
-              description,
+            proposal_execute_message: {
+              message: JSON.stringify({
+                '@type': '/cosmos.upgrade.v1beta1.MsgCancelUpgrade',
+                authority: 'neutron1hxskfdxpp5hqgtjj6am6nkjefhfzj359x0ar3z',
+              }),
+            },
+          },
+        },
+      },
+    };
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      deposit,
+    );
+  }
+  /**
+   * submitBankSendProposal creates proposal.
+   */
+  async submitBankSendProposal(
+    title: string,
+    description: string,
+    deposit: string,
+  ): Promise<number> {
+    const message = {
+      custom: {
+        submit_admin_proposal: {
+          admin_proposal: {
+            proposal_execute_message: {
+              message: JSON.stringify({
+                '@type': '/cosmos.bank.v1beta1.MsgSend',
+                from_address: ADMIN_MODULE_ADDRESS,
+                to_address: ADMIN_MODULE_ADDRESS,
+                amount: [],
+              }),
             },
           },
         },
@@ -933,17 +942,10 @@ export class DaoMember {
   async supportAndExecuteProposal(
     proposalId: number,
     customModule = 'single',
-    attempts = 5,
   ): Promise<TimeLockSingleChoiceProposal> {
     await this.voteYes(proposalId, customModule);
     await this.executeProposal(proposalId, customModule);
-    return await getWithAttempts(
-      this.dao.chain.blockWaiter,
-      async () =>
-        await this.dao.getTimelockedProposal(proposalId, customModule),
-      async (response) => response.id && +response.id > 0,
-      attempts,
-    );
+    return await this.dao.getTimelockedProposal(proposalId, customModule);
   }
 
   async executeTimelockedProposal(
@@ -957,33 +959,6 @@ export class DaoMember {
           proposal_id: proposalId,
         },
       }),
-    );
-  }
-
-  async submitUpdateConfigProposal(
-    title: string,
-    description: string,
-    config: SubdaoProposalConfig,
-    deposit: string,
-    customModule = 'single',
-  ): Promise<number> {
-    const msg = {
-      update_config: config,
-    };
-    const message = {
-      wasm: {
-        execute: {
-          contract_addr: this.dao.contracts.proposals[customModule].address,
-          msg: Buffer.from(JSON.stringify(msg)).toString('base64'),
-          funds: [],
-        },
-      },
-    };
-    return await this.submitSingleChoiceProposal(
-      title,
-      description,
-      [message],
-      deposit,
     );
   }
 
@@ -1040,7 +1015,7 @@ export class DaoMember {
     );
 
     const proposalId1 = parseInt(attribute);
-    if (proposalId1 < 0) {
+    if (proposalId < 0) {
       throw new Error(
         'failed to get proposal ID from the proposal creation tx attributes: ' +
           proposalTx.raw_log,
@@ -1216,6 +1191,32 @@ export class DaoMember {
   }
 
   /**
+   * submitPinCodesCustomAuthorityProposal creates proposal which pins given code ids to wasmvm.
+   */
+  async submitPinCodesCustomAuthorityProposal(
+    title: string,
+    description: string,
+    codesIds: number[],
+    amount: string,
+    authority: string,
+  ): Promise<number> {
+    const message = pinCodesCustomAutrhorityProposal(
+      {
+        title,
+        description,
+        codes_ids: codesIds,
+      },
+      authority,
+    );
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      amount,
+    );
+  }
+
+  /**
    * submitUnpinCodesProposal creates proposal which unpins given code ids to wasmvm.
    */
 
@@ -1229,6 +1230,137 @@ export class DaoMember {
       title,
       description,
       codes_ids: codesIds,
+    });
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      amount,
+    );
+  }
+
+  /**
+   * submitUpdateParamsInterchaintxsProposal creates proposal which changes params of interchaintxs module.
+   */
+
+  async submitUpdateParamsInterchaintxsProposal(
+    title: string,
+    description: string,
+    message: ParamsInterchaintxsInfo,
+    amount: string,
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      amount,
+    );
+  }
+
+  /**
+   * submitUpdateParamsInterchainqueriesProposal creates proposal which changes params of interchaintxs module.
+   */
+
+  async submitUpdateParamsInterchainqueriesProposal(
+    title: string,
+    description: string,
+    message: ParamsInterchainqueriesInfo,
+    amount: string,
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      amount,
+    );
+  }
+
+  /**
+   * submitUpdateParamsTokenfactoryProposal creates proposal which changes params of tokenfactory module.
+   */
+
+  async submitUpdateParamsTokenfactoryProposal(
+    title: string,
+    description: string,
+    message: ParamsTokenfactoryInfo,
+    amount: string,
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      amount,
+    );
+  }
+
+  /**
+   * submitUpdateParamsFeeburnerProposal creates proposal which changes some params of feeburner module.
+   */
+
+  async submitUpdateParamsFeeburnerProposal(
+    title: string,
+    description: string,
+    message: ParamsFeeburnerInfo,
+    amount: string,
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      amount,
+    );
+  }
+
+  /**
+   * submitUpdateParamsFeerefunderProposal creates proposal which changes some params of feerefunder module.
+   */
+
+  async submitUpdateParamsFeerefunderProposal(
+    title: string,
+    description: string,
+    amount: string,
+    message: ParamsFeerefunderInfo = {
+      min_fee: { recv_fee: null, ack_fee: null, timeout_fee: null },
+    },
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      amount,
+    );
+  }
+
+  /**
+   * submitUpdateParamsCronProposal creates proposal which changes soe params of cron module.
+   */
+
+  async submitUpdateParamsCronProposal(
+    title: string,
+    description: string,
+    message: ParamsCronInfo,
+    amount: string,
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      amount,
+    );
+  }
+
+  /**
+   * submitUpdateParamsContractmanageProposal creates proposal which changes some params of contractmanager module.
+   */
+
+  async submitUpdateParamsContractmanageProposal(
+    title: string,
+    description: string,
+    sudoCallGasLimit: string,
+    amount: string,
+  ): Promise<number> {
+    const message = updateContractmanagerParamsProposal({
+      sudo_call_gas_limit: sudoCallGasLimit,
     });
     return await this.submitSingleChoiceProposal(
       title,
@@ -1297,13 +1429,13 @@ export class DaoMember {
   async submitUpdateAdminProposal(
     title: string,
     description: string,
+    sender: string,
     contract: string,
     newAdmin: string,
     amount: string,
   ): Promise<number> {
     const message = updateAdminProposal({
-      title,
-      description,
+      sender,
       contract,
       new_admin: newAdmin,
     });
@@ -1321,10 +1453,11 @@ export class DaoMember {
   async submitClearAdminProposal(
     title: string,
     description: string,
+    sender: string,
     contract: string,
     amount: string,
   ): Promise<number> {
-    const message = clearAdminProposal({ title, description, contract });
+    const message = clearAdminProposal({ sender, contract });
     return await this.submitSingleChoiceProposal(
       title,
       description,
@@ -1546,7 +1679,7 @@ export const setupSubDaoTimelockSet = async (
     mockMainDao ? cm.wallet.address.toString() : daoContracts.core.address,
     daoContracts.proposals.overrule.pre_propose.address,
     securityDaoAddr,
-    closeProposalOnExecutionFailure,
+    closeProposalOnExecutionFailure
   );
 
   const mainDaoMember = new DaoMember(cm, new Dao(cm.chain, daoContracts));

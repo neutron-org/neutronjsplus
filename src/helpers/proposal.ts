@@ -1,5 +1,6 @@
 import { google } from '../generated/proto';
 import Any = google.protobuf.Any;
+import { ADMIN_MODULE_ADDRESS } from './cosmos';
 
 export type ParamChangeProposalInfo = {
   title: string;
@@ -15,16 +16,50 @@ export type PinCodesInfo = {
   codes_ids: number[];
 };
 
+export type ParamsInterchaintxsInfo = {
+  msg_submit_tx_max_messages: number;
+};
+
+export type ParamsInterchainqueriesInfo = {
+  query_submit_timeout: number;
+  query_deposit: null;
+  tx_query_removal_limit: number;
+};
+
+export type ParamsTokenfactoryInfo = {
+  denom_creation_fee: any;
+  denom_creation_gas_consume: number;
+};
+
+export type ParamsFeeburnerInfo = {
+  treasury_address: string;
+};
+
+export type ParamsFeerefunderInfo = {
+  min_fee: {
+    recv_fee: any;
+    ack_fee: any;
+    timeout_fee: any;
+  };
+};
+
+export type ParamsCronInfo = {
+  security_address: string;
+  limit: number;
+};
+
+export type ParamsContractmanagerInfo = {
+  sudo_call_gas_limit: string;
+};
+
 export type UpdateAdmin = {
-  title: string;
-  description: string;
+  sender: string;
   contract: string;
   new_admin: string;
 };
 
 export type ClearAdmin = {
-  title: string;
-  description: string;
+  sender: string;
   contract: string;
 };
 
@@ -146,10 +181,31 @@ export const pinCodesProposal = (info: PinCodesInfo): any => ({
   custom: {
     submit_admin_proposal: {
       admin_proposal: {
-        pin_codes_proposal: {
-          title: info.title,
-          description: info.description,
-          code_ids: info.codes_ids,
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/cosmwasm.wasm.v1.MsgPinCodes',
+            authority: ADMIN_MODULE_ADDRESS,
+            code_ids: info.codes_ids,
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const pinCodesCustomAutrhorityProposal = (
+  info: PinCodesInfo,
+  authority: string,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/cosmwasm.wasm.v1.MsgPinCodes',
+            authority: authority,
+            code_ids: info.codes_ids,
+          }),
         },
       },
     },
@@ -160,10 +216,155 @@ export const unpinCodesProposal = (info: PinCodesInfo): any => ({
   custom: {
     submit_admin_proposal: {
       admin_proposal: {
-        unpin_codes_proposal: {
-          title: info.title,
-          description: info.description,
-          code_ids: info.codes_ids,
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/cosmwasm.wasm.v1.MsgUnpinCodes',
+            authority: ADMIN_MODULE_ADDRESS,
+            code_ids: info.codes_ids,
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateInterchaintxsParamsProposal = (
+  info: ParamsInterchaintxsInfo,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.interchaintxs.v1.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params: {
+              msg_submit_tx_max_messages: info.msg_submit_tx_max_messages,
+            },
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateInterchainqueriesParamsProposal = (
+  info: ParamsInterchainqueriesInfo,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.interchainqueries.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params: {
+              query_submit_timeout: info.query_submit_timeout,
+              query_deposit: null,
+              tx_query_removal_limit: info.tx_query_removal_limit,
+            },
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateTokenfacoryParamsProposal = (
+  info: ParamsTokenfactoryInfo,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/osmosis.tokenfactory.v1beta1.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params: {
+              denom_creation_fee: info.denom_creation_fee,
+              denom_creation_gas_consume: info.denom_creation_gas_consume,
+              fee_collector_address: null,
+            },
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateFeeburnerParamsProposal = (
+  info: ParamsFeeburnerInfo,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.feeburner.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params: {
+              treasury_address: info.treasury_address,
+            },
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateFeerefunderParamsProposal = (
+  info: ParamsFeerefunderInfo,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.feerefunder.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params: {
+              min_fee: info.min_fee,
+            },
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateCronParamsProposal = (info: ParamsCronInfo): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.cron.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params: {
+              security_address: info.security_address,
+              limit: info.limit,
+            },
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateContractmanagerParamsProposal = (
+  info: ParamsContractmanagerInfo,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.contractmanager.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params: {
+              sudo_call_gas_limit: info.sudo_call_gas_limit,
+            },
+          }),
         },
       },
     },
@@ -174,11 +375,13 @@ export const updateAdminProposal = (info: UpdateAdmin): any => ({
   custom: {
     submit_admin_proposal: {
       admin_proposal: {
-        update_admin_proposal: {
-          title: info.title,
-          description: info.description,
-          contract: info.contract,
-          new_admin: info.new_admin,
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/cosmwasm.wasm.v1.MsgUpdateAdmin',
+            sender: info.sender,
+            contract: info.contract,
+            new_admin: info.new_admin,
+          }),
         },
       },
     },
@@ -189,10 +392,12 @@ export const clearAdminProposal = (info: ClearAdmin): any => ({
   custom: {
     submit_admin_proposal: {
       admin_proposal: {
-        clear_admin_proposal: {
-          title: info.title,
-          description: info.description,
-          contract: info.contract,
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/cosmwasm.wasm.v1.MsgClearAdmin',
+            sender: info.sender,
+            contract: info.contract,
+          }),
         },
       },
     },
