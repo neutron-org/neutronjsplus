@@ -1222,15 +1222,14 @@ export const getEventAttribute = (
     .map((event) => event.attributes)
     .flat();
 
-  const encodedAttr = attributes?.find(
-    (attr) => attr.key === Buffer.from(attribute).toString('base64'),
-  )?.value as string;
+  const attrValue = attributes?.find((attr) => attr.key === attribute)
+    ?.value as string;
 
-  if (!encodedAttr) {
+  if (!attrValue) {
     throw new Error(`Attribute ${attribute} not found`);
   }
 
-  return Buffer.from(encodedAttr, 'base64').toString('ascii');
+  return attrValue;
 };
 
 export const filterIBCDenoms = (list: CosmosBaseV1beta1Coin[]) =>
