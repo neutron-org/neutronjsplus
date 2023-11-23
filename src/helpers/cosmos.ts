@@ -859,17 +859,20 @@ export class WalletWrapper {
       .BroadcastTxMode.Sync,
   ): Promise<BroadcastTx200ResponseTxResponse> {
     const msg = new MsgSubmitProposalLegacy({
-      content: packAnyMsg('/cosmos.params.v1beta1.ParameterChangeProposal', new ParameterChangeProposal({
-        title: 'mock',
-        description: 'mock',
-        changes: [
-          new cosmosclient.proto.cosmos.params.v1beta1.ParamChange({
-            key: key,
-            subspace: subspace,
-            value: value,
-          }),
-        ],
-      })),
+      content: {
+        typeUrl: '/cosmos.params.v1beta1.ParameterChangeProposal',
+        value: new ParameterChangeProposal({
+          title: 'mock',
+          description: 'mock',
+          changes: [
+            new cosmosclient.proto.cosmos.params.v1beta1.ParamChange({
+              key: key,
+              subspace: subspace,
+              value: value,
+            }),
+          ],
+        }).toBinary(),
+      },
       proposer: this.wallet.account.address,
     });
     const res = await this.execTxNew(fee, [packAnyMsg('/cosmos.adminmodule.adminmodule.MsgSubmitProposalLegacy', msg)], 10, mode, sequence);

@@ -10,6 +10,7 @@ npx buf generate ../neutron/third_party/proto --include-imports --template ./buf
 npx buf generate ../github.com/neutron-admin-module --include-imports --template ./buf.ts.gen.yaml --output ./src/generated/admin_module
 npx buf generate ../github.com/block-sdk/proto --include-imports --template ./buf.ts.gen.yaml --output ./src/generated/block_sdk
 npx buf generate ../neutron-cosmos-sdk/proto --include-imports --template ./buf.ts.gen.yaml --output ./src/generated/cosmos_sdk
+npx buf generate ../github.com/ibc-go/proto --include-imports --template ./buf.ts.gen.yaml --output ./src/generated/ibc_go
 
 # npx buf generate ./ibc-go/ # TODO
 

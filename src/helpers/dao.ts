@@ -4,6 +4,7 @@ import {
   CosmosWrapper,
   createBankSendMessage,
   getEventAttribute,
+  packAnyMsg,
   WalletWrapper,
   wrapMsg,
 } from './cosmos';
@@ -41,6 +42,7 @@ import {
 import { ibc } from '../generated/ibc/proto';
 import cosmosclient from '@cosmos-client/core';
 import Long from 'long';
+import { ClientState } from '../generated/neutron_thirdparty/ibc/lightclients/tendermint/v1/tendermint_pb';
 
 export type SubdaoProposalConfig = {
   threshold: any;
@@ -1419,9 +1421,7 @@ export class DaoMember {
       name,
       height,
       info,
-      upgraded_client_state: cosmosclient.codec.instanceToProtoAny(
-        new ibc.lightclients.tendermint.v1.ClientState({}),
-      ),
+      upgraded_client_state: packAnyMsg('/ibc.lightclients.tendermint.v1.ClientState', new ClientState({})),
     });
     return await this.submitSingleChoiceProposal(
       title,
