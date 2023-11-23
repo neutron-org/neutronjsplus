@@ -1,28 +1,22 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import cosmosclient from '@cosmos-client/core';
 import { cosmos, osmosis } from '../generated/proto';
 import ICoin = cosmos.base.v1beta1.ICoin;
 import { BroadcastTx200ResponseTxResponse } from '@cosmos-client/core/cjs/openapi/api';
-import { WalletWrapper } from '../helpers/cosmos';
+import { WalletWrapper, packAnyMsg } from '../helpers/cosmos';
 import Long from 'long';
+import { MsgBurn, MsgChangeAdmin, MsgCreateDenom, MsgMint, MsgSetBeforeSendHook } from '../generated/neutron/osmosis/tokenfactory/v1beta1/tx_pb';
+import axios from 'axios';
 
-export function registerCodecs() {
-  cosmosclient.codec.register(
-    '/osmosis.tokenfactory.v1beta1.MsgCreateDenom',
-    osmosis.tokenfactory.v1beta1.MsgCreateDenom,
-  );
-  cosmosclient.codec.register(
-    '/osmosis.tokenfactory.v1beta1.MsgMint',
-    osmosis.tokenfactory.v1beta1.MsgMint,
-  );
-  cosmosclient.codec.register(
-    '/osmosis.tokenfactory.v1beta1.MsgBurn',
-    osmosis.tokenfactory.v1beta1.MsgBurn,
-  );
-  cosmosclient.codec.register(
-    '/osmosis.tokenfactory.v1beta1.MsgChangeAdmin',
-    osmosis.tokenfactory.v1beta1.MsgChangeAdmin,
-  );
+export interface DenomsFromCreator {
+  readonly denoms: readonly string[];
+}
+
+export interface AuthorityMetadata {
+  readonly authority_metadata: { readonly Admin: string };
+}
+
+export interface BeforeSendHook {
+  readonly contract_addr: string;
 }
 
 export const msgMintDenom = async (
@@ -30,16 +24,16 @@ export const msgMintDenom = async (
   creator: string,
   amount: ICoin,
 ): Promise<BroadcastTx200ResponseTxResponse> => {
-  const msgMint = new osmosis.tokenfactory.v1beta1.MsgMint({
+  const msgMint = new MsgMint({
     sender: creator,
     amount,
   });
-  const res = await cmNeutron.execTx(
+  const res = await cmNeutron.execTxNew(
     {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
     },
-    [msgMint],
+    [packAnyMsg('/osmosis.tokenfactory.v1beta1.MsgMint', msgMint)],
     10,
   );
 
@@ -51,16 +45,16 @@ export const msgCreateDenom = async (
   creator: string,
   subdenom: string,
 ): Promise<BroadcastTx200ResponseTxResponse> => {
-  const msgCreateDenom = new osmosis.tokenfactory.v1beta1.MsgCreateDenom({
+  const msgCreateDenom = new MsgCreateDenom({
     sender: creator,
     subdenom,
   });
-  const res = await cmNeutron.execTx(
+  const res = await cmNeutron.execTxNew(
     {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
     },
-    [msgCreateDenom],
+    [packAnyMsg('/osmosis.tokenfactory.v1beta1.MsgCreateDenom', msgCreateDenom)],
     10,
   );
 
@@ -73,19 +67,19 @@ export const msgBurn = async (
   denom: string,
   amountToBurn: string,
 ): Promise<BroadcastTx200ResponseTxResponse> => {
-  const msgBurn = new osmosis.tokenfactory.v1beta1.MsgBurn({
+  const msgBurn = new MsgBurn({
     sender: creator,
     amount: {
       denom: denom,
       amount: amountToBurn,
     },
   });
-  const res = await cmNeutron.execTx(
+  const res = await cmNeutron.execTxNew(
     {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
     },
-    [msgBurn],
+    [packAnyMsg('/osmosis.tokenfactory.v1beta1.MsgBurn',  msgBurn)],
     10,
   );
 
@@ -99,19 +93,86 @@ export const msgChangeAdmin = async (
   denom: string,
   newAdmin: string,
 ): Promise<BroadcastTx200ResponseTxResponse> => {
-  const msgChangeAdmin = new osmosis.tokenfactory.v1beta1.MsgChangeAdmin({
+  const msgChangeAdmin = new MsgChangeAdmin({
     sender: creator,
     denom,
-    new_admin: newAdmin,
+    newAdmin: newAdmin,
   });
-  const res = await cmNeutron.execTx(
+  const res = await cmNeutron.execTxNew(
     {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
     },
-    [msgChangeAdmin],
+    [packAnyMsg('/osmosis.tokenfactory.v1beta1.MsgChangeAdmin', msgChangeAdmin)],
     10,
   );
 
   return res.tx_response!;
 };
+
+export const msgSetBeforeSendHook = async (
+  cmNeutron: WalletWrapper,
+  creator: string,
+  denom: string,
+  contractAddr: string,
+): Promise<BroadcastTx200ResponseTxResponse> => {
+  const msgMint = new MsgSetBeforeSendHook({
+    sender: creator,
+    denom,
+    contractAddr: contractAddr,
+  });
+  const res = await cmNeutron.execTxNew(
+    {
+      gas_limit: Long.fromString('200000'),
+      amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
+    },
+    [packAnyMsg('/osmosis.tokenfactory.v1beta1.MsgSetBeforeSendHook', msgMint)],
+    10,
+  );
+
+  return res.tx_response!;
+};
+
+
+export const checkTokenfactoryParams = async (sdkUrl: string): Promise<boolean> => {
+  try {
+    await axios.get(`${sdkUrl}/osmosis/tokenfactory/v1beta1/params`);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+export const getDenomsFromCreator = async (
+  sdkUrl: string,
+  creator: string,
+): Promise<DenomsFromCreator> => {
+  const res = await axios.get<DenomsFromCreator>(
+    `${sdkUrl}/osmosis/tokenfactory/v1beta1/denoms_from_creator/${creator}`,
+  );
+
+  return res.data;
+};
+
+export const getAuthorityMetadata = async (
+  sdkUrl: string,
+  denom: string,
+): Promise<AuthorityMetadata> => {
+  const res = await axios.get<AuthorityMetadata>(
+    `${sdkUrl}/osmosis/tokenfactory/v1beta1/denoms/${denom}/authority_metadata`,
+  );
+
+  return res.data;
+};
+
+export const getBeforeSendHook = async (
+  sdkUrl: string,
+  denom: string,
+): Promise<BeforeSendHook> => {
+  const res = await axios.get<BeforeSendHook>(
+    `${sdkUrl}/osmosis/tokenfactory/v1beta1/denoms/${denom}/before_send_hook`,
+  );
+
+  return res.data;
+};
+
