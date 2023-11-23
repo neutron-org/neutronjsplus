@@ -5,6 +5,7 @@ import { waitSeconds } from './wait';
 import { promises as fsPromise } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import cosmosclient from '@cosmos-client/core';
 
 const CONTRACTS_PATH = process.env.CONTRACTS_PATH || './contracts';
 export const DEBUG_SUBMIT_TX = process.env.DEBUG_SUBMIT_TX;
@@ -165,4 +166,9 @@ const showContractsHashes = async () => {
   }
 
   console.log(result);
+};
+
+export const getHeight = async (sdk: cosmosclient.CosmosSDK) => {
+  const block = await cosmosclient.rest.tendermint.getLatestBlock(sdk);
+  return +block.data.block.header.height;
 };
