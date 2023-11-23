@@ -2,7 +2,7 @@ import axios from 'axios';
 import {
   ADMIN_MODULE_ADDRESS,
   CosmosWrapper,
-  createBankMessage,
+  createBankSendMessage,
   getEventAttribute,
   WalletWrapper,
   wrapMsg,
@@ -721,7 +721,7 @@ export class DaoMember {
     deposit = '',
   ): Promise<number> {
     const messages = dest.map((d) =>
-      createBankMessage(d.recipient, d.amount, d.denom),
+      createBankSendMessage(d.recipient, d.amount, d.denom),
     );
     return await this.submitSingleChoiceProposal(
       title,
@@ -775,7 +775,7 @@ export class DaoMember {
     const messages: MultiChoiceOption[] = choices.map((choice, idx) => ({
       description: 'choice' + idx,
       msgs: [
-        createBankMessage(choice.to, parseInt(choice.amount), choice.denom),
+        createBankSendMessage(choice.to, parseInt(choice.amount), choice.denom),
       ],
     }));
     return await this.submitMultiChoiceProposal(

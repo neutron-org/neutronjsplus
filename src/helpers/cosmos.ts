@@ -1194,7 +1194,7 @@ export const getIBCDenom = (portName, channelName, denom: string): string => {
   return `ibc/${uatomIBCHash}`;
 };
 
-export const createBankMessage = (
+export const createBankSendMessage = (
   addr: string,
   amount: number,
   denom: string,
