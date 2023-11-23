@@ -193,7 +193,7 @@ export const pinCodesProposal = (info: PinCodesInfo): any => ({
   },
 });
 
-export const pinCodesCustomAutrhorityProposal = (
+export const pinCodesCustomAuthorityProposal = (
   info: PinCodesInfo,
   authority: string,
 ): any => ({

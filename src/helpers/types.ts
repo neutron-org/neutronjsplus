@@ -1,5 +1,6 @@
 import cosmosclient from '@cosmos-client/core';
 import bech32 from 'bech32';
+import { ParamsContractmanagerInfo, ParamsCronInfo, ParamsFeeburnerInfo, ParamsFeerefunderInfo, ParamsInterchainqueriesInfo, ParamsTokenfactoryInfo } from './proposal';
 
 export type AcknowledgementResult =
   | { success: string[] }
@@ -289,6 +290,29 @@ export type ContractAdminResponse = {
   contract_info: {
     admin: string;
   };
+};
+
+export type ParamsContractmanagerResponse = {
+  params: ParamsContractmanagerInfo;
+};
+
+export type ParamsCronResponse = {
+  params: ParamsCronInfo;
+};
+
+export type ParamsFeerefunderResponse = {
+  params: ParamsFeerefunderInfo;
+};
+
+export type ParamsFeeburnerResponse = {
+  params: ParamsFeeburnerInfo;
+};
+
+export type ParamsTokenfactoryResponse = {
+  params: ParamsTokenfactoryInfo;
+};
+export type ParamsInterchainqueriesResponse = {
+  params: ParamsInterchainqueriesInfo;
 };
 
 // TODO: is this the right place?

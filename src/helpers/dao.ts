@@ -23,11 +23,19 @@ import {
   clientUpdateProposal,
   paramChangeProposal,
   ParamChangeProposalInfo,
+  ParamsCronInfo,
+  ParamsFeeburnerInfo,
+  ParamsFeerefunderInfo,
+  ParamsInterchainqueriesInfo,
+  ParamsInterchaintxsInfo,
+  ParamsTokenfactoryInfo,
+  pinCodesCustomAuthorityProposal,
   pinCodesProposal,
   removeSchedule,
   SendProposalInfo,
   unpinCodesProposal,
   updateAdminProposal,
+  updateContractmanagerParamsProposal,
   upgradeProposal,
 } from './proposal';
 import { ibc } from '../generated/ibc/proto';
@@ -1200,7 +1208,7 @@ export class DaoMember {
     amount: string,
     authority: string,
   ): Promise<number> {
-    const message = pinCodesCustomAutrhorityProposal(
+    const message = pinCodesCustomAuthorityProposal(
       {
         title,
         description,

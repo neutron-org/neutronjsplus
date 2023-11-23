@@ -26,6 +26,14 @@ import {
   IcaHostParamsResponse,
   Wallet,
   CodeId,
+  GlobalfeeParamsResponse,
+  InterchaintxsParamsResponse,
+  ParamsFeeburnerResponse,
+  ParamsInterchainqueriesResponse,
+  ParamsFeerefunderResponse,
+  ParamsContractmanagerResponse,
+  ParamsCronResponse,
+  ParamsTokenfactoryResponse,
 } from './types';
 import { getContractBinary } from './env';
 import { MsgTransfer } from '../generated/neutron/neutron/transfer/v1/tx_pb';
@@ -137,33 +145,28 @@ export class CosmosWrapper {
     contract: string,
     query: Record<string, unknown>,
   ): Promise<T> {
-    const url = `${this.sdk.url}/wasm/contract/${contract}/smart/${Buffer.from(
+    const url = `${
+      this.sdk.url
+    }/cosmwasm/wasm/v1/contract/${contract}/smart/${Buffer.from(
       JSON.stringify(query),
     ).toString('base64')}?encoding=base64`;
-    const resp = await axios
-      .get<{
-        result: { smart: string };
-        height: number;
-      }>(url)
-      .catch((error) => {
-        if (error.response) {
-          throw new Error(
-            `Status: ${JSON.stringify(error.response.status)} \n` +
-              `Response: ${JSON.stringify(error.response.data)} \n` +
-              `Headers: ${JSON.stringify(error.response.headers)}`,
-          );
-        } else if (error.request) {
-          throw new Error(error.request);
-        }
-        throw new Error('Error: ' + error.message);
-      });
-    return JSON.parse(
-      Buffer.from(resp.data.result.smart, 'base64').toString(),
-    ) as T;
+    const resp = await axios.get(url).catch((error) => {
+      if (error.response) {
+        throw new Error(
+          `Status: ${JSON.stringify(error.response.status)} \n` +
+            `Response: ${JSON.stringify(error.response.data)} \n` +
+            `Headers: ${JSON.stringify(error.response.headers)}`,
+        );
+      } else if (error.request) {
+        throw new Error(error.request);
+      }
+      throw new Error('Error: ' + error.message);
+    });
+    return resp.data.data as T;
   }
 
   async getContractInfo(contract: string): Promise<any> {
-    const url = `${this.sdk.url}/cosmwasm/wasm/v1/contract/${contract}?encoding=base64`;
+    const url = `${this.sdk.url}/cosmwasm/wasm/v1/contract/${contract}`;
     try {
       const resp = await axios.get(url);
       return resp.data;
@@ -172,9 +175,9 @@ export class CosmosWrapper {
     }
   }
 
-  async getSeq(address: cosmosclient.AccAddress): Promise<any> {
+  async getSeq(address: string): Promise<number> {
     const account = await cosmosclient.rest.auth
-      .account(this.sdk, address.toString()) // TODO: check
+      .account(this.sdk, address)
       .then((res) =>
         cosmosclient.codec.protoJSONToInstance(
           cosmosclient.codec.castProtoJSONOfProtoAny(res.data.account),
@@ -185,16 +188,54 @@ export class CosmosWrapper {
         throw e;
       });
 
-    if (!(account instanceof cosmosclient.proto.cosmos.auth.v1beta1.BaseAccount)) {
+    if (
+      !(account instanceof cosmosclient.proto.cosmos.auth.v1beta1.BaseAccount)
+    ) {
       throw new Error("can't get account");
     }
 
     return account.sequence;
   }
 
-  async queryInterchainqueriesParams(): Promise<any> {
+  async queryInterchainqueriesParams(): Promise<ParamsInterchainqueriesResponse> {
     const req = await axios.get(
       `${this.sdk.url}/neutron/interchainqueries/params`,
+    );
+
+    return req.data;
+  }
+
+  async queryFeeburnerParams(): Promise<ParamsFeeburnerResponse> {
+    const req = await axios.get(`${this.sdk.url}/neutron/feeburner/params`);
+
+    return req.data;
+  }
+
+  async queryFeerefunderParams(): Promise<ParamsFeerefunderResponse> {
+    const req = await axios.get(
+      `${this.sdk.url}/neutron-org/neutron/feerefunder/params`,
+    );
+
+    return req.data;
+  }
+
+  async queryContractmanagerParams(): Promise<ParamsContractmanagerResponse> {
+    const req = await axios.get(
+      `${this.sdk.url}/neutron/contractmanager/params`,
+    );
+
+    return req.data;
+  }
+
+  async queryCronParams(): Promise<ParamsCronResponse> {
+    const req = await axios.get(`${this.sdk.url}/neutron/cron/params`);
+
+    return req.data;
+  }
+
+  async queryTokenfactoryParams(): Promise<ParamsTokenfactoryResponse> {
+    const req = await axios.get(
+      `${this.sdk.url}/osmosis/tokenfactory/v1beta1/params`,
     );
 
     return req.data;
@@ -211,18 +252,18 @@ export class CosmosWrapper {
   async queryBalances(addr: string): Promise<BalancesResponse> {
     const balances = await cosmosclient.rest.bank.allBalances(
       this.sdk,
-      addr.toString(),
+      addr,
     );
     return balances.data as BalancesResponse;
   }
 
   async queryDenomBalance(
-    addr: string | cosmosclient.AccAddress | cosmosclient.ValAddress,
+    addr: string,
     denom: string,
   ): Promise<number> {
     const { data } = await cosmosclient.rest.bank.allBalances(
       this.sdk,
-      addr.toString(),
+      addr,
     );
     const balance = data.balances.find((b) => b.denom === denom);
     return parseInt(balance?.amount ?? '0', 10);
@@ -279,7 +320,7 @@ export class CosmosWrapper {
   ): Promise<TotalSupplyByDenomResponse> {
     try {
       const req = await axios.get<TotalSupplyByDenomResponse>(
-        `${this.sdk.url}/cosmos/bank/v1beta1/supply/${denom}`,
+        `${this.sdk.url}/cosmos/bank/v1beta1/supply/by_denom?denom=${denom}`,
       );
       return req.data;
     } catch (e) {
@@ -389,6 +430,29 @@ export class CosmosWrapper {
       }
       throw e;
     }
+  }
+
+  async queryMaxTxsAllowed(): Promise<string> {
+    try {
+      const req = await axios.get<InterchaintxsParamsResponse>(
+        `${this.sdk.url}/neutron/interchaintxs/params`,
+        {},
+      );
+      return req.data.params.msg_submit_tx_max_messages;
+    } catch (e) {
+      if (e.response?.data?.message !== undefined) {
+        throw new Error(e.response?.data?.message);
+      }
+      throw e;
+    }
+  }
+
+  async queryGlobalfeeParams(): Promise<GlobalfeeParamsResponse> {
+    const req = await axios.get(
+      `${this.sdk.url}/gaia/globalfee/v1beta1/params`,
+    );
+
+    return req.data.params;
   }
 
   async queryContractAdmin(address: string): Promise<string> {
