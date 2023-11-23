@@ -1,5 +1,3 @@
-import cosmosclient from '@cosmos-client/core';
-import { CosmosSDK } from '@cosmos-client/core/cjs/sdk';
 import axios from 'axios';
 import { execSync } from 'child_process';
 import { ChannelsList, NeutronContract } from './types';
@@ -9,6 +7,7 @@ import path from 'path';
 import crypto from 'crypto';
 
 const CONTRACTS_PATH = process.env.CONTRACTS_PATH || './contracts';
+export const DEBUG_SUBMIT_TX = process.env.DEBUG_SUBMIT_TX;
 
 const BLOCKS_COUNT_BEFORE_START = process.env.BLOCKS_COUNT_BEFORE_START
   ? parseInt(process.env.BLOCKS_COUNT_BEFORE_START, 10)
@@ -64,7 +63,7 @@ export const setup = async (host1: string, host2: string) => {
 
 const waitForHTTP = async (
   host = 'http://127.0.0.1:1317',
-  path = `blocks/${BLOCKS_COUNT_BEFORE_START}`,
+  path = `cosmos/base/tendermint/v1beta1/blocks/${BLOCKS_COUNT_BEFORE_START}`,
   timeout = 280000,
 ) => {
   const start = Date.now();
@@ -166,9 +165,4 @@ const showContractsHashes = async () => {
   }
 
   console.log(result);
-};
-
-export const getHeight = async (sdk: CosmosSDK) => {
-  const block = await cosmosclient.rest.tendermint.getLatestBlock(sdk);
-  return +block.data.block.header.height;
 };

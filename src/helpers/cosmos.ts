@@ -1,5 +1,4 @@
 import cosmosclient from '@cosmos-client/core';
-import { AccAddress, ValAddress } from '@cosmos-client/core/cjs/types';
 import cosmwasmclient from '@cosmos-client/cosmwasm';
 import { cosmos as AdminProto, ibc as ibcProto } from '../generated/ibc/proto';
 import { neutron } from '../generated/proto';
@@ -216,7 +215,7 @@ export class CosmosWrapper {
   }
 
   async queryDenomBalance(
-    addr: string | AccAddress | ValAddress,
+    addr: string | cosmosclient.AccAddress | cosmosclient.ValAddress,
     denom: string,
   ): Promise<number> {
     const { data } = await cosmosclient.rest.bank.allBalances(

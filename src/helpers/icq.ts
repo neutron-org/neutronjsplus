@@ -1,4 +1,3 @@
-import { CosmosSDK } from '@cosmos-client/core/cjs/sdk';
 import axios, { AxiosResponse } from 'axios';
 import { CosmosWrapper, WalletWrapper } from './cosmos';
 import { getWithAttempts } from './wait';
@@ -151,7 +150,7 @@ export const registerTransfersQuery = async (
   );
 
   const tx = await cosmosclient.rest.tx.getTx(
-    cm.chain.sdk as CosmosSDK,
+    cm.chain.sdk as cosmosclient.CosmosSDK,
     res.txhash as string,
   );
   if (tx?.data.tx_response?.code != 0) {

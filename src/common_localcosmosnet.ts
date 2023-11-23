@@ -1,5 +1,4 @@
 import { exec } from 'child_process';
-import cosmosclient from '@cosmos-client/core';
 import {
   COSMOS_DENOM,
   CosmosWrapper,
@@ -12,9 +11,10 @@ import {
 import { BlockWaiter } from './helpers/wait';
 import { generateMnemonic } from 'bip39';
 import Long from 'long';
-import { AccAddress } from '@cosmos-client/core/cjs/types';
-import { CosmosBaseV1beta1Coin } from '@cosmos-client/core/cjs/openapi/api';
+import cosmosclient from '@cosmos-client/core';
 import { Wallet } from './helpers/types';
+
+import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 
 export const disconnectValidator = async (name: string) => {
   const { stdout } = exec(`docker stop ${name}`);
@@ -174,7 +174,7 @@ export class TestStateLocalCosmosTestNet {
 
   sendTokensWithRetry = async (
     cm: WalletWrapper,
-    to: AccAddress,
+    to: cosmosclient.AccAddress,
     amount: string,
     denom = cm.chain.denom,
     retryCount = 100,
@@ -213,7 +213,7 @@ export class TestStateLocalCosmosTestNet {
     blockWaiter: BlockWaiter,
     wallet: Wallet,
     denom: string,
-    balances: CosmosBaseV1beta1Coin[] = [],
+    balances: ICoin[] = [],
   ) {
     if (balances.length === 0) {
       balances = [
