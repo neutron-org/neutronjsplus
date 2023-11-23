@@ -7,6 +7,10 @@
 npx buf generate buf.build/protocolbuffers/wellknowntypes --include-imports --template ./buf.ts.gen.yaml --output ./src/generated/wellknowntypes
 npx buf generate ../neutron/proto --include-imports --template ./buf.ts.gen.yaml --output ./src/generated/neutron
 npx buf generate ../neutron/third_party/proto --include-imports --template ./buf.ts.gen.yaml --output ./src/generated/neutron_thirdparty
+npx buf generate ../github.com/neutron-admin-module --include-imports --template ./buf.ts.gen.yaml --output ./src/generated/admin_module
+npx buf generate ../github.com/block-sdk/proto --include-imports --template ./buf.ts.gen.yaml --output ./src/generated/block_sdk
+npx buf generate ../neutron-cosmos-sdk/proto --include-imports --template ./buf.ts.gen.yaml --output ./src/generated/cosmos_sdk
+
 # npx buf generate ./ibc-go/ # TODO
 
 # generate ibc-go types
@@ -15,3 +19,7 @@ npx buf generate ../neutron/third_party/proto --include-imports --template ./buf
 # generate google types
 
 # generate admin-module types
+
+# generate pob types
+git clone git@github.com:skip-mev/block-sdk.git
+# gco v1.1.0
