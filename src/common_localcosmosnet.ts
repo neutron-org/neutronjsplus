@@ -187,7 +187,7 @@ export class TestStateLocalCosmosTestNet {
     let res;
     while (retryCount > attemptCount) {
       try {
-        const sequence = await cm.chain.getSeq(cm.wallet.address);
+        const sequence = await cm.chain.getSeq(cm.wallet.address.toString());
         res = await cm.msgSend(
           to.toString(),
           { amount, denom },
