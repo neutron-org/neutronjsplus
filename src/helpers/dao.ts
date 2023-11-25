@@ -39,8 +39,6 @@ import {
   updateContractmanagerParamsProposal,
   upgradeProposal,
 } from './proposal';
-import { ibc } from '../generated/ibc/proto';
-import cosmosclient from '@cosmos-client/core';
 import Long from 'long';
 import { ClientState } from '../generated/neutron_thirdparty/ibc/lightclients/tendermint/v1/tendermint_pb';
 
@@ -198,7 +196,6 @@ export const getVotingVaults = async (
   const votingVaults = await cm.queryContract<
     [{ address: string; name: string }]
   >(votingModuleAddress, { voting_vaults: {} });
-
   let ntrnVaultAddress;
   let lockdropVaultAddress;
   for (const vault of votingVaults) {
@@ -278,7 +275,6 @@ export const getDaoContracts = async (
 
   const votingModuleAddress = await getVotingModule(cm, daoAddress);
   const votingVaults = await getVotingVaults(cm, votingModuleAddress);
-
   const proposalsStructure = await getProposalModules(cm, daoAddress);
 
   const subdaosList = await cm.queryContract<{ addr: string }[]>(daoAddress, {
@@ -1034,6 +1030,33 @@ export class DaoMember {
     return proposalId1;
   }
 
+  async submitUpdateConfigProposal(
+    title: string,
+    description: string,
+    config: SubdaoProposalConfig,
+    deposit: string,
+    customModule = 'single',
+  ): Promise<number> {
+    const msg = {
+      update_config: config,
+    };
+    const message = {
+      wasm: {
+        execute: {
+          contract_addr: this.dao.contracts.proposals[customModule].address,
+          msg: Buffer.from(JSON.stringify(msg)).toString('base64'),
+          funds: [],
+        },
+      },
+    };
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      deposit,
+    );
+  }
+
   async submitUpdateSubDaoConfigProposal(
     newConfig: {
       name?: string;
@@ -1735,7 +1758,7 @@ export const deployNeutronDao = async (
 
   const f = (arr: Record<string, string>[], id: number) =>
     (arr.find((v) => Number(v.code_id) == id) || {})._contract_address;
-  const neutronVaultAddess = f(neutronVaultCodeIdRes, neutronVaultCodeId);
+  const neutronVaultAddress = f(neutronVaultCodeIdRes, neutronVaultCodeId);
   const votingRegistryInstantiateInfo = {
     admin: {
       core_module: {},
@@ -1743,9 +1766,8 @@ export const deployNeutronDao = async (
     code_id: votingRegistryCodeId,
     label: DaoContractLabels.DAO_VOTING_REGISTRY,
     msg: wrapMsg({
-      manager: null,
       owner: cm.wallet.address.toString(),
-      voting_vaults: [neutronVaultAddess],
+      voting_vaults: [neutronVaultAddress],
     }),
   };
   const preProposeInitMsg = {
@@ -1886,5 +1908,6 @@ export const deployNeutronDao = async (
     JSON.stringify(coreInstantiateMessage),
     DaoContractLabels.DAO_CORE,
   );
+  await cm.chain.blockWaiter.waitBlocks(1);
   return getDaoContracts(cm.chain, f(res, coreCodeId));
 };
