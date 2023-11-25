@@ -24,6 +24,7 @@ import {
   clientUpdateProposal,
   paramChangeProposal,
   ParamChangeProposalInfo,
+  ParamsContractmanagerInfo,
   ParamsCronInfo,
   ParamsFeeburnerInfo,
   ParamsFeerefunderInfo,
@@ -1351,10 +1352,10 @@ export class DaoMember {
   async submitUpdateParamsFeerefunderProposal(
     title: string,
     description: string,
-    amount: string,
     message: ParamsFeerefunderInfo = {
       min_fee: { recv_fee: null, ack_fee: null, timeout_fee: null },
     },
+    amount: string,
   ): Promise<number> {
     return await this.submitSingleChoiceProposal(
       title,
@@ -1383,18 +1384,15 @@ export class DaoMember {
   }
 
   /**
-   * submitUpdateParamsContractmanageProposal creates proposal which changes some params of contractmanager module.
+   * submitUpdateParamsContractmanagerProposal creates proposal which changes some params of contractmanager module.
    */
 
-  async submitUpdateParamsContractmanageProposal(
+  async submitUpdateParamsContractmanagerProposal(
     title: string,
     description: string,
-    sudoCallGasLimit: string,
+    message: ParamsContractmanagerInfo,
     amount: string,
   ): Promise<number> {
-    const message = updateContractmanagerParamsProposal({
-      sudo_call_gas_limit: sudoCallGasLimit,
-    });
     return await this.submitSingleChoiceProposal(
       title,
       description,
