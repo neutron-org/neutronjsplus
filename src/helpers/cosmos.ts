@@ -1,7 +1,5 @@
 import cosmosclient from '@cosmos-client/core';
 import cosmwasmclient from '@cosmos-client/cosmwasm';
-import { cosmos as AdminProto, ibc as ibcProto } from '../generated/ibc/proto';
-import { neutron } from '../generated/proto';
 import axios from 'axios';
 import Long from 'long';
 import { BlockWaiter, getWithAttempts } from './wait';
@@ -46,8 +44,6 @@ import { MsgSend } from '../generated/cosmos_sdk/cosmos/bank/v1beta1/tx_pb';
 import { MsgRemoveInterchainQueryRequest } from '../generated/neutron/neutron/interchainqueries/tx_pb';
 import { MsgDelegate } from '../generated/cosmos_sdk/cosmos/staking/v1beta1/tx_pb';
 
-const adminmodule = AdminProto.adminmodule.adminmodule;
-
 export const NEUTRON_DENOM = process.env.NEUTRON_DENOM || 'untrn';
 export const IBC_ATOM_DENOM = process.env.IBC_ATOM_DENOM || 'uibcatom';
 export const IBC_USDC_DENOM = process.env.IBC_USDC_DENOM || 'uibcusdc';
@@ -82,34 +78,6 @@ export type TotalBurnedNeutronsAmountResponse = {
     coin: ICoin;
   };
 };
-
-export function registerCodecs() {
-  cosmosclient.codec.register(
-    '/cosmos.params.v1beta1.ParameterChangeProposal',
-    cosmosclient.proto.cosmos.params.v1beta1.ParameterChangeProposal,
-  );
-
-  cosmosclient.codec.register(
-    '/neutron.interchainqueries.MsgRemoveInterchainQueryRequest',
-    neutron.interchainqueries.MsgRemoveInterchainQueryRequest,
-  );
-  cosmosclient.codec.register(
-    '/cosmos.params.v1beta1.ParameterChangeProposal',
-    cosmosclient.proto.cosmos.params.v1beta1.ParameterChangeProposal,
-  );
-  // cosmosclient.codec.register(
-  //   '/ibc.applications.transfer.v1.MsgTransfer',
-  //   ibcProto.applications.transfer.v1.MsgTransfer,
-  // );
-  cosmosclient.codec.register(
-    '/cosmos.adminmodule.adminmodule.MsgSubmitProposal',
-    adminmodule.MsgSubmitProposal,
-  );
-  cosmosclient.codec.register(
-    '/ibc.lightclients.tendermint.v1.ClientState',
-    ibcProto.lightclients.tendermint.v1.ClientState,
-  );
-}
 
 export class CosmosWrapper {
   readonly sdk: cosmosclient.CosmosSDK;
@@ -487,55 +455,13 @@ export class WalletWrapper {
     );
   }
 
-  buildTx<T>(
-    fee: cosmosclient.proto.cosmos.tx.v1beta1.IFee,
-    msgs: T[],
-    sequence: number = this.wallet.account.sequence,
-    txTimeoutHeight?: number,
-  ): cosmosclient.TxBuilder {
-    const protoMsgs: Array<cosmosclient.proto.google.protobuf.IAny> = [];
-    msgs.forEach((msg) => {
-      protoMsgs.push(cosmosclient.codec.instanceToProtoAny(msg));
-    });
-    const txBody = new cosmosclient.proto.cosmos.tx.v1beta1.TxBody({
-      messages: protoMsgs,
-    });
-    if (txTimeoutHeight != undefined) {
-      txBody.timeout_height = txTimeoutHeight;
-    }
-    const authInfo = new cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo({
-      signer_infos: [
-        {
-          public_key: cosmosclient.codec.instanceToProtoAny(this.wallet.pubKey),
-          mode_info: {
-            single: {
-              mode: cosmosclient.proto.cosmos.tx.signing.v1beta1.SignMode
-                .SIGN_MODE_DIRECT,
-            },
-          },
-          sequence,
-        },
-      ],
-      fee,
-    });
-    const txBuilder = new cosmosclient.TxBuilder(
-      this.chain.sdk as CosmosSDK,
-      txBody,
-      authInfo,
-    );
-    const signDocBytes = txBuilder.signDocBytes(
-      this.wallet.account.account_number,
-    );
-    txBuilder.addSignature(this.wallet.privKey.sign(signDocBytes));
-    return txBuilder;
-  }
 
   /**
    * execTx broadcasts messages and returns the transaction result.
    */
   async execTx<T>(
     fee: cosmosclient.proto.cosmos.tx.v1beta1.IFee,
-    msgs: T[],
+    msgs: cosmosclient.proto.google.protobuf.Any[],
     numAttempts = 10,
     mode: cosmosclient.rest.tx.BroadcastTxMode = cosmosclient.rest.tx
       .BroadcastTxMode.Sync,
@@ -574,51 +500,7 @@ export class WalletWrapper {
   }
 
 
-  /**
-   * execTx broadcasts messages and returns the transaction result.
-   */
-  async execTxNew<T>(
-    fee: cosmosclient.proto.cosmos.tx.v1beta1.IFee,
-    msgs: cosmosclient.proto.google.protobuf.Any[],
-    numAttempts = 10,
-    mode: cosmosclient.rest.tx.BroadcastTxMode = cosmosclient.rest.tx
-      .BroadcastTxMode.Sync,
-    sequence: number = this.wallet.account.sequence,
-    txTimeoutHeight?: number,
-  ): Promise<CosmosTxV1beta1GetTxResponse> {
-    const txBuilder = this.buildTxNew(fee, msgs, sequence, txTimeoutHeight);
-    const txhash = await this.broadcastTx(txBuilder, mode);
-    // if (DEBUG_SUBMIT_TX) {
-      // console.log('tx hash: ', txhash);
-    // }
-    let error = null;
-    while (numAttempts > 0) {
-      await this.chain.blockWaiter.waitBlocks(1);
-      numAttempts--;
-      const data = await cosmosclient.rest.tx
-        .getTx(this.chain.sdk as CosmosSDK, txhash)
-        .catch((reason) => {
-          error = reason;
-          return null;
-        });
-      if (data != null) {
-        // if (DEBUG_SUBMIT_TX) {
-          const code = +data.data?.tx_response.code;
-        //   console.log('response code: ', code);
-          if (code > 0) {
-            // console.log('\x1b[31m error log: ', data.data?.tx_response.raw_log);
-          }
-          // console.log('response: ', JSON.stringify(data.data));
-        // }
-        return data.data;
-      }
-    }
-    error = error ?? new Error('failed to submit tx');
-    throw error;
-  }
-
-
-  buildTxNew<T>(
+  buildTx<T>(
     fee: cosmosclient.proto.cosmos.tx.v1beta1.IFee,
     protoMsgs: cosmosclient.proto.google.protobuf.Any[],
     sequence: number = this.wallet.account.sequence,
@@ -663,14 +545,14 @@ export class WalletWrapper {
       .BroadcastTxMode.Sync,
   ): Promise<string> {
     try {
-    // if (DEBUG_SUBMIT_TX) {
-    //   console.log('\n\n\nStart broadcasting tx: ----------------------');
+    if (DEBUG_SUBMIT_TX) {
+      console.log('\n\n\nStart broadcasting tx: ----------------------');
       try {
-        // console.log(JSON.stringify(txBuilder.toProtoJSON()));
+        console.log(JSON.stringify(txBuilder.toProtoJSON()));
       } catch (error) {
-        // console.log('failed to serrialize tx');
+        console.log('failed to serrialize tx');
       }
-    // }
+    }
 
       const res = await cosmosclient.rest.tx.broadcastTx(
         this.chain.sdk as CosmosSDK,
@@ -681,13 +563,13 @@ export class WalletWrapper {
       );
 
     const code = res.data?.tx_response.code;
-    // if (DEBUG_SUBMIT_TX) {
-    //   console.log('async response code: ', code);
-    // }
+    if (DEBUG_SUBMIT_TX) {
+      console.log('async response code: ', code);
+    }
     if (code !== 0) {
-      // if (DEBUG_SUBMIT_TX) {
-      //   console.log(`broadcast error: ${res.data?.tx_response.raw_log}`);
-      // }
+      if (DEBUG_SUBMIT_TX) {
+        console.log(`broadcast error: ${res.data?.tx_response.raw_log}`);
+      }
       throw new Error(`broadcast error: ${res.data?.tx_response.raw_log}`);
     }
     const txhash = res.data?.tx_response.txhash;
@@ -702,7 +584,7 @@ export class WalletWrapper {
 
   // storeWasm stores the wasm code by the passed path on the blockchain.
   async storeWasm(fileName: string): Promise<CodeId> {
-    const msg = new cosmwasmclient.proto.cosmwasm.wasm.v1.MsgStoreCode({
+    const storeMsg = new cosmwasmclient.proto.cosmwasm.wasm.v1.MsgStoreCode({
       sender: this.wallet.address.toString(),
       wasm_byte_code: await getContractBinary(fileName),
       instantiate_permission: null,
@@ -712,7 +594,7 @@ export class WalletWrapper {
         amount: [{ denom: NEUTRON_DENOM, amount: '250000' }],
         gas_limit: Long.fromString('60000000'),
       },
-      [msg],
+      [cosmosclient.codec.instanceToProtoAny(storeMsg)],
     );
 
     if (data.tx_response.code !== 0) {
@@ -746,7 +628,7 @@ export class WalletWrapper {
         amount: [{ denom: NEUTRON_DENOM, amount: '2000000' }],
         gas_limit: Long.fromString('600000000'),
       },
-      [msgInit],
+      [cosmosclient.codec.instanceToProtoAny(msgInit)],
       10,
       cosmosclient.rest.tx.BroadcastTxMode.Sync,
     );
@@ -779,7 +661,7 @@ export class WalletWrapper {
         gas_limit: Long.fromString('5000000'),
         amount: [{ denom: this.chain.denom, amount: '20000' }],
       },
-      [msgMigrate],
+      [cosmosclient.codec.instanceToProtoAny(msgMigrate)],
     );
     if (res.tx_response.code !== 0) {
       throw new Error(
@@ -807,7 +689,7 @@ export class WalletWrapper {
         funds,
       });
 
-    const res = await this.execTx(fee, [msgExecute]);
+    const res = await this.execTx(fee, [cosmosclient.codec.instanceToProtoAny(msgExecute)]);
     if (res.tx_response.code !== 0) {
       throw new Error(
         `${res.tx_response.raw_log}\nFailed tx hash: ${res.tx_response.txhash}`,
@@ -842,7 +724,7 @@ export class WalletWrapper {
       toAddress: to,
       amount: [{ denom, amount }],
     });
-    const res = await this.execTxNew(fee, [packAnyMsg('/cosmos.bank.v1beta1.MsgSend', msgSend)], 10, mode, sequence);
+    const res = await this.execTx(fee, [packAnyMsg('/cosmos.bank.v1beta1.MsgSend', msgSend)], 10, mode, sequence);
     return res?.tx_response;
   }
 
@@ -875,7 +757,7 @@ export class WalletWrapper {
       },
       proposer: this.wallet.account.address,
     });
-    const res = await this.execTxNew(fee, [packAnyMsg('/cosmos.adminmodule.adminmodule.MsgSubmitProposalLegacy', msg)], 10, mode, sequence);
+    const res = await this.execTx(fee, [packAnyMsg('/cosmos.adminmodule.adminmodule.MsgSubmitProposalLegacy', msg)], 10, mode, sequence);
     return res?.tx_response;
   }
 
@@ -897,118 +779,13 @@ export class WalletWrapper {
       transactions: transactions,
     });
     const currentHeight = await getHeight(this.chain.sdk);
-    const res = await this.execTxNew(
+    const res = await this.execTx(
       fee,
       [packAnyMsg('/sdk.auction.v1.MsgAuctionBid', msg)],
       10,
       mode,
       sequence,
       currentHeight + 1,
-    );
-    return res?.tx_response;
-  }
-
-  /**
-   * Tests a pausable contract execution control.
-   * @param testingContract is the contract the method tests;
-   * @param execAction is an executable action to be called during a pause and after unpausing
-   * as the main part of the test. Should return the execution response code;
-   * @param actionCheck is called after unpausing to make sure the executable action worked.
-   */
-  // TODO: should not be here? what to do for expects?
-  async testExecControl(
-    testingContract: string,
-    execAction: () => Promise<number | undefined>,
-    actionCheck: () => Promise<void>,
-  ) {
-    // check contract's pause info before pausing
-    let pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    // expect(pauseInfo).toEqual({ unpaused: {} });
-    // expect(pauseInfo.paused).toEqual(undefined);
-
-    // pause contract
-    let res = await this.executeContract(
-      testingContract,
-      JSON.stringify({
-        pause: {
-          duration: 50,
-        },
-      }),
-    );
-    // expect(res.code).toEqual(0);
-
-    // check contract's pause info after pausing
-    pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    // expect(pauseInfo.unpaused).toEqual(undefined);
-    // expect(pauseInfo.paused.until_height).toBeGreaterThan(0);
-
-    // execute msgs on paused contract
-    // await expect(execAction()).rejects.toThrow(/Contract execution is paused/);
-
-    // unpause contract
-    res = await this.executeContract(
-      testingContract,
-      JSON.stringify({
-        unpause: {},
-      }),
-    );
-    // expect(res.code).toEqual(0);
-
-    // check contract's pause info after unpausing
-    pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    // expect(pauseInfo).toEqual({ unpaused: {} });
-    // expect(pauseInfo.paused).toEqual(undefined);
-
-    // execute msgs on unpaused contract
-    const code = await execAction();
-    // expect(code).toEqual(0);
-    await actionCheck();
-
-    // pause contract again for a short period
-    const shortPauseDuration = 5;
-    res = await this.executeContract(
-      testingContract,
-      JSON.stringify({
-        pause: {
-          duration: shortPauseDuration,
-        },
-      }),
-    );
-    // expect(res.code).toEqual(0);
-
-    // check contract's pause info after pausing
-    pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    // expect(pauseInfo.unpaused).toEqual(undefined);
-    // expect(pauseInfo.paused.until_height).toBeGreaterThan(0);
-
-    // wait and check contract's pause info after unpausing
-    await this.chain.blockWaiter.waitBlocks(shortPauseDuration);
-    pauseInfo = await this.chain.queryPausedInfo(testingContract);
-    // expect(pauseInfo).toEqual({ unpaused: {} });
-    // expect(pauseInfo.paused).toEqual(undefined);
-  }
-
-  /* simulateFeeBurning simulates fee burning via send tx.
-   */
-  async simulateFeeBurning(
-    amount: number,
-  ): Promise<BroadcastTx200ResponseTxResponse> {
-    const msgSend = new MsgSend({
-      fromAddress: this.wallet.address.toString(),
-      toAddress: this.wallet.address.toString(),
-      amount: [{ denom: this.chain.denom, amount: '1' }],
-    });
-    const res = await this.execTxNew(
-      {
-        gas_limit: Long.fromString('200000'),
-        amount: [
-          {
-            denom: this.chain.denom,
-            amount: `${Math.ceil((1000 * amount) / 750)}`,
-          },
-        ],
-      },
-      [packAnyMsg('/cosmos.bank.v1beta1.MsgSend', msgSend)],
     );
     return res?.tx_response;
   }
@@ -1026,7 +803,7 @@ export class WalletWrapper {
         sender,
       });
 
-    const res = await this.execTxNew(
+    const res = await this.execTx(
       {
         gas_limit: Long.fromString('200000'),
         amount: [{ denom: this.chain.denom, amount: '1000' }],
@@ -1061,7 +838,7 @@ async msgIBCTransfer(
   });
   // newMsgSend.memo = memo; // TODO: check if needed
 
-  const res = await this.execTxNew(
+  const res = await this.execTx(
     {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: this.chain.denom, amount: '1000' }],
@@ -1082,7 +859,7 @@ async msgIBCTransfer(
         validatorAddress,
         amount: { denom: this.chain.denom, amount: amount },
       });
-    const res = await this.execTxNew(
+    const res = await this.execTx(
       {
         gas_limit: Long.fromString('200000'),
         amount: [{ denom: this.chain.denom, amount: '1000' }],
@@ -1235,7 +1012,7 @@ export const getEventAttribute = (
   return attrValue;
 };
 
-export const filterIBCDenoms = (list: CosmosBaseV1beta1Coin[]) =>
+export const filterIBCDenoms = (list: ICoin[]) =>
   list.filter(
     (coin) =>
       coin.denom && ![IBC_ATOM_DENOM, IBC_USDC_DENOM].includes(coin.denom),
@@ -1243,6 +1020,7 @@ export const filterIBCDenoms = (list: CosmosBaseV1beta1Coin[]) =>
 
 export const wrapMsg = (x) => Buffer.from(JSON.stringify(x)).toString('base64');
 
+// *packAnyMsg* packs the protobuf message inside an Any type with given typeUrl
 export const packAnyMsg = (typeUrl: string, msg: Message): cosmosclient.proto.google.protobuf.Any => {
   return new cosmosclient.proto.google.protobuf.Any({ type_url: typeUrl, value: msg.toBinary() })
 }

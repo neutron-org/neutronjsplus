@@ -28,7 +28,7 @@ export const msgMintDenom = async (
     sender: creator,
     amount,
   });
-  const res = await cmNeutron.execTxNew(
+  const res = await cmNeutron.execTx(
     {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
@@ -49,7 +49,7 @@ export const msgCreateDenom = async (
     sender: creator,
     subdenom,
   });
-  const res = await cmNeutron.execTxNew(
+  const res = await cmNeutron.execTx(
     {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
@@ -74,7 +74,7 @@ export const msgBurn = async (
       amount: amountToBurn,
     },
   });
-  const res = await cmNeutron.execTxNew(
+  const res = await cmNeutron.execTx(
     {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
@@ -98,7 +98,7 @@ export const msgChangeAdmin = async (
     denom,
     newAdmin: newAdmin,
   });
-  const res = await cmNeutron.execTxNew(
+  const res = await cmNeutron.execTx(
     {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
@@ -121,7 +121,7 @@ export const msgSetBeforeSendHook = async (
     denom,
     contractAddr: contractAddr,
   });
-  const res = await cmNeutron.execTxNew(
+  const res = await cmNeutron.execTx(
     {
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
