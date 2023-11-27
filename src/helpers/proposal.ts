@@ -1,5 +1,4 @@
-import { google } from '../generated/proto';
-import Any = google.protobuf.Any;
+import { google } from '@cosmos-client/core/cjs/proto';
 import { ADMIN_MODULE_ADDRESS } from './cosmos';
 
 export type ParamChangeProposalInfo = {
@@ -76,7 +75,7 @@ export type UpgradeInfo = {
   name: string;
   height: number;
   info: string;
-  upgraded_client_state: Any;
+  upgraded_client_state: google.protobuf.Any;
 };
 
 export type SendProposalInfo = {

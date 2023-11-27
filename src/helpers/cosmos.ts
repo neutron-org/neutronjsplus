@@ -4,15 +4,12 @@ import axios from 'axios';
 import Long from 'long';
 import { BlockWaiter, getWithAttempts } from './wait';
 import {
-  CosmosBaseV1beta1Coin,
   CosmosTxV1beta1GetTxResponse,
   BroadcastTx200ResponseTxResponse,
 } from '@cosmos-client/core/cjs/openapi/api';
 import { CosmosSDK } from '@cosmos-client/core/cjs/sdk';
 import { ibc } from '@cosmos-client/ibc/cjs/proto';
 import crypto from 'crypto';
-import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
-import IHeight = ibc.core.client.v1.IHeight;
 import {
   AckFailuresResponse,
   ScheduleResponse,
@@ -43,6 +40,8 @@ import { ParameterChangeProposal } from '../generated/cosmos_sdk/cosmos/params/v
 import { MsgSend } from '../generated/cosmos_sdk/cosmos/bank/v1beta1/tx_pb';
 import { MsgRemoveInterchainQueryRequest } from '../generated/neutron/neutron/interchainqueries/tx_pb';
 import { MsgDelegate } from '../generated/cosmos_sdk/cosmos/staking/v1beta1/tx_pb';
+import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
+import IHeight = ibc.core.client.v1.IHeight;
 
 export const NEUTRON_DENOM = process.env.NEUTRON_DENOM || 'untrn';
 export const IBC_ATOM_DENOM = process.env.IBC_ATOM_DENOM || 'uibcatom';
@@ -455,11 +454,10 @@ export class WalletWrapper {
     );
   }
 
-
   /**
    * execTx broadcasts messages and returns the transaction result.
    */
-  async execTx<T>(
+  async execTx(
     fee: cosmosclient.proto.cosmos.tx.v1beta1.IFee,
     msgs: cosmosclient.proto.google.protobuf.Any[],
     numAttempts = 10,
@@ -499,8 +497,7 @@ export class WalletWrapper {
     throw error;
   }
 
-
-  buildTx<T>(
+  buildTx(
     fee: cosmosclient.proto.cosmos.tx.v1beta1.IFee,
     protoMsgs: cosmosclient.proto.google.protobuf.Any[],
     sequence: number = this.wallet.account.sequence,

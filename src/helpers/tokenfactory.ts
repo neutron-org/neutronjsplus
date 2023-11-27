@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { cosmos, osmosis } from '../generated/proto';
-import ICoin = cosmos.base.v1beta1.ICoin;
 import { BroadcastTx200ResponseTxResponse } from '@cosmos-client/core/cjs/openapi/api';
 import { WalletWrapper, packAnyMsg } from '../helpers/cosmos';
 import Long from 'long';
 import { MsgBurn, MsgChangeAdmin, MsgCreateDenom, MsgMint, MsgSetBeforeSendHook } from '../generated/neutron/osmosis/tokenfactory/v1beta1/tx_pb';
 import axios from 'axios';
+import cosmosclient from '@cosmos-client/core';
+import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 
 export interface DenomsFromCreator {
   readonly denoms: readonly string[];
