@@ -2,7 +2,7 @@
 
 ROOT=$(pwd)
 IN="./tmp"
-OUT="./src/generated"
+OUT="./src/proto"
 TEMPLATE="./buf.ts.gen.yaml"
 
 mkdir $IN

@@ -8,7 +8,7 @@ import {
   MsgCreateDenom,
   MsgMint,
   MsgSetBeforeSendHook,
-} from './generated/neutron/osmosis/tokenfactory/v1beta1/tx_pb';
+} from './proto/neutron/osmosis/tokenfactory/v1beta1/tx_pb';
 import axios from 'axios';
 import cosmosclient from '@cosmos-client/core';
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;

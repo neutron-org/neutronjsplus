@@ -40,7 +40,7 @@ import {
   upgradeProposal,
 } from './proposal';
 import Long from 'long';
-import { ClientState } from './generated/neutron_thirdparty/ibc/lightclients/tendermint/v1/tendermint_pb';
+import { ClientState } from './proto/neutron_thirdparty/ibc/lightclients/tendermint/v1/tendermint_pb';
 
 export type SubdaoProposalConfig = {
   threshold: any;

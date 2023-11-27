@@ -32,14 +32,14 @@ import {
 } from './types';
 import { DEBUG_SUBMIT_TX, getContractBinary, getHeight } from './env';
 import { Message } from '@bufbuild/protobuf';
-import { MsgSubmitProposalLegacy } from './generated/admin_module/cosmos/adminmodule/adminmodule/tx_pb';
-import { MsgTransfer } from './generated/neutron/neutron/transfer/v1/tx_pb';
-import { Height } from './generated/neutron/ibc/core/client/v1/client_pb';
-import { MsgAuctionBid } from './generated/block_sdk/sdk/auction/v1/tx_pb';
-import { ParameterChangeProposal } from './generated/cosmos_sdk/cosmos/params/v1beta1/params_pb';
-import { MsgSend } from './generated/cosmos_sdk/cosmos/bank/v1beta1/tx_pb';
-import { MsgRemoveInterchainQueryRequest } from './generated/neutron/neutron/interchainqueries/tx_pb';
-import { MsgDelegate } from './generated/cosmos_sdk/cosmos/staking/v1beta1/tx_pb';
+import { MsgSubmitProposalLegacy } from './proto/admin_module/cosmos/adminmodule/adminmodule/tx_pb';
+import { MsgTransfer } from './proto/neutron/neutron/transfer/v1/tx_pb';
+import { Height } from './proto/neutron/ibc/core/client/v1/client_pb';
+import { MsgAuctionBid } from './proto/block_sdk/sdk/auction/v1/tx_pb';
+import { ParameterChangeProposal } from './proto/cosmos_sdk/cosmos/params/v1beta1/params_pb';
+import { MsgSend } from './proto/cosmos_sdk/cosmos/bank/v1beta1/tx_pb';
+import { MsgRemoveInterchainQueryRequest } from './proto/neutron/neutron/interchainqueries/tx_pb';
+import { MsgDelegate } from './proto/cosmos_sdk/cosmos/staking/v1beta1/tx_pb';
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 import IHeight = ibc.core.client.v1.IHeight;
 
