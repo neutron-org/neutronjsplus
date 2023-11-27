@@ -1,6 +1,6 @@
 {
   "name": "@neutron-org/neutronjsplus",
-  "version": "0.0.16",
+  "version": "0.1.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "Apache-2.0",
@@ -11,7 +11,6 @@
   "scripts": {
     "build": "rimraf ./build && tsc && mkdir -p ./dist/generated/ && cp -r ./src/generated/* ./dist/generated/",
     "gen:proto": "mkdir -p ./src/generated -p && bash ./gen-proto.sh",
-    "gen:proto-ibc-go": "mkdir -p ./src/generated -p && bash ./gen-proto-ibc-go.sh",
     "lint": "eslint ./src",
     "fmt": "eslint ./src --fix"
   },
