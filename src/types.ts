@@ -315,7 +315,6 @@ export type ParamsInterchainqueriesResponse = {
   params: ParamsInterchainqueriesInfo;
 };
 
-// TODO: is this the right place?
 export class Wallet {
   address: cosmosclient.AccAddress | cosmosclient.ValAddress;
   account: cosmosclient.proto.cosmos.auth.v1beta1.BaseAccount | null;
