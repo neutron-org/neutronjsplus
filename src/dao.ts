@@ -1441,7 +1441,10 @@ export class DaoMember {
       name,
       height,
       info,
-      upgraded_client_state: packAnyMsg('/ibc.lightclients.tendermint.v1.ClientState', new ClientState({})),
+      upgraded_client_state: packAnyMsg(
+        '/ibc.lightclients.tendermint.v1.ClientState',
+        new ClientState({}),
+      ),
     });
     return await this.submitSingleChoiceProposal(
       title,
@@ -1707,7 +1710,7 @@ export const setupSubDaoTimelockSet = async (
     mockMainDao ? cm.wallet.address.toString() : daoContracts.core.address,
     daoContracts.proposals.overrule.pre_propose.address,
     securityDaoAddr,
-    closeProposalOnExecutionFailure
+    closeProposalOnExecutionFailure,
   );
 
   const mainDaoMember = new DaoMember(cm, new Dao(cm.chain, daoContracts));

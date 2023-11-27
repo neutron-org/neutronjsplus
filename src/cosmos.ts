@@ -223,21 +223,12 @@ export class CosmosWrapper {
   }
 
   async queryBalances(addr: string): Promise<BalancesResponse> {
-    const balances = await cosmosclient.rest.bank.allBalances(
-      this.sdk,
-      addr,
-    );
+    const balances = await cosmosclient.rest.bank.allBalances(this.sdk, addr);
     return balances.data as BalancesResponse;
   }
 
-  async queryDenomBalance(
-    addr: string,
-    denom: string,
-  ): Promise<number> {
-    const { data } = await cosmosclient.rest.bank.allBalances(
-      this.sdk,
-      addr,
-    );
+  async queryDenomBalance(addr: string, denom: string): Promise<number> {
+    const { data } = await cosmosclient.rest.bank.allBalances(this.sdk, addr);
     const balance = data.balances.find((b) => b.denom === denom);
     return parseInt(balance?.amount ?? '0', 10);
   }
@@ -542,14 +533,14 @@ export class WalletWrapper {
       .BroadcastTxMode.Sync,
   ): Promise<string> {
     try {
-    if (DEBUG_SUBMIT_TX) {
-      console.log('\n\n\nStart broadcasting tx: ----------------------');
-      try {
-        console.log(JSON.stringify(txBuilder.toProtoJSON()));
-      } catch (error) {
-        console.log('failed to serrialize tx');
+      if (DEBUG_SUBMIT_TX) {
+        console.log('\n\n\nStart broadcasting tx: ----------------------');
+        try {
+          console.log(JSON.stringify(txBuilder.toProtoJSON()));
+        } catch (error) {
+          console.log('failed to serrialize tx');
+        }
       }
-    }
 
       const res = await cosmosclient.rest.tx.broadcastTx(
         this.chain.sdk as CosmosSDK,
@@ -559,20 +550,19 @@ export class WalletWrapper {
         },
       );
 
-    const code = res.data?.tx_response.code;
-    if (DEBUG_SUBMIT_TX) {
-      console.log('async response code: ', code);
-    }
-    if (code !== 0) {
+      const code = res.data?.tx_response.code;
       if (DEBUG_SUBMIT_TX) {
-        console.log(`broadcast error: ${res.data?.tx_response.raw_log}`);
+        console.log('async response code: ', code);
       }
-      throw new Error(`broadcast error: ${res.data?.tx_response.raw_log}`);
-    }
-    const txhash = res.data?.tx_response.txhash;
-    this.wallet.account.sequence++;
-    return txhash;
-
+      if (code !== 0) {
+        if (DEBUG_SUBMIT_TX) {
+          console.log(`broadcast error: ${res.data?.tx_response.raw_log}`);
+        }
+        throw new Error(`broadcast error: ${res.data?.tx_response.raw_log}`);
+      }
+      const txhash = res.data?.tx_response.txhash;
+      this.wallet.account.sequence++;
+      return txhash;
     } catch (e) {
       console.log('broadcast error: ' + JSON.stringify(e));
       throw e;
@@ -686,7 +676,9 @@ export class WalletWrapper {
         funds,
       });
 
-    const res = await this.execTx(fee, [cosmosclient.codec.instanceToProtoAny(msgExecute)]);
+    const res = await this.execTx(fee, [
+      cosmosclient.codec.instanceToProtoAny(msgExecute),
+    ]);
     if (res.tx_response.code !== 0) {
       throw new Error(
         `${res.tx_response.raw_log}\nFailed tx hash: ${res.tx_response.txhash}`,
@@ -721,7 +713,13 @@ export class WalletWrapper {
       toAddress: to,
       amount: [{ denom, amount }],
     });
-    const res = await this.execTx(fee, [packAnyMsg('/cosmos.bank.v1beta1.MsgSend', msgSend)], 10, mode, sequence);
+    const res = await this.execTx(
+      fee,
+      [packAnyMsg('/cosmos.bank.v1beta1.MsgSend', msgSend)],
+      10,
+      mode,
+      sequence,
+    );
     return res?.tx_response;
   }
 
@@ -754,7 +752,18 @@ export class WalletWrapper {
       },
       proposer: this.wallet.account.address,
     });
-    const res = await this.execTx(fee, [packAnyMsg('/cosmos.adminmodule.adminmodule.MsgSubmitProposalLegacy', msg)], 10, mode, sequence);
+    const res = await this.execTx(
+      fee,
+      [
+        packAnyMsg(
+          '/cosmos.adminmodule.adminmodule.MsgSubmitProposalLegacy',
+          msg,
+        ),
+      ],
+      10,
+      mode,
+      sequence,
+    );
     return res?.tx_response;
   }
 
@@ -794,18 +803,22 @@ export class WalletWrapper {
     queryId: bigint,
     sender: string,
   ): Promise<BroadcastTx200ResponseTxResponse> {
-    const msgRemove =
-      new MsgRemoveInterchainQueryRequest({
-        queryId: queryId,
-        sender,
-      });
+    const msgRemove = new MsgRemoveInterchainQueryRequest({
+      queryId: queryId,
+      sender,
+    });
 
     const res = await this.execTx(
       {
         gas_limit: Long.fromString('200000'),
         amount: [{ denom: this.chain.denom, amount: '1000' }],
       },
-      [packAnyMsg('/neutron.interchainqueries.MsgRemoveInterchainQueryRequest', msgRemove)],
+      [
+        packAnyMsg(
+          '/neutron.interchainqueries.MsgRemoveInterchainQueryRequest',
+          msgRemove,
+        ),
+      ],
     );
     return res?.tx_response;
   }
@@ -813,49 +826,48 @@ export class WalletWrapper {
   /**
    * msgIBCTransfer processes an IBC transfer, waits two blocks and returns the tx hash.
    */
-async msgIBCTransfer(
-  sourcePort: string,
-  sourceChannel: string,
-  token: ICoin,
-  receiver: string,
-  timeoutHeight: IHeight,
-  memo?: string,
-): Promise<BroadcastTx200ResponseTxResponse> {
-  const newMsgSend = new MsgTransfer({
-    sourcePort: sourcePort,
-    sourceChannel: sourceChannel,
-    token: token,
-    sender: this.wallet.address.toString(),
-    receiver: receiver,
-    timeoutHeight: new Height({
-      revisionHeight: timeoutHeight.revision_height,
-      revisionNumber: timeoutHeight.revision_number,
-    }),
-    memo: memo,
-  });
-  // newMsgSend.memo = memo; // TODO: check if needed
+  async msgIBCTransfer(
+    sourcePort: string,
+    sourceChannel: string,
+    token: ICoin,
+    receiver: string,
+    timeoutHeight: IHeight,
+    memo?: string,
+  ): Promise<BroadcastTx200ResponseTxResponse> {
+    const newMsgSend = new MsgTransfer({
+      sourcePort: sourcePort,
+      sourceChannel: sourceChannel,
+      token: token,
+      sender: this.wallet.address.toString(),
+      receiver: receiver,
+      timeoutHeight: new Height({
+        revisionHeight: timeoutHeight.revision_height,
+        revisionNumber: timeoutHeight.revision_number,
+      }),
+      memo: memo,
+    });
+    // newMsgSend.memo = memo; // TODO: check if needed
 
-  const res = await this.execTx(
-    {
-      gas_limit: Long.fromString('200000'),
-      amount: [{ denom: this.chain.denom, amount: '1000' }],
-    },
-    [packAnyMsg('/ibc.applications.transfer.v1.MsgTransfer', newMsgSend)],
-  );
-  return res?.tx_response;
-}
+    const res = await this.execTx(
+      {
+        gas_limit: Long.fromString('200000'),
+        amount: [{ denom: this.chain.denom, amount: '1000' }],
+      },
+      [packAnyMsg('/ibc.applications.transfer.v1.MsgTransfer', newMsgSend)],
+    );
+    return res?.tx_response;
+  }
 
   async msgDelegate(
     delegatorAddress: string,
     validatorAddress: string,
     amount: string,
   ): Promise<BroadcastTx200ResponseTxResponse> {
-    const msgDelegate =
-      new MsgDelegate({
-        delegatorAddress,
-        validatorAddress,
-        amount: { denom: this.chain.denom, amount: amount },
-      });
+    const msgDelegate = new MsgDelegate({
+      delegatorAddress,
+      validatorAddress,
+      amount: { denom: this.chain.denom, amount: amount },
+    });
     const res = await this.execTx(
       {
         gas_limit: Long.fromString('200000'),
@@ -873,7 +885,9 @@ export const getEventAttributesFromTx = (
   data: TxResponseType['data'],
   event: string,
   attributes: string[],
-): Array<Record<typeof attributes[number], string> | Record<string, never>> => {
+): Array<
+  Record<(typeof attributes)[number], string> | Record<string, never>
+> => {
   const events =
     (
       JSON.parse(data?.tx_response.raw_log) as [
@@ -1018,6 +1032,11 @@ export const filterIBCDenoms = (list: ICoin[]) =>
 export const wrapMsg = (x) => Buffer.from(JSON.stringify(x)).toString('base64');
 
 // *packAnyMsg* packs the protobuf message inside an Any type with given typeUrl
-export const packAnyMsg = (typeUrl: string, msg: Message): cosmosclient.proto.google.protobuf.Any => {
-  return new cosmosclient.proto.google.protobuf.Any({ type_url: typeUrl, value: msg.toBinary() })
-}
+export const packAnyMsg = (
+  typeUrl: string,
+  msg: Message,
+): cosmosclient.proto.google.protobuf.Any =>
+  new cosmosclient.proto.google.protobuf.Any({
+    type_url: typeUrl,
+    value: msg.toBinary(),
+  });

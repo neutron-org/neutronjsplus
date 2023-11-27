@@ -2,7 +2,13 @@
 import { BroadcastTx200ResponseTxResponse } from '@cosmos-client/core/cjs/openapi/api';
 import { WalletWrapper, packAnyMsg } from './cosmos';
 import Long from 'long';
-import { MsgBurn, MsgChangeAdmin, MsgCreateDenom, MsgMint, MsgSetBeforeSendHook } from './generated/neutron/osmosis/tokenfactory/v1beta1/tx_pb';
+import {
+  MsgBurn,
+  MsgChangeAdmin,
+  MsgCreateDenom,
+  MsgMint,
+  MsgSetBeforeSendHook,
+} from './generated/neutron/osmosis/tokenfactory/v1beta1/tx_pb';
 import axios from 'axios';
 import cosmosclient from '@cosmos-client/core';
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
@@ -54,7 +60,12 @@ export const msgCreateDenom = async (
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
     },
-    [packAnyMsg('/osmosis.tokenfactory.v1beta1.MsgCreateDenom', msgCreateDenom)],
+    [
+      packAnyMsg(
+        '/osmosis.tokenfactory.v1beta1.MsgCreateDenom',
+        msgCreateDenom,
+      ),
+    ],
     10,
   );
 
@@ -79,7 +90,7 @@ export const msgBurn = async (
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
     },
-    [packAnyMsg('/osmosis.tokenfactory.v1beta1.MsgBurn',  msgBurn)],
+    [packAnyMsg('/osmosis.tokenfactory.v1beta1.MsgBurn', msgBurn)],
     10,
   );
 
@@ -103,7 +114,12 @@ export const msgChangeAdmin = async (
       gas_limit: Long.fromString('200000'),
       amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
     },
-    [packAnyMsg('/osmosis.tokenfactory.v1beta1.MsgChangeAdmin', msgChangeAdmin)],
+    [
+      packAnyMsg(
+        '/osmosis.tokenfactory.v1beta1.MsgChangeAdmin',
+        msgChangeAdmin,
+      ),
+    ],
     10,
   );
 
@@ -133,8 +149,9 @@ export const msgSetBeforeSendHook = async (
   return res.tx_response!;
 };
 
-
-export const checkTokenfactoryParams = async (sdkUrl: string): Promise<boolean> => {
+export const checkTokenfactoryParams = async (
+  sdkUrl: string,
+): Promise<boolean> => {
   try {
     await axios.get(`${sdkUrl}/osmosis/tokenfactory/v1beta1/params`);
     return true;
@@ -175,4 +192,3 @@ export const getBeforeSendHook = async (
 
   return res.data;
 };
-

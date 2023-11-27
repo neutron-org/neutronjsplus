@@ -1,6 +1,13 @@
 import cosmosclient from '@cosmos-client/core';
 import bech32 from 'bech32';
-import { ParamsContractmanagerInfo, ParamsCronInfo, ParamsFeeburnerInfo, ParamsFeerefunderInfo, ParamsInterchainqueriesInfo, ParamsTokenfactoryInfo } from './proposal';
+import {
+  ParamsContractmanagerInfo,
+  ParamsCronInfo,
+  ParamsFeeburnerInfo,
+  ParamsFeerefunderInfo,
+  ParamsInterchainqueriesInfo,
+  ParamsTokenfactoryInfo,
+} from './proposal';
 
 export type AcknowledgementResult =
   | { success: string[] }

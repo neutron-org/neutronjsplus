@@ -256,7 +256,7 @@ export class Tge {
       this.instantiator,
       this.codeIds.ASTRO_COIN_REGISTRY,
     );
-    const res = await this.instantiator.executeContract(
+    await this.instantiator.executeContract(
       this.contracts.coinRegistry,
       JSON.stringify({
         add: {
@@ -327,7 +327,7 @@ export class Tge {
     );
 
     for (const denom of [this.atomDenom, this.usdcDenom]) {
-      const res = await executeFactoryCreatePair(
+      await executeFactoryCreatePair(
         this.instantiator,
         this.contracts.astroFactory,
         denom,
@@ -381,7 +381,7 @@ export class Tge {
       [this.contracts.vestingAtomLp, this.pairs.atom_ntrn.liquidity],
       [this.contracts.vestingUsdcLp, this.pairs.usdc_ntrn.liquidity],
     ]) {
-      const res = await executeVestingLpSetVestingToken(
+      await executeVestingLpSetVestingToken(
         this.instantiator,
         contract,
         liquidity,
@@ -411,7 +411,7 @@ export class Tge {
       this.times.auctionVestingLpDuration,
     );
 
-    const res = await executeAuctionSetTokenInfo(
+    await executeAuctionSetTokenInfo(
       this.tokenInfoManager,
       this.contracts.auction,
       this.atomDenom,
@@ -439,7 +439,7 @@ export class Tge {
       ],
     );
 
-    let res = await executeLockdropSetTokenInfo(
+    await executeLockdropSetTokenInfo(
       this.tokenInfoManager,
       this.contracts.lockdrop,
       this.pairs.atom_ntrn.liquidity,
@@ -447,7 +447,7 @@ export class Tge {
       this.contracts.astroGenerator,
     );
 
-    res = await executeAuctionUpdateConfig(
+    await executeAuctionUpdateConfig(
       this.instantiator,
       this.contracts.auction,
       this.contracts.lockdrop,
@@ -463,14 +463,12 @@ export class Tge {
       this.contracts.vestingAtomLp,
       this.contracts.vestingUsdcLp,
     ]) {
-      res = await executeVestingLpSetVestingManagers(
-        this.instantiator,
-        contract,
-        [this.contracts.auction],
-      );
+      await executeVestingLpSetVestingManagers(this.instantiator, contract, [
+        this.contracts.auction,
+      ]);
     }
 
-    res = await executeCreditsUpdateConfig(
+    await executeCreditsUpdateConfig(
       this.instantiator,
       this.contracts.credits,
       this.contracts.airdrop,
@@ -478,7 +476,7 @@ export class Tge {
     );
     // 4000100 - users
     // 10000000 - extra to test its ignored in credits vault voting power
-    res = await executeCreditsMint(
+    await executeCreditsMint(
       this.instantiator,
       this.contracts.credits,
       this.neutronDenom,
@@ -508,7 +506,7 @@ export class Tge {
       [this.contracts.oracleAtom, this.atomDenom, this.neutronDenom],
       [this.contracts.oracleUsdc, this.usdcDenom, this.neutronDenom],
     ]) {
-      const res = await executeAstroportOracleSetAssetInfos(
+      await executeAstroportOracleSetAssetInfos(
         this.tokenInfoManager,
         contract,
         denom1,
