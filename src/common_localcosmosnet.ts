@@ -7,12 +7,12 @@ import {
   mnemonicToWallet,
   NEUTRON_DENOM,
   WalletWrapper,
-} from './helpers/cosmos';
-import { BlockWaiter } from './helpers/wait';
+} from './cosmos';
+import { BlockWaiter } from './wait';
 import { generateMnemonic } from 'bip39';
 import Long from 'long';
 import cosmosclient from '@cosmos-client/core';
-import { Wallet } from './helpers/types';
+import { Wallet } from './types';
 
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 
