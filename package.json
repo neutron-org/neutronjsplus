@@ -9,7 +9,7 @@
     "url": "hhttps://github.com/neutron-org/neutronjsplus.git"
   },
   "scripts": {
-    "build": "rimraf ./build && tsc && mkdir -p ./dist/generated/ && cp -r ./src/generated/* ./dist/generated/",
+    "build": "rimraf ./build && tsc",
     "gen:proto": "mkdir -p ./src/generated -p && bash ./gen-proto.sh",
     "lint": "eslint ./src",
     "fmt": "eslint ./src --fix"
