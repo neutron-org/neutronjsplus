@@ -221,7 +221,7 @@ export class BlockID extends Message<BlockID> {
 }
 
 /**
- * Header defines the structure of a block header.
+ * Header defines the structure of a Tendermint block header.
  *
  * @generated from message tendermint.types.Header
  */

@@ -109,8 +109,7 @@ export class PageRequest extends Message<PageRequest> {
 export class PageResponse extends Message<PageResponse> {
   /**
    * next_key is the key to be passed to PageRequest.key to
-   * query the next page most efficiently. It will be empty if
-   * there are no more results.
+   * query the next page most efficiently
    *
    * @generated from field: bytes next_key = 1;
    */

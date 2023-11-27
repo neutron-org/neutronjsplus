@@ -37,6 +37,7 @@ export class Plan extends Message<Plan> {
 
   /**
    * The height at which the upgrade must be performed.
+   * Only used if Time is not set.
    *
    * @generated from field: int64 height = 3;
    */
@@ -95,30 +96,21 @@ export class Plan extends Message<Plan> {
 /**
  * SoftwareUpgradeProposal is a gov Content type for initiating a software
  * upgrade.
- * Deprecated: This legacy proposal is deprecated in favor of Msg-based gov
- * proposals, see MsgSoftwareUpgrade.
  *
  * @generated from message cosmos.upgrade.v1beta1.SoftwareUpgradeProposal
- * @deprecated
  */
 export class SoftwareUpgradeProposal extends Message<SoftwareUpgradeProposal> {
   /**
-   * title of the proposal
-   *
    * @generated from field: string title = 1;
    */
   title = "";
 
   /**
-   * description of the proposal
-   *
    * @generated from field: string description = 2;
    */
   description = "";
 
   /**
-   * plan of the proposal
-   *
    * @generated from field: cosmos.upgrade.v1beta1.Plan plan = 3;
    */
   plan?: Plan;
@@ -156,23 +148,16 @@ export class SoftwareUpgradeProposal extends Message<SoftwareUpgradeProposal> {
 /**
  * CancelSoftwareUpgradeProposal is a gov Content type for cancelling a software
  * upgrade.
- * Deprecated: This legacy proposal is deprecated in favor of Msg-based gov
- * proposals, see MsgCancelUpgrade.
  *
  * @generated from message cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal
- * @deprecated
  */
 export class CancelSoftwareUpgradeProposal extends Message<CancelSoftwareUpgradeProposal> {
   /**
-   * title of the proposal
-   *
    * @generated from field: string title = 1;
    */
   title = "";
 
   /**
-   * description of the proposal
-   *
    * @generated from field: string description = 2;
    */
   description = "";

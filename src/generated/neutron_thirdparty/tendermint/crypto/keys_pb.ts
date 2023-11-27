@@ -7,7 +7,7 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3 } from "@bufbuild/protobuf";
 
 /**
- * PublicKey defines the keys available for use with Validators
+ * PublicKey defines the keys available for use with Tendermint Validators
  *
  * @generated from message tendermint.crypto.PublicKey
  */

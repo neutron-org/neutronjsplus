@@ -9,8 +9,7 @@ import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
 /**
  * Failure message contains information about ACK failures and can be used to
  * replay ACK in case of requirement.
- * Note that Failure means that sudo handler to cosmwasm contract failed for
- * some reason
+ * Note that Failure means that sudo handler to cosmwasm contract failed for some reason
  *
  * @generated from message neutron.contractmanager.Failure
  */
