@@ -846,7 +846,6 @@ export class WalletWrapper {
       }),
       memo: memo,
     });
-    // newMsgSend.memo = memo; // TODO: check if needed
 
     const res = await this.execTx(
       {
