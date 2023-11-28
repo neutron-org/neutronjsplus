@@ -15,11 +15,11 @@ git clone https://github.com/neutron-org/neutron $REPOS/neutron --branch update-
 npx buf generate $REPOS/neutron/proto --template $TEMPLATE --output $OUT/neutron
 npx buf generate $REPOS/neutron/third_party/proto --template $TEMPLATE --output $OUT/neutron_thirdparty
 
-# ===== neutron admin-module ==
+# ===== admin-module ==========
 git clone https://github.com/neutron-org/admin-module $REPOS/admin-module --branch v1.0.0 --depth 1
 npx buf generate $REPOS/admin-module/proto --template $TEMPLATE --output $OUT/admin_module
 
-# ===== neutron cosmos-sdk ====
+# ===== cosmos-sdk ============
 git clone https://github.com/neutron-org/cosmos-sdk $REPOS/cosmos-sdk --branch v0.47.6-neutron
 cd $REPOS/cosmos-sdk
 # git checkout v0.47.6-neutron

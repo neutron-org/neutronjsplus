@@ -538,7 +538,7 @@ export class WalletWrapper {
         try {
           console.log(JSON.stringify(txBuilder.toProtoJSON()));
         } catch (error) {
-          console.log('failed to serrialize tx');
+          console.log('failed to serialize tx');
         }
       }
 
