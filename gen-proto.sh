@@ -11,7 +11,7 @@ mkdir $REPOS
 npx buf generate buf.build/protocolbuffers/wellknowntypes --template $TEMPLATE --output $OUT/wellknowntypes
 
 # ===== neutron ===============
-git clone https://github.com/neutron-org/neutron $REPOS/neutron --branch v1.1.0 --depth 1
+git clone https://github.com/neutron-org/neutron $REPOS/neutron --branch v2.0.0 --depth 1
 npx buf generate $REPOS/neutron/proto --template $TEMPLATE --output $OUT/neutron
 npx buf generate $REPOS/neutron/third_party/proto --template $TEMPLATE --output $OUT/neutron_thirdparty
 
