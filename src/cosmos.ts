@@ -34,7 +34,7 @@ import { DEBUG_SUBMIT_TX, getContractBinary, getHeight } from './env';
 import { Message } from '@bufbuild/protobuf';
 import { MsgSubmitProposalLegacy } from './proto/admin_module/cosmos/adminmodule/adminmodule/tx_pb';
 import { MsgTransfer } from './proto/neutron/neutron/transfer/v1/tx_pb';
-import { Height } from './proto/neutron/ibc/core/client/v1/client_pb';
+import { Height } from './proto/ibc_go/ibc/core/client/v1/client_pb';
 import { MsgAuctionBid } from './proto/block_sdk/sdk/auction/v1/tx_pb';
 import { ParameterChangeProposal } from './proto/cosmos_sdk/cosmos/params/v1beta1/params_pb';
 import { MsgSend } from './proto/cosmos_sdk/cosmos/bank/v1beta1/tx_pb';
@@ -780,9 +780,9 @@ export class WalletWrapper {
       .BroadcastTxMode.Sync,
   ): Promise<BroadcastTx200ResponseTxResponse> {
     const msg = new MsgAuctionBid({
-      bidder: bidder,
-      bid: bid,
-      transactions: transactions,
+      bidder,
+      bid,
+      transactions,
     });
     const currentHeight = await getHeight(this.chain.sdk);
     const res = await this.execTx(
