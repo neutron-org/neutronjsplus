@@ -796,6 +796,32 @@ export class WalletWrapper {
     return res?.tx_response;
   }
 
+  /* simulateFeeBurning simulates fee burning via send tx.
+   */
+  async simulateFeeBurning(
+    amount: number,
+  ): Promise<BroadcastTx200ResponseTxResponse> {
+    const msgSend = new MsgSend({
+      fromAddress: this.wallet.address.toString(),
+      toAddress: this.wallet.address.toString(),
+      amount: [{ denom: this.chain.denom, amount: '1' }],
+    });
+
+    const res = await this.execTx(
+      {
+        gas_limit: Long.fromString('200000'),
+        amount: [
+          {
+            denom: this.chain.denom,
+            amount: `${Math.ceil((1000 * amount) / 750)}`,
+          },
+        ],
+      },
+      [packAnyMsg('/cosmos.bank.v1beta1.MsgSend', msgSend)],
+    );
+    return res?.tx_response;
+  }
+
   /**
    * msgRemoveInterchainQuery sends transaction to remove interchain query, waits two blocks and returns the tx hash.
    */
