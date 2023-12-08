@@ -26,7 +26,6 @@ npx buf generate $REPOS/cosmos-sdk/proto --template $TEMPLATE --output $OUT/cosm
 git clone https://github.com/cosmos/ibc-go $REPOS/ibc-go --branch v7.3.1 --depth 1
 npx buf generate $REPOS/ibc-go/proto --template $TEMPLATE --output $OUT/ibc_go --include-imports
 
-# note: commented because we don't have pob for now
 # ===== block-sdk (pob) =======
 git clone git@github.com:skip-mev/block-sdk.git $REPOS/block-sdk --branch v1.1.0 --depth 1
 npx buf generate $REPOS/block-sdk/proto --template $TEMPLATE --output $OUT/block_sdk --include-imports
