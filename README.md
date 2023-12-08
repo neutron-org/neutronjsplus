@@ -26,7 +26,10 @@ yarn add @neutron-org/neutronjsplus
 
 ## Version compatibility
 
-Neutron [v2.0.0](https://github.com/neutron-org/neutron/releases/tag/v2.0.0) <-> neutronjsplus v0.1.0
+| Neutron | Neutronjsplus |
+|---------|---------------|
+| < 2.0.0 | < 0.1.0       |
+| 2.0.0   | 0.1.0         |
 
 ## Building protofiles
 

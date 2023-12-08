@@ -5,6 +5,12 @@ on:
       - main
     types:
       - closed
+    inputs:
+      autopublish:
+        description: Increments the minor version and publishes it to npm
+        type: boolean
+        required: true
+        default: true
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,8 +24,10 @@ jobs:
           git config --global user.email "${{ secrets.NEUTRON_EMAIL }}"
           git config --global user.name "${{ secrets.NEUTRON_USER }}"
       - name: Apply version bump (patch)
+        if: ${{ github.event.inputs.autopublish == 'true' }}
         run: yarn version --patch
       - name: Git push version bump
+        if: ${{ github.event.inputs.autopublish == 'true' }}
         run: git push origin main --follow-tags --force
       - uses: actions/setup-node@v3
         with:
@@ -27,8 +35,8 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           # Defaults to the user or organization that owns the workflow file
           scope: '@neutron-org'
-      - run: yarn
-      - run: yarn build
-      - run: yarn publish --access public
+      - name: Publish package
+        if: ${{ github.event.inputs.autopublish == 'true' }}
+        run: yarn && yarn build && yarn publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPMJS_ACCESS_TOKEN }}
