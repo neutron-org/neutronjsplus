@@ -24,6 +24,21 @@ yarn add @neutron-org/neutronjsplus
 - Sending and receiving transactions;
 - Interaction with the Neutron blockchain, and much more.
 
+## Version compatibility
+
+Neutron [v2.0.0](https://github.com/neutron-org/neutron/releases/tag/v2.0.0) <-> neutronjsplus v0.1.0
+
+## Building protofiles
+
+If need updated protofiles, they can be generated using yarn:
+
+```bash
+yarn proto
+```
+
+What this does is it clones all needed repos with protofiles we use and runs `buf` with ts plugin.
+For exact code, see gen-proto.sh in root.
+
 ## Usage Example
 
 ```typescript
