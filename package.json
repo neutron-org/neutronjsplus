@@ -1,6 +1,6 @@
 {
   "name": "@neutron-org/neutronjsplus",
-  "version": "0.0.16",
+  "version": "0.1.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "Apache-2.0",
@@ -9,15 +9,15 @@
     "url": "hhttps://github.com/neutron-org/neutronjsplus.git"
   },
   "scripts": {
-    "build": "rimraf ./build && tsc && mkdir -p ./dist/generated/ && cp -r ./src/generated/* ./dist/generated/",
-    "gen:proto": "mkdir ./src/generated -p && bash ./gen-proto.sh",
-    "gen:proto-ibc-go": "mkdir ./src/generated -p && bash ./gen-proto-ibc-go.sh",
+    "build": "rimraf ./build && tsc",
+    "proto": "mkdir -p ./src/generated && bash ./gen-proto.sh",
     "lint": "eslint ./src",
     "fmt": "eslint ./src --fix"
   },
   "dependencies": {
-    "@cosmos-client/core": "0.45.13",
-    "@cosmos-client/cosmwasm": "^0.20.1",
+    "@bufbuild/protobuf": "^1.4.2",
+    "@cosmos-client/core": "^0.47.4",
+    "@cosmos-client/cosmwasm": "^0.40.3",
     "@cosmos-client/ibc": "^1.2.1",
     "axios": "^0.27.2",
     "long": "^5.2.1",
@@ -26,9 +26,13 @@
   "devDependencies": {
     "@babel/preset-env": "^7.20.2",
     "@babel/preset-typescript": "^7.18.6",
+    "@bufbuild/buf": "^1.28.1",
+    "@bufbuild/protoc-gen-es": "^1.4.2",
     "@types/express": "^4.17.9",
     "@types/long": "^5.0.0",
     "@types/node": "^20.4.5",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
     "eslint": "^8.13.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",

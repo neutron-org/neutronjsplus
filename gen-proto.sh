@@ -1,42 +1,33 @@
 #!/usr/bin/env bash
 
-rm -r ./proto
-cp -r ../neutron/proto ./proto
+REPOS="./tmp_repos"
+OUT="./src/proto"
+TEMPLATE="./buf.ts.gen.yaml"
 
-proto_dirs=$(find ./proto -path -prune -o -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq)
-proto_files=()
+mkdir $REPOS
 
-for dir in $proto_dirs; do
-  proto_files=("${proto_files[@]} $(find "${dir}" -maxdepth 1 -name '*.proto')")
-done
+# ===== base types ============
+npx buf generate buf.build/protocolbuffers/wellknowntypes --template $TEMPLATE --output $OUT/wellknowntypes --include-imports
 
-npx pbjs \
-  -o ./src/generated/proto.cjs \
-  -t static-module \
-  --force-long \
-  --keep-case \
-  --no-create \
-  --path=./proto/ \
-  --path=./proto-thirdparty/ \
-  --root="@neutron-org/neutron" \
-  ${proto_files[@]}
+# ===== neutron ===============
+git clone https://github.com/neutron-org/neutron $REPOS/neutron --branch v2.0.0 --depth 1
+npx buf generate $REPOS/neutron/proto --template $TEMPLATE --output $OUT/neutron --include-imports
+npx buf generate $REPOS/neutron/third_party/proto --template $TEMPLATE --output $OUT/neutron_thirdparty --include-imports
 
-npx pbjs \
-  -o ./src/generated/proto.js \
-  -t static-module \
-  -w es6 \
-  --es6 \
-  --force-long \
-  --keep-case \
-  --no-create \
-  --path=./proto/ \
-  --path=./proto-thirdparty/ \
-  --root="@neutron-org/neutron" \
-  ${proto_files[@]}
+# ===== admin-module ==========
+git clone https://github.com/neutron-org/admin-module $REPOS/admin-module --branch v1.0.0 --depth 1
+npx buf generate $REPOS/admin-module/proto --template $TEMPLATE --output $OUT/admin_module --include-imports
 
-npx pbts \
-  -o ./src/generated/proto.d.ts \
-  ./src/generated/proto.js
+# ===== cosmos-sdk ============
+git clone https://github.com/neutron-org/cosmos-sdk $REPOS/cosmos-sdk --branch v0.47.6-neutron --depth 1
+npx buf generate $REPOS/cosmos-sdk/proto --template $TEMPLATE --output $OUT/cosmos_sdk --include-imports
 
-rm ./src/generated/proto.js
-rm -r ./proto
+# ===== ibc-go ================
+git clone https://github.com/cosmos/ibc-go $REPOS/ibc-go --branch v7.3.1 --depth 1
+npx buf generate $REPOS/ibc-go/proto --template $TEMPLATE --output $OUT/ibc_go --include-imports
+
+# ===== block-sdk (pob) =======
+git clone git@github.com:skip-mev/block-sdk.git $REPOS/block-sdk --branch v1.1.0 --depth 1
+npx buf generate $REPOS/block-sdk/proto --template $TEMPLATE --output $OUT/block_sdk --include-imports
+
+rm -rf $REPOS

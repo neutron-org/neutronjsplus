@@ -1,5 +1,4 @@
 import { exec } from 'child_process';
-import { cosmosclient, rest } from '@cosmos-client/core';
 import {
   COSMOS_DENOM,
   CosmosWrapper,
@@ -8,13 +7,14 @@ import {
   mnemonicToWallet,
   NEUTRON_DENOM,
   WalletWrapper,
-} from './helpers/cosmos';
-import { BlockWaiter } from './helpers/wait';
+} from './cosmos';
+import { BlockWaiter } from './wait';
 import { generateMnemonic } from 'bip39';
 import Long from 'long';
-import { AccAddress } from '@cosmos-client/core/cjs/types';
-import { Coin } from '@cosmos-client/core/cjs/openapi/api';
-import { Wallet } from './helpers/types';
+import cosmosclient from '@cosmos-client/core';
+import { Wallet } from './types';
+
+import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 
 export const disconnectValidator = async (name: string) => {
   const { stdout } = exec(`docker stop ${name}`);
@@ -174,7 +174,7 @@ export class TestStateLocalCosmosTestNet {
 
   sendTokensWithRetry = async (
     cm: WalletWrapper,
-    to: AccAddress,
+    to: cosmosclient.AccAddress,
     amount: string,
     denom = cm.chain.denom,
     retryCount = 100,
@@ -187,13 +187,13 @@ export class TestStateLocalCosmosTestNet {
     let res;
     while (retryCount > attemptCount) {
       try {
-        const sequence = await cm.chain.getSeq(cm.wallet.address);
+        const sequence = await cm.chain.getSeq(cm.wallet.address.toString());
         res = await cm.msgSend(
           to.toString(),
           { amount, denom },
           fee,
           sequence,
-          rest.tx.BroadcastTxMode.Block,
+          cosmosclient.rest.tx.BroadcastTxMode.Sync,
         );
         break;
       } catch (e) {
@@ -212,7 +212,7 @@ export class TestStateLocalCosmosTestNet {
     blockWaiter: BlockWaiter,
     wallet: Wallet,
     denom: string,
-    balances: Coin[] = [],
+    balances: ICoin[] = [],
   ) {
     if (balances.length === 0) {
       balances = [
