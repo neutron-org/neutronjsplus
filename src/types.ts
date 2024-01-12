@@ -29,6 +29,10 @@ export type ChannelsList = {
   }[];
 };
 
+export type IBCClientStatus = {
+  status: string;
+};
+
 // SingleChoiceProposal represents a single governance proposal item (partial object).
 export type SingleChoiceProposal = {
   readonly title: string;

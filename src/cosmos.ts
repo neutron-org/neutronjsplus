@@ -14,6 +14,7 @@ import {
   AckFailuresResponse,
   ScheduleResponse,
   ChannelsList,
+  IBCClientStatus,
   PageRequest,
   PauseInfoResponse,
   CurrentPlanResponse,
@@ -261,6 +262,13 @@ export class CosmosWrapper {
   async listIBCChannels(): Promise<ChannelsList> {
     const res = await axios.get<ChannelsList>(
       `${this.sdk.url}/ibc/core/channel/v1/channels`,
+    );
+    return res.data;
+  }
+
+  async getIBCClientStatus(clientId: string): Promise<IBCClientStatus> {
+    const res = await axios.get<IBCClientStatus>(
+      `${this.sdk.url}/ibc/core/client/v1/client_status/${clientId}`,
     );
     return res.data;
   }
