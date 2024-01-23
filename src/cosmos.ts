@@ -40,7 +40,10 @@ import { MsgAuctionBid } from './proto/block_sdk/sdk/auction/v1/tx_pb';
 import { ParameterChangeProposal } from './proto/cosmos_sdk/cosmos/params/v1beta1/params_pb';
 import { MsgSend } from './proto/cosmos_sdk/cosmos/bank/v1beta1/tx_pb';
 import { MsgRemoveInterchainQueryRequest } from './proto/neutron/neutron/interchainqueries/tx_pb';
-import { MsgDelegate } from './proto/cosmos_sdk/cosmos/staking/v1beta1/tx_pb';
+import {
+  MsgDelegate,
+  MsgUndelegate,
+} from './proto/cosmos_sdk/cosmos/staking/v1beta1/tx_pb';
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 import IHeight = ibc.core.client.v1.IHeight;
 
@@ -907,6 +910,26 @@ export class WalletWrapper {
         amount: [{ denom: this.chain.denom, amount: '1000' }],
       },
       [packAnyMsg('/cosmos.staking.v1beta1.MsgDelegate', msgDelegate)],
+    );
+    return res?.tx_response;
+  }
+
+  async msgUndelegate(
+    delegatorAddress: string,
+    validatorAddress: string,
+    amount: string,
+  ): Promise<BroadcastTx200ResponseTxResponse> {
+    const msgUndelegate = new MsgUndelegate({
+      delegatorAddress,
+      validatorAddress,
+      amount: { denom: this.chain.denom, amount: amount },
+    });
+    const res = await this.execTx(
+      {
+        gas_limit: Long.fromString('200000'),
+        amount: [{ denom: this.chain.denom, amount: '1000' }],
+      },
+      [packAnyMsg('/cosmos.staking.v1beta1.MsgUndelegate', msgUndelegate)],
     );
     return res?.tx_response;
   }
