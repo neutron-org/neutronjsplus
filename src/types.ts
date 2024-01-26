@@ -171,6 +171,12 @@ export const NeutronContract = {
   // https://github.com/CosmWasm/cosmwasm/tree/main/contracts/floaty
   FLOATY: '../contracts_thirdparty/floaty_2.0.wasm',
   DEX_STARGATE: 'dex_stargate.wasm',
+
+  // TGE liquidity migration related contracts with fixed versions
+
+  // pre-migration mainnet version of the lockdrop contract
+  TGE_LOCKDROP_CURRENT:
+    '../contracts_tge_migration/current_neutron_lockdrop.wasm',
 };
 
 export type MultiChoiceOption = {

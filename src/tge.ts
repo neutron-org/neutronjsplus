@@ -192,7 +192,7 @@ export class Tge {
     for (const contract of [
       'TGE_CREDITS',
       'TGE_AUCTION',
-      'TGE_LOCKDROP',
+      'TGE_LOCKDROP_CURRENT',
       'TGE_AIRDROP',
       'TGE_PRICE_FEED_MOCK',
       'ASTRO_PAIR_XYK',
@@ -424,7 +424,7 @@ export class Tge {
   async deployLockdrop() {
     this.contracts.lockdrop = await instantiateLockdrop(
       this.instantiator,
-      this.codeIds.TGE_LOCKDROP,
+      this.codeIds.TGE_LOCKDROP_CURRENT,
       null,
       this.tokenInfoManager.wallet.address.toString(),
       this.contracts.credits,
