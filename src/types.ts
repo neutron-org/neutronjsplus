@@ -150,8 +150,10 @@ export const NeutronContract = {
   CW20_BASE: '../contracts_thirdparty/cw20_base.wasm',
   TGE_AUCTION: 'neutron_auction.wasm',
   TGE_LOCKDROP: 'neutron_lockdrop.wasm',
+  TGE_LOCKDROP_PCL: 'neutron_lockdrop_pcl.wasm',
   TGE_PRICE_FEED_MOCK: 'neutron_price_feed_mock.wasm',
-  ASTRO_PAIR: '../contracts_thirdparty/astroport_pair.wasm',
+  ASTRO_PAIR_XYK: '../contracts_thirdparty/astroport_pair.wasm',
+  ASTRO_PAIR_PCL: '../contracts_thirdparty/astroport_pair_concentrated.wasm',
   ASTRO_COIN_REGISTRY:
     '../contracts_thirdparty/astroport_native_coin_registry.wasm',
   ASTRO_FACTORY: '../contracts_thirdparty/astroport_factory.wasm',
