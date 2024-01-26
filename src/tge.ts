@@ -195,7 +195,8 @@ export class Tge {
       'TGE_LOCKDROP',
       'TGE_AIRDROP',
       'TGE_PRICE_FEED_MOCK',
-      'ASTRO_PAIR',
+      'ASTRO_PAIR_XYK',
+      'ASTRO_PAIR_PCL',
       'ASTRO_FACTORY',
       'ASTRO_TOKEN',
       'ASTRO_GENERATOR',
@@ -272,7 +273,8 @@ export class Tge {
     this.contracts.astroFactory = await instantiateAstroFactory(
       this.instantiator,
       this.codeIds.ASTRO_FACTORY,
-      this.codeIds.ASTRO_PAIR,
+      this.codeIds.ASTRO_PAIR_XYK,
+      this.codeIds.ASTRO_PAIR_PCL,
       this.codeIds.ASTRO_TOKEN,
       this.contracts.coinRegistry,
     );
@@ -910,6 +912,67 @@ export const queryLockdropUserInfo = async (
     user_info: { address: userAddress },
   });
 
+export const queryXykLockdropConfig = (
+  chain: CosmosWrapper,
+  contractAddress: string,
+) =>
+  chain.queryContract<XykLockdropConfig>(contractAddress, {
+    config: {},
+  });
+
+export type XykLockdropConfig = {
+  owner: string;
+  token_info_manager: string;
+  credits_contract: string;
+  auction_contract: string;
+  generator: string | undefined;
+  init_timestamp: number;
+  lock_window: number;
+  withdrawal_window: number;
+  min_lock_duration: number;
+  max_lock_duration: number;
+  lockdrop_incentives: string; // Uint128
+  max_positions_per_user: number;
+  lockup_rewards_info: LockupRewardsInfo[];
+};
+
+export const queryPclLockdropConfig = (
+  chain: CosmosWrapper,
+  contractAddress: string,
+) =>
+  chain.queryContract<PclLockdropConfig>(contractAddress, {
+    config: {},
+  });
+
+export type PclLockdropConfig = {
+  owner: string;
+  xyk_lockdrop_contract: string;
+  credits_contract: string;
+  auction_contract: string;
+  generator: string;
+  lockdrop_incentives: string; // Uint128
+  lockup_rewards_info: LockupRewardsInfo[];
+};
+
+export const queryLockdropPool = (
+  chain: CosmosWrapper,
+  contractAddress: string,
+  poolType: string,
+) =>
+  chain.queryContract<LockdropPool>(contractAddress, {
+    pool: { pool_type: poolType },
+  });
+
+export type LockdropPool = {
+  lp_token: string;
+  amount_in_lockups: string; // Uint128
+  incentives_share: string; // Uint128
+  weighted_amount: string; // Uint256
+  generator_ntrn_per_share: string; // Decimal
+  generator_proxy_per_share: any; // just can't be bothered to describe the struct
+  is_staked: boolean;
+};
+
 export const executeLockdropUpdateConfig = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -977,7 +1040,8 @@ export const instantiateCoinRegistry = async (
 export const instantiateAstroFactory = async (
   cm: WalletWrapper,
   codeId: CodeId,
-  astroPairCodeId: CodeId,
+  xykPairCodeId: CodeId,
+  pclPairCodeId: CodeId,
   astroTokenCodeId: CodeId,
   coinRegistryAddress: string,
   label = 'astro_factory',
@@ -987,9 +1051,19 @@ export const instantiateAstroFactory = async (
     JSON.stringify({
       pair_configs: [
         {
-          code_id: astroPairCodeId,
+          code_id: xykPairCodeId,
           pair_type: {
             xyk: {},
+          },
+          total_fee_bps: 0,
+          maker_fee_bps: 0,
+          is_disabled: false,
+          is_generator_disabled: false,
+        },
+        {
+          code_id: pclPairCodeId,
+          pair_type: {
+            custom: 'concentrated',
           },
           total_fee_bps: 0,
           maker_fee_bps: 0,
