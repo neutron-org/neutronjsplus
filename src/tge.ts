@@ -117,6 +117,10 @@ export class Tge {
     atom_ntrn: { contract: string; liquidity: string };
     usdc_ntrn: { contract: string; liquidity: string };
   };
+  old_pairs: {
+    atom_ntrn: { contract: string; liquidity: string };
+    usdc_ntrn: { contract: string; liquidity: string };
+  };
   times: Record<string, number>;
   lockdropVaultName: string;
   lockdropVaultDescription: string;
@@ -203,7 +207,7 @@ export class Tge {
       'ASTRO_WHITELIST',
       'ASTRO_VESTING',
       'ASTRO_COIN_REGISTRY',
-      'VESTING_LP',
+      'VESING_LP_CURRENT',
       'LOCKDROP_VAULT',
       'CREDITS_VAULT',
       'VESTING_LP_VAULT',
@@ -368,13 +372,13 @@ export class Tge {
 
     this.contracts.vestingAtomLp = await instantiateVestingLp(
       this.instantiator,
-      this.codeIds.VESTING_LP,
+      this.codeIds.VESING_LP_CURRENT,
       this.tokenInfoManager.wallet.address.toString(),
       'vesting_atom_lp',
     );
     this.contracts.vestingUsdcLp = await instantiateVestingLp(
       this.instantiator,
-      this.codeIds.VESTING_LP,
+      this.codeIds.VESING_LP_CURRENT,
       this.tokenInfoManager.wallet.address.toString(),
       'vesting_usdc_lp',
     );

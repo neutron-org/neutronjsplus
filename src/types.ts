@@ -161,6 +161,7 @@ export const NeutronContract = {
   ASTRO_GENERATOR: '../contracts_thirdparty/astroport_generator.wasm',
   ASTRO_WHITELIST: '../contracts_thirdparty/astroport_whitelist.wasm',
   ASTRO_VESTING: '../contracts_thirdparty/astroport_vesting.wasm',
+  VESTING_LP_PCL: 'vesting_lp_pcl.wasm',
   VESTING_LP: 'vesting_lp.wasm',
   VESTING_LP_VAULT: 'vesting_lp_vault.wasm',
   CREDITS_VAULT: 'credits_vault.wasm',
@@ -177,6 +178,10 @@ export const NeutronContract = {
   // pre-migration mainnet version of the lockdrop contract
   TGE_LOCKDROP_CURRENT:
     '../contracts_tge_migration/current_neutron_lockdrop.wasm',
+
+  // pre-migration mainnet version of the vesting lp contract
+  VESING_LP_CURRENT:
+    '../contracts_tge_migration/current_vesting_lp.wasm',
 };
 
 export type MultiChoiceOption = {
