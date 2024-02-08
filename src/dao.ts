@@ -20,6 +20,7 @@ import {
 import {
   addSchedule,
   addSubdaoProposal,
+  chainManagerWrapper,
   clearAdminProposal,
   clientUpdateProposal,
   paramChangeProposal,
@@ -747,6 +748,7 @@ export class DaoMember {
    * submitParameterChangeProposal creates parameter change proposal.
    */
   async submitParameterChangeProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     subspace: string,
@@ -758,13 +760,16 @@ export class DaoMember {
       amount: [{ denom: this.user.chain.denom, amount: '10000' }],
     },
   ): Promise<number> {
-    const message = paramChangeProposal({
-      title,
-      description,
-      subspace,
-      key,
-      value,
-    });
+    const message = paramChangeProposal(
+      {
+        title,
+        description,
+        subspace,
+        key,
+        value,
+      },
+      chainManagerAddress,
+    );
     return await this.submitSingleChoiceProposal(
       title,
       description,
@@ -802,6 +807,7 @@ export class DaoMember {
    * submitMultiChoiceParameterChangeProposal creates parameter change proposal with multiple choices.
    */
   async submitMultiChoiceParameterChangeProposal(
+    chainManagerAddress: string,
     choices: ParamChangeProposalInfo[],
     title: string,
     description: string,
@@ -809,7 +815,7 @@ export class DaoMember {
   ): Promise<number> {
     const messages: MultiChoiceOption[] = choices.map((choice, idx) => ({
       description: 'choice' + idx,
-      msgs: [paramChangeProposal(choice)],
+      msgs: [paramChangeProposal(choice, chainManagerAddress)],
     }));
     return await this.submitMultiChoiceProposal(
       title,
@@ -864,6 +870,7 @@ export class DaoMember {
    * submitSoftwareUpgradeProposal creates proposal.
    */
   async submitSoftwareUpgradeProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     name: string,
@@ -871,7 +878,7 @@ export class DaoMember {
     info: string,
     deposit: string,
   ): Promise<number> {
-    const message = {
+    const message = chainManagerWrapper(chainManagerAddress, {
       custom: {
         submit_admin_proposal: {
           admin_proposal: {
@@ -889,7 +896,7 @@ export class DaoMember {
           },
         },
       },
-    };
+    });
     return await this.submitSingleChoiceProposal(
       title,
       description,
@@ -902,11 +909,12 @@ export class DaoMember {
    * submitCancelSoftwareUpgradeProposal creates proposal.
    */
   async submitCancelSoftwareUpgradeProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     deposit: string,
   ): Promise<number> {
-    const message = {
+    const message = chainManagerWrapper(chainManagerAddress, {
       custom: {
         submit_admin_proposal: {
           admin_proposal: {
@@ -919,7 +927,7 @@ export class DaoMember {
           },
         },
       },
-    };
+    });
     return await this.submitSingleChoiceProposal(
       title,
       description,
@@ -931,11 +939,12 @@ export class DaoMember {
    * submitBankSendProposal creates proposal.
    */
   async submitBankSendProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     deposit: string,
   ): Promise<number> {
-    const message = {
+    const message = chainManagerWrapper(chainManagerAddress, {
       custom: {
         submit_admin_proposal: {
           admin_proposal: {
@@ -950,7 +959,7 @@ export class DaoMember {
           },
         },
       },
-    };
+    });
     return await this.submitSingleChoiceProposal(
       title,
       description,
@@ -1219,16 +1228,20 @@ export class DaoMember {
    * submitPinCodesProposal creates proposal which pins given code ids to wasmvm.
    */
   async submitPinCodesProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     codesIds: number[],
     amount: string,
   ): Promise<number> {
-    const message = pinCodesProposal({
-      title,
-      description,
-      codes_ids: codesIds,
-    });
+    const message = chainManagerWrapper(
+      chainManagerAddress,
+      pinCodesProposal({
+        title,
+        description,
+        codes_ids: codesIds,
+      }),
+    );
     return await this.submitSingleChoiceProposal(
       title,
       description,
@@ -1241,19 +1254,23 @@ export class DaoMember {
    * submitPinCodesCustomAuthorityProposal creates proposal which pins given code ids to wasmvm.
    */
   async submitPinCodesCustomAuthorityProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     codesIds: number[],
     amount: string,
     authority: string,
   ): Promise<number> {
-    const message = pinCodesCustomAuthorityProposal(
-      {
-        title,
-        description,
-        codes_ids: codesIds,
-      },
-      authority,
+    const message = chainManagerWrapper(
+      chainManagerAddress,
+      pinCodesCustomAuthorityProposal(
+        {
+          title,
+          description,
+          codes_ids: codesIds,
+        },
+        authority,
+      ),
     );
     return await this.submitSingleChoiceProposal(
       title,
@@ -1268,16 +1285,20 @@ export class DaoMember {
    */
 
   async submitUnpinCodesProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     codesIds: number[],
     amount: string,
   ): Promise<number> {
-    const message = unpinCodesProposal({
-      title,
-      description,
-      codes_ids: codesIds,
-    });
+    const message = chainManagerWrapper(
+      chainManagerAddress,
+      unpinCodesProposal({
+        title,
+        description,
+        codes_ids: codesIds,
+      }),
+    );
     return await this.submitSingleChoiceProposal(
       title,
       description,
@@ -1291,15 +1312,31 @@ export class DaoMember {
    */
 
   async submitUpdateParamsInterchaintxsProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     message: ParamsInterchaintxsInfo,
     amount: string,
   ): Promise<number> {
+    const messageWrapped = {
+      wasm: {
+        execute: {
+          contract_addr: chainManagerAddress,
+          msg: Buffer.from(
+            JSON.stringify({
+              execute_messages: {
+                messages: [message],
+              },
+            }),
+          ).toString('base64'),
+          funds: [],
+        },
+      },
+    };
     return await this.submitSingleChoiceProposal(
       title,
       description,
-      [message],
+      [messageWrapped],
       amount,
     );
   }
@@ -1418,18 +1455,22 @@ export class DaoMember {
    * submitClientUpdateProposal creates proposal which updates client.
    */
   async submitClientUpdateProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     subjectClientId: string,
     substituteClientId: string,
     amount: string,
   ): Promise<number> {
-    const message = clientUpdateProposal({
-      title,
-      description,
-      subject_client_id: subjectClientId,
-      substitute_client_id: substituteClientId,
-    });
+    const message = chainManagerWrapper(
+      chainManagerAddress,
+      clientUpdateProposal({
+        title,
+        description,
+        subject_client_id: subjectClientId,
+        substitute_client_id: substituteClientId,
+      }),
+    );
     return await this.submitSingleChoiceProposal(
       title,
       description,
@@ -1472,6 +1513,7 @@ export class DaoMember {
    * submitUpdateAminProposal creates proposal which updates an admin of a contract.
    */
   async submitUpdateAdminProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     sender: string,
@@ -1479,11 +1521,14 @@ export class DaoMember {
     newAdmin: string,
     amount: string,
   ): Promise<number> {
-    const message = updateAdminProposal({
-      sender,
-      contract,
-      new_admin: newAdmin,
-    });
+    const message = chainManagerWrapper(
+      chainManagerAddress,
+      updateAdminProposal({
+        sender,
+        contract,
+        new_admin: newAdmin,
+      }),
+    );
     return await this.submitSingleChoiceProposal(
       title,
       description,
@@ -1496,13 +1541,17 @@ export class DaoMember {
    * submitClearAdminProposal creates proposal which removes an admin of a contract.
    */
   async submitClearAdminProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     sender: string,
     contract: string,
     amount: string,
   ): Promise<number> {
-    const message = clearAdminProposal({ sender, contract });
+    const message = chainManagerWrapper(
+      chainManagerAddress,
+      clearAdminProposal({ sender, contract }),
+    );
     return await this.submitSingleChoiceProposal(
       title,
       description,
@@ -1515,6 +1564,7 @@ export class DaoMember {
    * submitAddSchedule creates proposal to add new schedule.
    */
   async submitAddSchedule(
+    chainManagerAddress: string,
     title: string,
     description: string,
     amount: string,
@@ -1522,7 +1572,10 @@ export class DaoMember {
     period: number,
     msgs: any[],
   ): Promise<number> {
-    const message = addSchedule(name, period, msgs);
+    const message = chainManagerWrapper(
+      chainManagerAddress,
+      addSchedule(name, period, msgs),
+    );
     return await this.submitSingleChoiceProposal(
       title,
       description,
@@ -1535,13 +1588,27 @@ export class DaoMember {
    * submitRemoveSchedule creates proposal to remove added schedule.
    */
   async submitRemoveSchedule(
+    chainManagerAddress: string,
     title: string,
     description: string,
     amount: string,
     name: string,
     customModule = 'single',
+    wrapForChainManager = true,
   ): Promise<number> {
-    const message = removeSchedule(name);
+    // This ugly piece of code is required because we are not going
+    // to remove the security address functionality from the cron module
+    // when upgrading the dao to support privileged subdaos. In the future,
+    // the security address functionality should be removed from the cron
+    // module, and the permission to remove schedules should be given to
+    // the privileged cron subdao through the chain manager contract.
+    // TODO(pr0n00gler).
+    let message: any;
+    if (wrapForChainManager) {
+      message = chainManagerWrapper(chainManagerAddress, removeSchedule(name));
+    } else {
+      message = removeSchedule(name);
+    }
     return await this.submitSingleChoiceProposal(
       title,
       description,
