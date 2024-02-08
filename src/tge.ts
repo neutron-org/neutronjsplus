@@ -203,7 +203,7 @@ export class Tge {
       'ASTRO_WHITELIST',
       'ASTRO_VESTING',
       'ASTRO_COIN_REGISTRY',
-      'VESTING_LP',
+      'VESING_LP_CURRENT',
       'LOCKDROP_VAULT',
       'CREDITS_VAULT',
       'VESTING_LP_VAULT',
@@ -368,13 +368,13 @@ export class Tge {
 
     this.contracts.vestingAtomLp = await instantiateVestingLp(
       this.instantiator,
-      this.codeIds.VESTING_LP,
+      this.codeIds.VESING_LP_CURRENT,
       this.tokenInfoManager.wallet.address.toString(),
       'vesting_atom_lp',
     );
     this.contracts.vestingUsdcLp = await instantiateVestingLp(
       this.instantiator,
-      this.codeIds.VESTING_LP,
+      this.codeIds.VESING_LP_CURRENT,
       this.tokenInfoManager.wallet.address.toString(),
       'vesting_usdc_lp',
     );
@@ -1170,6 +1170,65 @@ type GeneratorRewardsState = {
   atomNtrnLpTokenBalance: number;
   usdcNtrnLpTokenBalance: number;
 };
+
+export const queryTotalUnclaimedAmountAtHeight = async (
+  chain: CosmosWrapper,
+  address: string,
+  height: number,
+) =>
+  chain.queryContract<string>(address, {
+    historical_extension: {
+      msg: {
+        unclaimed_total_amount_at_height: {
+          height: height,
+        },
+      },
+    },
+  });
+
+export const queryNtrnCLBalanceAtHeight = async (
+  chain: CosmosWrapper,
+  address: string,
+  height: string,
+) =>
+  chain.queryContract<string>(address, {
+    asset_balance_at: {
+      asset_info: {
+        native_token: {
+          denom: 'untrn',
+        },
+      },
+      block_height: height,
+    },
+  });
+
+export const queryUnclaimmedAmountAtHeight = async (
+  chain: CosmosWrapper,
+  address: string,
+  height: number,
+  user: string,
+) =>
+  chain.queryContract<string>(address, {
+    historical_extension: {
+      msg: {
+        unclaimed_amount_at_height: {
+          address: user,
+          height: height,
+        },
+      },
+    },
+  });
+
+export const queryAvialableAmount = async (
+  chain: CosmosWrapper,
+  address: string,
+  user: string,
+) =>
+  chain.queryContract<string>(address, {
+    available_amount: {
+      address: user,
+    },
+  });
 
 export const instantiateVestingLp = async (
   cm: WalletWrapper,
