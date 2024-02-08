@@ -117,10 +117,6 @@ export class Tge {
     atom_ntrn: { contract: string; liquidity: string };
     usdc_ntrn: { contract: string; liquidity: string };
   };
-  old_pairs: {
-    atom_ntrn: { contract: string; liquidity: string };
-    usdc_ntrn: { contract: string; liquidity: string };
-  };
   times: Record<string, number>;
   lockdropVaultName: string;
   lockdropVaultDescription: string;
