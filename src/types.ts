@@ -157,7 +157,7 @@ export const NeutronContract = {
   ASTRO_COIN_REGISTRY:
     '../contracts_thirdparty/astroport_native_coin_registry.wasm',
   ASTRO_FACTORY: '../contracts_thirdparty/astroport_factory.wasm',
-  ASTRO_TOKEN: '../contracts_thirdparty/astroport_token.wasm',
+  ASTRO_TOKEN: '../contracts_thirdparty/astroport_xastro_token.wasm',
   ASTRO_GENERATOR: '../contracts_thirdparty/astroport_generator.wasm',
   ASTRO_WHITELIST: '../contracts_thirdparty/astroport_whitelist.wasm',
   ASTRO_VESTING: '../contracts_thirdparty/astroport_vesting.wasm',
@@ -182,6 +182,8 @@ export const NeutronContract = {
   // pre-migration mainnet version of the vesting lp contract
   VESING_LP_CURRENT:
     '../contracts_tge_migration/current_vesting_lp.wasm',
+  VESTING_LP_VAULT_CL: 'vesting_lp_vault_for_cl_pools.wasm',
+  LOCKDROP_VAULT_CL: 'lockdrop_vault_for_cl_pools.wasm',
 };
 
 export type MultiChoiceOption = {
