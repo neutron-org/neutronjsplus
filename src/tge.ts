@@ -102,6 +102,7 @@ export class Tge {
     auction: string;
     lockdrop: string;
     astroGenerator: string;
+    astroIncentives: string;
     astroVesting: string;
     lockdropVault: string;
     oracleAtom: string;
@@ -157,6 +158,7 @@ export class Tge {
       auction: null,
       lockdrop: null,
       astroGenerator: null,
+      astroIncentives: null,
       astroVesting: null,
       lockdropVault: null,
       oracleAtom: null,
@@ -200,6 +202,7 @@ export class Tge {
       'ASTRO_FACTORY',
       'ASTRO_TOKEN',
       'ASTRO_GENERATOR',
+      'ASTRO_INCENTIVES',
       'ASTRO_WHITELIST',
       'ASTRO_VESTING',
       'ASTRO_COIN_REGISTRY',
@@ -296,6 +299,14 @@ export class Tge {
       this.generatorRewardsPerBlock.toString(),
       this.contracts.astroVesting,
       this.codeIds.ASTRO_WHITELIST,
+    );
+
+    this.contracts.astroIncentives = await instantiateAstroIncentives(
+      this.instantiator,
+      this.codeIds.ASTRO_INCENTIVES,
+      this.astroDenom,
+      this.contracts.astroFactory,
+      this.contracts.astroVesting,
     );
 
     await this.instantiator.executeContract(
@@ -559,7 +570,7 @@ export class Tge {
       this.instantiator.wallet.address.toString(),
       {
         denom: this.astroDenom,
-        amount: this.generatorRewardsTotal.toString(),
+        amount: (this.generatorRewardsTotal * 2).toString(),
       },
     );
   }
@@ -1312,6 +1323,34 @@ export const instantiateAstroGenerator = async (
       tokens_per_block: tokensPerBlock,
       vesting_contract: vestingContract,
       whitelist_code_id: whitelistCodeId,
+    }),
+    label,
+  );
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
+  return res[0]._contract_address;
+};
+
+export const instantiateAstroIncentives = async (
+  cm: WalletWrapper,
+  codeId: CodeId,
+  denom: string,
+  factoryContract: string,
+  vestingContract: string,
+  label = 'astro_incentives',
+) => {
+  const res = await cm.instantiateContract(
+    codeId,
+    JSON.stringify({
+      astro_token: {
+        native_token: {
+          denom,
+        },
+      },
+      factory: factoryContract,
+      owner: cm.wallet.address.toString(),
+      vesting_contract: vestingContract,
     }),
     label,
   );
