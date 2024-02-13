@@ -1346,6 +1346,7 @@ export class DaoMember {
    */
 
   async submitUpdateParamsInterchainqueriesProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     message: ParamsInterchainqueriesInfo,
@@ -1354,7 +1355,7 @@ export class DaoMember {
     return await this.submitSingleChoiceProposal(
       title,
       description,
-      [message],
+      [chainManagerWrapper(chainManagerAddress, message)],
       amount,
     );
   }
@@ -1364,6 +1365,7 @@ export class DaoMember {
    */
 
   async submitUpdateParamsTokenfactoryProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     message: ParamsTokenfactoryInfo,
@@ -1372,7 +1374,7 @@ export class DaoMember {
     return await this.submitSingleChoiceProposal(
       title,
       description,
-      [message],
+      [chainManagerWrapper(chainManagerAddress, message)],
       amount,
     );
   }
@@ -1382,6 +1384,7 @@ export class DaoMember {
    */
 
   async submitUpdateParamsFeeburnerProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     message: ParamsFeeburnerInfo,
@@ -1390,7 +1393,7 @@ export class DaoMember {
     return await this.submitSingleChoiceProposal(
       title,
       description,
-      [message],
+      [chainManagerWrapper(chainManagerAddress, message)],
       amount,
     );
   }
@@ -1400,6 +1403,7 @@ export class DaoMember {
    */
 
   async submitUpdateParamsFeerefunderProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     message: ParamsFeerefunderInfo = {
@@ -1410,7 +1414,7 @@ export class DaoMember {
     return await this.submitSingleChoiceProposal(
       title,
       description,
-      [message],
+      [chainManagerWrapper(chainManagerAddress, message)],
       amount,
     );
   }
@@ -1420,6 +1424,7 @@ export class DaoMember {
    */
 
   async submitUpdateParamsCronProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     message: ParamsCronInfo,
@@ -1428,7 +1433,7 @@ export class DaoMember {
     return await this.submitSingleChoiceProposal(
       title,
       description,
-      [message],
+      [chainManagerWrapper(chainManagerAddress, message)],
       amount,
     );
   }
@@ -1438,6 +1443,7 @@ export class DaoMember {
    */
 
   async submitUpdateParamsContractmanagerProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     message: ParamsContractmanagerInfo,
@@ -1446,7 +1452,7 @@ export class DaoMember {
     return await this.submitSingleChoiceProposal(
       title,
       description,
-      [message],
+      [chainManagerWrapper(chainManagerAddress, message)],
       amount,
     );
   }
