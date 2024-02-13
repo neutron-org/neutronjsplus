@@ -91,6 +91,10 @@ export type DenomMetadataResponse = {
       uri_hash: string;
     },
   ];
+  pagination: {
+    next_key: string;
+    total: string;
+  };
 };
 
 // TotalBurnedNeutronsAmountResponse is the response model for the feeburner's total-burned-neutrons.
