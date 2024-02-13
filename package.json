@@ -12,7 +12,8 @@
     "build": "rimraf ./build && tsc",
     "proto": "mkdir -p ./src/generated && bash ./gen-proto.sh",
     "lint": "eslint ./src",
-    "fmt": "eslint ./src --fix"
+    "fmt": "eslint ./src --fix",
+    "postinstall": "tsc --outDir ./build"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^1.4.2",
