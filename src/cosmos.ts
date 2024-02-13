@@ -324,10 +324,13 @@ export class CosmosWrapper {
     }
   }
 
-  async queryDenomsMetadata(): Promise<DenomMetadataResponse> {
+  async queryDenomsMetadata(
+    pagination?: PageRequest,
+  ): Promise<DenomMetadataResponse> {
     try {
       const req = await axios.get<DenomMetadataResponse>(
         `${this.sdk.url}/cosmos/bank/v1beta1/denoms_metadata`,
+        { params: pagination },
       );
       return req.data;
     } catch (e) {
