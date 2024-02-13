@@ -72,6 +72,31 @@ export type TotalSupplyByDenomResponse = {
   amount: ICoin;
 };
 
+export type DenomMetadataResponse = {
+  metadatas: [
+    {
+      description: string;
+      denom_units: [
+        {
+          denom: string;
+          exponent: number;
+          aliases: [string];
+        },
+      ];
+      base: string;
+      display: string;
+      name: string;
+      symbol: string;
+      uri: string;
+      uri_hash: string;
+    },
+  ];
+  pagination: {
+    next_key: string;
+    total: string;
+  };
+};
+
 // TotalBurnedNeutronsAmountResponse is the response model for the feeburner's total-burned-neutrons.
 export type TotalBurnedNeutronsAmountResponse = {
   total_burned_neutrons_amount: {
@@ -293,6 +318,23 @@ export class CosmosWrapper {
     try {
       const req = await axios.get<TotalSupplyByDenomResponse>(
         `${this.sdk.url}/cosmos/bank/v1beta1/supply/by_denom?denom=${denom}`,
+      );
+      return req.data;
+    } catch (e) {
+      if (e.response?.data?.message !== undefined) {
+        throw new Error(e.response?.data?.message);
+      }
+      throw e;
+    }
+  }
+
+  async queryDenomsMetadata(
+    pagination?: PageRequest,
+  ): Promise<DenomMetadataResponse> {
+    try {
+      const req = await axios.get<DenomMetadataResponse>(
+        `${this.sdk.url}/cosmos/bank/v1beta1/denoms_metadata`,
+        { params: pagination },
       );
       return req.data;
     } catch (e) {
