@@ -152,6 +152,15 @@ export type MultipleChoiceVotes = {
   vote_weights: string[];
 };
 
+export type AddChainManagerStrategy = {
+  strategy: ChainManagerStrategy;
+};
+
+export type ChainManagerStrategy = {
+  address: string;
+  permissions: any[];
+};
+
 // 'none' is a choice that represents selecting none of the options; still counts toward quorum
 // and allows proposals with all bad options to be voted against.
 export type MultipleChoiceOptionType = 'none' | 'standard';

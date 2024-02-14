@@ -18,6 +18,7 @@ import {
   VotingPowerAtHeightResponse,
 } from './types';
 import {
+  AddChainManagerStrategy,
   addSchedule,
   addSubdaoProposal,
   chainManagerWrapper,
@@ -1356,6 +1357,30 @@ export class DaoMember {
       title,
       description,
       [chainManagerWrapper(chainManagerAddress, message)],
+      amount,
+    );
+  }
+
+  async submitAddChainManagerStrategyProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    proposal: AddChainManagerStrategy,
+    amount: string,
+  ): Promise<number> {
+    const message = {
+      wasm: {
+        execute: {
+          contract_addr: chainManagerAddress,
+          msg: Buffer.from(JSON.stringify(proposal)).toString('base64'),
+          funds: [],
+        },
+      },
+    };
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
       amount,
     );
   }
