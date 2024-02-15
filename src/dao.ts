@@ -18,7 +18,6 @@ import {
   VotingPowerAtHeightResponse,
 } from './types';
 import {
-  AddChainManagerStrategy,
   addSchedule,
   addSubdaoProposal,
   chainManagerWrapper,
@@ -1365,14 +1364,14 @@ export class DaoMember {
     chainManagerAddress: string,
     title: string,
     description: string,
-    proposal: AddChainManagerStrategy,
+    strategy: any,
     amount: string,
   ): Promise<number> {
     const message = {
       wasm: {
         execute: {
           contract_addr: chainManagerAddress,
-          msg: Buffer.from(JSON.stringify(proposal)).toString('base64'),
+          msg: Buffer.from(JSON.stringify(strategy)).toString('base64'),
           funds: [],
         },
       },

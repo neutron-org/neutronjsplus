@@ -152,10 +152,6 @@ export type MultipleChoiceVotes = {
   vote_weights: string[];
 };
 
-export type AddChainManagerStrategy = {
-  strategy: ChainManagerStrategy;
-};
-
 export type ChainManagerStrategy = {
   address: string;
   permissions: any[];
