@@ -145,6 +145,8 @@ export type DepositRecord = {
   lower_tick_index: string; // Int64
   ipper_tick_index: string; // Int64
   fee?: string; // Option<Int64>
+  total_shares?: string, // Option<Int128>
+  pool?: Pool, // Option<Pool>
 };
 
 export type PairID = {
