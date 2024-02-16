@@ -117,6 +117,7 @@ export type AllLimitOrderTrancheResponse = {
 // Queries a list of UserDeposits items.
 export type UserDepositAllQuery = {
   address: string;
+  include_pool_data: boolean;
   pagination?: PageRequest;
 };
 export type AllUserDepositsResponse = {
@@ -303,6 +304,8 @@ export type DepositRecord = {
   lower_tick_index: number; // i64
   ipper_tick_index: number; // i64
   fee: number; //u64
+  total_shares: string,
+  pool: Pool,
 };
 
 export type PairID = {
