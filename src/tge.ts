@@ -876,7 +876,7 @@ export type LockdropUserInfoResponse = {
 };
 
 export type LockdropPclUserInfoResponse = {
-  claimable_generator_debt: [Token | NativeToken, string][]; // RestrictedVector<AssetInfo, Uint128>
+  claimable_incentives_debt: [Token | NativeToken, string][]; // RestrictedVector<AssetInfo, Uint128>
   lockup_infos: LockdropPclLockUpInfoResponse[];
   lockup_positions_index: number;
   ntrn_transferred: boolean;
@@ -889,8 +889,8 @@ export type LockdropPclLockUpInfoResponse = {
   withdrawal_flag: boolean;
   ntrn_rewards: string; // Uint128
   duration: number;
-  generator_debt: [Token | NativeToken, string][]; // RestrictedVector<AssetInfo, Uint128>
-  claimable_generator_debt: [Token | NativeToken, string][]; // RestrictedVector<AssetInfo, Uint128>
+  incentives_debt: [Token | NativeToken, string][]; // RestrictedVector<AssetInfo, Uint128>
+  claimable_incentives_debt: [Token | NativeToken, string][]; // RestrictedVector<AssetInfo, Uint128>
   unlock_timestamp: number;
   astroport_lp_units: string | null;
   astroport_lp_token: string;
@@ -912,7 +912,7 @@ export type LockdropPclPool = {
   amount_in_lockups: string; // Uint128
   incentives_share: string; // Uint128
   weighted_amount: string; // Uint256
-  generator_rewards_per_share: [Token | NativeToken, string][]; // RestrictedVector<AssetInfo, Decimal>
+  incentives_rewards_per_share: [Token | NativeToken, string][]; // RestrictedVector<AssetInfo, Decimal>
   is_staked: boolean;
 };
 
