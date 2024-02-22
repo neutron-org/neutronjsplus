@@ -1,4 +1,7 @@
-import { PageResponse,PageRequest } from './proto/cosmos_sdk/cosmos/base/query/v1beta1/pagination_pb';
+import {
+  PageResponse,
+  PageRequest,
+} from './proto/cosmos_sdk/cosmos/base/query/v1beta1/pagination_pb';
 import { Coin } from './proto/cosmos_sdk/cosmos/base/v1beta1/coin_pb';
 
 // DEX msgs
@@ -183,7 +186,7 @@ export type EstimateMultiHopSwapQuery = {
   creator: string;
   receiver: string;
   routes: MultiHopRoute[];
-  amount_id: string; //Int128
+  amount_in: string; //Int128
   exit_limit_price: string; //PrecDec
   pick_best_route: boolean;
 };
@@ -279,6 +282,7 @@ export type TradePairID = {
 
 export type Params = {
   fee_tiers: number[]; //u64
+  max_true_taker_spread?: string; // PrecDec
 };
 
 export type LimitOrderTranche = {
@@ -302,10 +306,10 @@ export type DepositRecord = {
   shares_owned: string; //Int128
   center_tick_index: number; // i64
   lower_tick_index: number; // i64
-  ipper_tick_index: number; // i64
+  upper_tick_index: number; // i64
   fee: number; //u64
-  total_shares?: string, // Option<Int128>
-  pool?: Pool, // Option<Pool>
+  total_shares?: string; // Option<Int128>
+  pool?: Pool; // Option<Pool>
 };
 
 export type PairID = {
@@ -335,7 +339,7 @@ export type PoolReservesKey = {
 export type Pool = {
   id: number; //u64;
   lower_tick0: PoolReserves;
-  lower_tick1: PoolReserves;
+  upper_tick1: PoolReserves;
 };
 
 export type PoolMetadata = {
