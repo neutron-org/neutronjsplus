@@ -102,6 +102,7 @@ export class Tge {
     auction: string;
     lockdrop: string;
     astroGenerator: string;
+    astroIncentives: string;
     astroVesting: string;
     lockdropVault: string;
     oracleAtom: string;
@@ -157,6 +158,7 @@ export class Tge {
       auction: null,
       lockdrop: null,
       astroGenerator: null,
+      astroIncentives: null,
       astroVesting: null,
       lockdropVault: null,
       oracleAtom: null,
@@ -200,6 +202,7 @@ export class Tge {
       'ASTRO_FACTORY',
       'ASTRO_TOKEN',
       'ASTRO_GENERATOR',
+      'ASTRO_INCENTIVES',
       'ASTRO_WHITELIST',
       'ASTRO_VESTING',
       'ASTRO_COIN_REGISTRY',
@@ -296,6 +299,14 @@ export class Tge {
       this.generatorRewardsPerBlock.toString(),
       this.contracts.astroVesting,
       this.codeIds.ASTRO_WHITELIST,
+    );
+
+    this.contracts.astroIncentives = await instantiateAstroIncentives(
+      this.instantiator,
+      this.codeIds.ASTRO_INCENTIVES,
+      this.astroDenom,
+      this.contracts.astroFactory,
+      this.contracts.astroVesting,
     );
 
     await this.instantiator.executeContract(
@@ -403,7 +414,7 @@ export class Tge {
       this.contracts.vestingUsdcLp,
       this.contracts.vestingAtomLp,
       this.times.lockdropDepositDuration +
-        this.times.lockdropWithdrawalDuration,
+      this.times.lockdropWithdrawalDuration,
       this.times.auctionInit,
       this.times.auctionDepositWindow,
       this.times.auctionWithdrawalWindow,
@@ -559,7 +570,7 @@ export class Tge {
       this.instantiator.wallet.address.toString(),
       {
         denom: this.astroDenom,
-        amount: this.generatorRewardsTotal.toString(),
+        amount: (this.generatorRewardsTotal * 2).toString(),
       },
     );
   }
@@ -576,7 +587,7 @@ export class Tge {
       user,
       this.astroDenom,
     );
-    const userInfo = await queryLockdropUserInfo(
+    const userInfo = await queryXykLockdropUserInfo(
       this.chain,
       this.contracts.lockdrop,
       user,
@@ -864,6 +875,47 @@ export type LockdropUserInfoResponse = {
   total_ntrn_rewards: string;
 };
 
+export type LockdropPclUserInfoResponse = {
+  claimable_generator_debt: [Token | NativeToken, string][]; // RestrictedVector<AssetInfo, Uint128>
+  lockup_infos: LockdropPclLockUpInfoResponse[];
+  lockup_positions_index: number;
+  ntrn_transferred: boolean;
+  total_ntrn_rewards: string;
+};
+
+export type LockdropPclLockUpInfoResponse = {
+  pool_type: string;
+  lp_units_locked: string; // Uint128
+  withdrawal_flag: boolean;
+  ntrn_rewards: string; // Uint128
+  duration: number;
+  generator_debt: [Token | NativeToken, string][]; // RestrictedVector<AssetInfo, Uint128>
+  claimable_generator_debt: [Token | NativeToken, string][]; // RestrictedVector<AssetInfo, Uint128>
+  unlock_timestamp: number;
+  astroport_lp_units: string | null;
+  astroport_lp_token: string;
+  astroport_lp_transferred: string | null;
+};
+
+export type LockdropXykPool = {
+  lp_token: string;
+  amount_in_lockups: string; // Uint128
+  incentives_share: string; // Uint128
+  weighted_amount: string; // Uint256
+  generator_ntrn_per_share: string; // Decimal
+  generator_proxy_per_share: any; // just can't be bothered to describe the struct
+  is_staked: boolean;
+};
+
+export type LockdropPclPool = {
+  lp_token: string;
+  amount_in_lockups: string; // Uint128
+  incentives_share: string; // Uint128
+  weighted_amount: string; // Uint256
+  generator_rewards_per_share: [Token | NativeToken, string][]; // RestrictedVector<AssetInfo, Decimal>
+  is_staked: boolean;
+};
+
 export const instantiateLockdrop = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -903,12 +955,21 @@ export const instantiateLockdrop = async (
   return res[0]._contract_address;
 };
 
-export const queryLockdropUserInfo = async (
+export const queryXykLockdropUserInfo = async (
   chain: CosmosWrapper,
   contractAddress: string,
   userAddress: string,
 ) =>
   chain.queryContract<LockdropUserInfoResponse>(contractAddress, {
+    user_info: { address: userAddress },
+  });
+
+export const queryPclLockdropUserInfo = async (
+  chain: CosmosWrapper,
+  contractAddress: string,
+  userAddress: string,
+) =>
+  chain.queryContract<LockdropPclUserInfoResponse>(contractAddress, {
     user_info: { address: userAddress },
   });
 
@@ -954,24 +1015,23 @@ export type PclLockdropConfig = {
   lockup_rewards_info: LockupRewardsInfo[];
 };
 
-export const queryLockdropPool = (
+export const queryXykLockdropPool = (
   chain: CosmosWrapper,
   contractAddress: string,
   poolType: string,
 ) =>
-  chain.queryContract<LockdropPool>(contractAddress, {
+  chain.queryContract<LockdropXykPool>(contractAddress, {
     pool: { pool_type: poolType },
   });
 
-export type LockdropPool = {
-  lp_token: string;
-  amount_in_lockups: string; // Uint128
-  incentives_share: string; // Uint128
-  weighted_amount: string; // Uint256
-  generator_ntrn_per_share: string; // Decimal
-  generator_proxy_per_share: any; // just can't be bothered to describe the struct
-  is_staked: boolean;
-};
+export const queryPclLockdropPool = (
+  chain: CosmosWrapper,
+  contractAddress: string,
+  poolType: string,
+) =>
+  chain.queryContract<LockdropPclPool>(contractAddress, {
+    pool: { pool_type: poolType },
+  });
 
 export const executeLockdropUpdateConfig = async (
   cm: WalletWrapper,
@@ -1312,6 +1372,34 @@ export const instantiateAstroGenerator = async (
       tokens_per_block: tokensPerBlock,
       vesting_contract: vestingContract,
       whitelist_code_id: whitelistCodeId,
+    }),
+    label,
+  );
+  if (!res) {
+    throw new Error('res should be truthy');
+  }
+  return res[0]._contract_address;
+};
+
+export const instantiateAstroIncentives = async (
+  cm: WalletWrapper,
+  codeId: CodeId,
+  denom: string,
+  factoryContract: string,
+  vestingContract: string,
+  label = 'astro_incentives',
+) => {
+  const res = await cm.instantiateContract(
+    codeId,
+    JSON.stringify({
+      astro_token: {
+        native_token: {
+          denom,
+        },
+      },
+      factory: factoryContract,
+      owner: cm.wallet.address.toString(),
+      vesting_contract: vestingContract,
     }),
     label,
   );
