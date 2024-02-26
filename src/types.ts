@@ -120,9 +120,7 @@ export type PauseInfoResponse = {
 };
 
 // Strategy defines a permission strategy in the chain manager.
-export type Strategy = {
-  address: string;
-};
+export type Strategy = any;
 
 export const NeutronContract = {
   IBC_TRANSFER: 'ibc_transfer.wasm',

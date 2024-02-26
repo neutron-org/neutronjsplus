@@ -314,10 +314,13 @@ export class CosmosWrapper {
 
   async getNeutronDAOCore() {
     const chainManager = (await this.getChainAdmins())[0];
-    const strategies = await this.queryContract<Strategy[]>(chainManager, {
-      strategies: {},
-    });
-    return strategies[0].address;
+    const strategies = await this.queryContract<[string, Strategy][]>(
+      chainManager,
+      {
+        strategies: {},
+      },
+    );
+    return strategies[0][0];
   }
 
   async queryPausedInfo(addr: string): Promise<PauseInfoResponse> {
