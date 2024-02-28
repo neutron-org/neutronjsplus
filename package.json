@@ -1,6 +1,6 @@
 {
   "name": "@neutron-org/neutronjsplus",
-  "version": "0.3.1",
+  "version": "0.4.0-rc5",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "Apache-2.0",
