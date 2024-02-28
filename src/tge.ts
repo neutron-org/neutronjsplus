@@ -414,7 +414,7 @@ export class Tge {
       this.contracts.vestingUsdcLp,
       this.contracts.vestingAtomLp,
       this.times.lockdropDepositDuration +
-      this.times.lockdropWithdrawalDuration,
+        this.times.lockdropWithdrawalDuration,
       this.times.auctionInit,
       this.times.auctionDepositWindow,
       this.times.auctionWithdrawalWindow,
