@@ -40,7 +40,6 @@ import { MsgAuctionBid } from './proto/block_sdk/sdk/auction/v1/tx_pb';
 import { ParameterChangeProposal } from './proto/cosmos_sdk/cosmos/params/v1beta1/params_pb';
 import { MsgSend } from './proto/cosmos_sdk/cosmos/bank/v1beta1/tx_pb';
 import { MsgRemoveInterchainQueryRequest } from './proto/neutron/neutron/interchainqueries/tx_pb';
-import { MsgDelegate } from './proto/cosmos_sdk/cosmos/staking/v1beta1/tx_pb';
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 import IHeight = ibc.core.client.v1.IHeight;
 
@@ -70,6 +69,31 @@ type DenomTraceResponse = {
 
 export type TotalSupplyByDenomResponse = {
   amount: ICoin;
+};
+
+export type DenomMetadataResponse = {
+  metadatas: [
+    {
+      description: string;
+      denom_units: [
+        {
+          denom: string;
+          exponent: number;
+          aliases: [string];
+        },
+      ];
+      base: string;
+      display: string;
+      name: string;
+      symbol: string;
+      uri: string;
+      uri_hash: string;
+    },
+  ];
+  pagination: {
+    next_key: string;
+    total: string;
+  };
 };
 
 // TotalBurnedNeutronsAmountResponse is the response model for the feeburner's total-burned-neutrons.
@@ -293,6 +317,23 @@ export class CosmosWrapper {
     try {
       const req = await axios.get<TotalSupplyByDenomResponse>(
         `${this.sdk.url}/cosmos/bank/v1beta1/supply/by_denom?denom=${denom}`,
+      );
+      return req.data;
+    } catch (e) {
+      if (e.response?.data?.message !== undefined) {
+        throw new Error(e.response?.data?.message);
+      }
+      throw e;
+    }
+  }
+
+  async queryDenomsMetadata(
+    pagination?: PageRequest,
+  ): Promise<DenomMetadataResponse> {
+    try {
+      const req = await axios.get<DenomMetadataResponse>(
+        `${this.sdk.url}/cosmos/bank/v1beta1/denoms_metadata`,
+        { params: pagination },
       );
       return req.data;
     } catch (e) {
@@ -887,26 +928,6 @@ export class WalletWrapper {
         amount: [{ denom: this.chain.denom, amount: '1000' }],
       },
       [packAnyMsg('/ibc.applications.transfer.v1.MsgTransfer', newMsgSend)],
-    );
-    return res?.tx_response;
-  }
-
-  async msgDelegate(
-    delegatorAddress: string,
-    validatorAddress: string,
-    amount: string,
-  ): Promise<BroadcastTx200ResponseTxResponse> {
-    const msgDelegate = new MsgDelegate({
-      delegatorAddress,
-      validatorAddress,
-      amount: { denom: this.chain.denom, amount: amount },
-    });
-    const res = await this.execTx(
-      {
-        gas_limit: Long.fromString('200000'),
-        amount: [{ denom: this.chain.denom, amount: '1000' }],
-      },
-      [packAnyMsg('/cosmos.staking.v1beta1.MsgDelegate', msgDelegate)],
     );
     return res?.tx_response;
   }
