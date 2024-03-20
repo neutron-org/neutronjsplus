@@ -936,22 +936,13 @@ export class WalletWrapper {
 type TxResponseType = Awaited<ReturnType<typeof cosmosclient.rest.tx.getTx>>;
 
 export const getEventAttributesFromTx = (
-  data: TxResponseType['data'],
+  data: any,
   event: string,
   attributes: string[],
 ): Array<
   Record<(typeof attributes)[number], string> | Record<string, never>
 > => {
-  const events =
-    (
-      JSON.parse(data?.tx_response.raw_log) as [
-        {
-          events: [
-            { type: string; attributes: [{ key: string; value: string }] },
-          ];
-        },
-      ]
-    )[0].events || [];
+  const events = data?.tx_response.events;
   const resp = [];
   for (const e of events) {
     if (event === e.type) {
