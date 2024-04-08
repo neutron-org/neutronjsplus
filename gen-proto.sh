@@ -7,6 +7,7 @@ TEMPLATE="./buf.ts.gen.yaml"
 mkdir $REPOS
 
 # ===== base types ============
+# TODO: lock version?
 npx buf generate buf.build/protocolbuffers/wellknowntypes --template $TEMPLATE --output $OUT/wellknowntypes --include-imports
 
 # ===== neutron ===============

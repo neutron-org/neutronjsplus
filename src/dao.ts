@@ -1551,6 +1551,38 @@ export class DaoMember {
     );
   }
 
+  /**
+   * submitRemoveSchedule creates proposal to remove added schedule.
+   */
+  async submitUpdateMarketMap(
+    title: string,
+    description: string,
+    newMarkets: any, // TODO: type
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [
+        {
+          custom: {
+            submit_admin_proposal: {
+              admin_proposal: {
+                proposal_execute_message: {
+                  message: JSON.stringify({
+                    '@type': '/slinky.marketmap.v1.MsgUpdateMarketMap',
+                    signer: ADMIN_MODULE_ADDRESS,
+                    create_markets: newMarkets,
+                  }),
+                },
+              },
+            },
+          },
+        },
+      ],
+      '1000',
+    );
+  }
+
   async queryVotingPower(): Promise<VotingPowerAtHeightResponse> {
     return await this.dao.queryVotingPower(this.user.wallet.address.toString());
   }
