@@ -1,18 +1,5 @@
-import {
-  Operation,
-  Path,
-  Paths,
-  ProviderConfig,
-  Providers,
-  Ticker,
-} from './proto/slinky/slinky/marketmap/v1/market_pb';
 import { google } from '@cosmos-client/core/cjs/proto';
 import { ADMIN_MODULE_ADDRESS } from './cosmos';
-import {
-  CreateMarket,
-  MsgUpdateMarketMap,
-} from './proto/slinky/slinky/marketmap/v1/tx_pb';
-import { CurrencyPair } from './proto/slinky/slinky/types/v1/currency_pair_pb';
 
 export type ParamChangeProposalInfo = {
   title: string;

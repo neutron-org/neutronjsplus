@@ -146,6 +146,36 @@ export type ProposalModule = {
   };
 };
 
+export type NewMarkets = {
+  ticker: {
+    currency_pair: {
+      Base: string;
+      Quote: string;
+    };
+    decimals: number;
+    min_provider_count: number;
+    enabled: boolean;
+    metadata_JSON: string;
+  };
+  providers: {
+    providers: {
+      name: string;
+      off_chain_ticker: string;
+    }[];
+  };
+  paths: {
+    paths: {
+      operations: {
+        provider: string;
+        currency_pair: {
+          Base: string;
+          Quote: string;
+        };
+      }[];
+    }[];
+  };
+}[];
+
 export const DaoContractLabels = {
   DAO_CORE: 'neutron.core',
   NEUTRON_VAULT: 'neutron.voting.vaults.neutron',
@@ -1557,7 +1587,7 @@ export class DaoMember {
   async submitUpdateMarketMap(
     title: string,
     description: string,
-    newMarkets: any, // TODO: type
+    newMarkets: NewMarkets,
   ): Promise<number> {
     return await this.submitSingleChoiceProposal(
       title,
