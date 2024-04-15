@@ -1,5 +1,5 @@
 import cosmosclient from '@cosmos-client/core';
-import cosmwasmclient from '@cosmos-client/cosmwasm';
+// import cosmwasmclient from '@cosmos-client/cosmwasm';
 import axios from 'axios';
 import Long from 'long';
 import { BlockWaiter, getWithAttempts } from './wait';
@@ -40,8 +40,25 @@ import { MsgAuctionBid } from './proto/block_sdk/sdk/auction/v1/tx_pb';
 import { ParameterChangeProposal } from './proto/cosmos_sdk/cosmos/params/v1beta1/params_pb';
 import { MsgSend } from './proto/cosmos_sdk/cosmos/bank/v1beta1/tx_pb';
 import { MsgRemoveInterchainQueryRequest } from './proto/neutron/neutron/interchainqueries/tx_pb';
+import {
+  defaultRegistryTypes,
+  IndexedTx,
+  MsgSendEncodeObject,
+  SigningStargateClient,
+  StdFee,
+} from '@cosmjs/stargate';
+
+// import { MsgDelegate } from 'cosmjs-types/cosmos/staking/v1beta1/tx';
+
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 import IHeight = ibc.core.client.v1.IHeight;
+import {
+  // DirectSecp256k1HdWallet,
+  DirectSecp256k1Wallet,
+  EncodeObject,
+  Registry,
+  // Registry,
+} from '@cosmjs/proto-signing';
 
 export const NEUTRON_DENOM = process.env.NEUTRON_DENOM || 'untrn';
 export const IBC_ATOM_DENOM = process.env.IBC_ATOM_DENOM || 'uibcatom';
@@ -107,15 +124,18 @@ export class CosmosWrapper {
   readonly sdk: cosmosclient.CosmosSDK;
   readonly blockWaiter: BlockWaiter;
   readonly denom: string;
+  readonly rpc: string;
 
   constructor(
     sdk: cosmosclient.CosmosSDK,
     blockWaiter: BlockWaiter,
     denom: string,
+    rpc: string,
   ) {
     this.denom = denom;
     this.sdk = sdk;
     this.blockWaiter = blockWaiter;
+    this.rpc = rpc;
   }
 
   async queryContractWithWait<T>(
@@ -477,6 +497,7 @@ export class CosmosWrapper {
 export class WalletWrapper {
   readonly chain: CosmosWrapper;
   readonly wallet: Wallet;
+  // readonly client: SigningStargateClient;
 
   constructor(cw: CosmosWrapper, wallet: Wallet) {
     this.chain = cw;
@@ -492,6 +513,64 @@ export class WalletWrapper {
       this.wallet.address.toString(),
       denom,
     );
+  }
+
+  async execTx2(
+    fee: StdFee | 'auto' | number,
+    msgs: EncodeObject[],
+    numAttempts = 10,
+    memo?: string,
+  ): Promise<IndexedTx> {
+    console.log('execTx2');
+    const wallet2 = await DirectSecp256k1Wallet.fromKey(
+      this.wallet.privKey.bytes(),
+      this.wallet.addrPrefix,
+    );
+    const client = await SigningStargateClient.connectWithSigner(
+      this.chain.rpc,
+      wallet2,
+      { registry: new Registry(defaultRegistryTypes) },
+    );
+    console.log('connected with signer');
+    memo ||= '';
+
+    const result = await client.signAndBroadcast(
+      (
+        await wallet2.getAccounts()
+      )[0].address,
+      msgs,
+      fee,
+      memo,
+    );
+    // console.log('broadcast result: ' + JSON.stringify(result.events));
+    console.log(
+      'result code : ' +
+        JSON.stringify(result.code) +
+        ' hash: ' +
+        result.transactionHash,
+    );
+
+    let error = null;
+    // TODO: probably does not make sense because it already waits being in the block
+    while (numAttempts > 0) {
+      await this.chain.blockWaiter.waitBlocks(1);
+      numAttempts--;
+      const data = await client.getTx(result.transactionHash);
+      if (data != null) {
+        if (DEBUG_SUBMIT_TX) {
+          const code = +data.code;
+          console.log('response code: ', code);
+          if (code > 0) {
+            console.log('\x1b[31m error log: ', JSON.stringify(data.events));
+          }
+          console.log('response: ', JSON.stringify(data));
+        }
+        return data;
+      }
+    }
+    error = error ?? new Error('failed to submit tx');
+
+    throw error;
   }
 
   /**
@@ -620,28 +699,29 @@ export class WalletWrapper {
 
   // storeWasm stores the wasm code by the passed path on the blockchain.
   async storeWasm(fileName: string): Promise<CodeId> {
-    const storeMsg = new cosmwasmclient.proto.cosmwasm.wasm.v1.MsgStoreCode({
-      sender: this.wallet.address.toString(),
-      wasm_byte_code: await getContractBinary(fileName),
-      instantiate_permission: null,
-    });
-    const data = await this.execTx(
-      {
-        amount: [{ denom: NEUTRON_DENOM, amount: '250000' }],
-        gas_limit: Long.fromString('60000000'),
-      },
-      [cosmosclient.codec.instanceToProtoAny(storeMsg)],
-    );
+    return new Promise(() => 1);
+    // const storeMsg = new cosmwasmclient.proto.cosmwasm.wasm.v1.MsgStoreCode({
+    //   sender: this.wallet.address.toString(),
+    //   wasm_byte_code: await getContractBinary(fileName),
+    //   instantiate_permission: null,
+    // });
+    // const data = await this.execTx(
+    //   {
+    //     amount: [{ denom: NEUTRON_DENOM, amount: '250000' }],
+    //     gas_limit: Long.fromString('60000000'),
+    //   },
+    //   [cosmosclient.codec.instanceToProtoAny(storeMsg)],
+    // );
 
-    if (data.tx_response.code !== 0) {
-      throw new Error(`upload error: ${data.tx_response.raw_log}`);
-    }
+    // if (data.tx_response.code !== 0) {
+    //   throw new Error(`upload error: ${data.tx_response.raw_log}`);
+    // }
 
-    const attributes = getEventAttributesFromTx(data, 'store_code', [
-      'code_id',
-    ]);
+    // const attributes = getEventAttributesFromTx(data, 'store_code', [
+    //   'code_id',
+    // ]);
 
-    return parseInt(attributes[0].code_id);
+    // return parseInt(attributes[0].code_id);
   }
 
   async instantiateContract(
@@ -650,33 +730,34 @@ export class WalletWrapper {
     label: string,
     admin: string = this.wallet.address.toString(),
   ): Promise<Array<Record<string, string>>> {
-    const msgInit =
-      new cosmwasmclient.proto.cosmwasm.wasm.v1.MsgInstantiateContract({
-        code_id: codeId + '',
-        sender: this.wallet.address.toString(),
-        admin: admin,
-        label,
-        msg: Buffer.from(msg),
-      });
+    return new Promise(() => 1);
+    // const msgInit =
+    //   new cosmwasmclient.proto.cosmwasm.wasm.v1.MsgInstantiateContract({
+    //     code_id: codeId + '',
+    //     sender: this.wallet.address.toString(),
+    //     admin: admin,
+    //     label,
+    //     msg: Buffer.from(msg),
+    //   });
 
-    const data = await this.execTx(
-      {
-        amount: [{ denom: NEUTRON_DENOM, amount: '2000000' }],
-        gas_limit: Long.fromString('600000000'),
-      },
-      [cosmosclient.codec.instanceToProtoAny(msgInit)],
-      10,
-      cosmosclient.rest.tx.BroadcastTxMode.Sync,
-    );
+    // const data = await this.execTx(
+    //   {
+    //     amount: [{ denom: NEUTRON_DENOM, amount: '2000000' }],
+    //     gas_limit: Long.fromString('600000000'),
+    //   },
+    //   [cosmosclient.codec.instanceToProtoAny(msgInit)],
+    //   10,
+    //   cosmosclient.rest.tx.BroadcastTxMode.Sync,
+    // );
 
-    if (data.tx_response.code !== 0) {
-      throw new Error(`instantiate error: ${data.tx_response.raw_log}`);
-    }
+    // if (data.tx_response.code !== 0) {
+    //   throw new Error(`instantiate error: ${data.tx_response.raw_log}`);
+    // }
 
-    return getEventAttributesFromTx(data, 'instantiate', [
-      '_contract_address',
-      'code_id',
-    ]);
+    // return getEventAttributesFromTx(data, 'instantiate', [
+    //   '_contract_address',
+    //   'code_id',
+    // ]);
   }
 
   async migrateContract(
@@ -684,27 +765,29 @@ export class WalletWrapper {
     codeId: number,
     msg: string | Record<string, unknown>,
   ): Promise<BroadcastTx200ResponseTxResponse> {
-    const sender = this.wallet.address.toString();
-    const msgMigrate =
-      new cosmwasmclient.proto.cosmwasm.wasm.v1.MsgMigrateContract({
-        sender,
-        contract,
-        code_id: codeId + '',
-        msg: Buffer.from(typeof msg === 'string' ? msg : JSON.stringify(msg)),
-      });
-    const res = await this.execTx(
-      {
-        gas_limit: Long.fromString('5000000'),
-        amount: [{ denom: this.chain.denom, amount: '20000' }],
-      },
-      [cosmosclient.codec.instanceToProtoAny(msgMigrate)],
-    );
-    if (res.tx_response.code !== 0) {
-      throw new Error(
-        `${res.tx_response.raw_log}\nFailed tx hash: ${res.tx_response.txhash}`,
-      );
-    }
-    return res?.tx_response;
+    return new Promise(() => 1);
+
+    // const sender = this.wallet.address.toString();
+    // const msgMigrate =
+    //   new cosmwasmclient.proto.cosmwasm.wasm.v1.MsgMigrateContract({
+    //     sender,
+    //     contract,
+    //     code_id: codeId + '',
+    //     msg: Buffer.from(typeof msg === 'string' ? msg : JSON.stringify(msg)),
+    //   });
+    // const res = await this.execTx(
+    //   {
+    //     gas_limit: Long.fromString('5000000'),
+    //     amount: [{ denom: this.chain.denom, amount: '20000' }],
+    //   },
+    //   [cosmosclient.codec.instanceToProtoAny(msgMigrate)],
+    // );
+    // if (res.tx_response.code !== 0) {
+    //   throw new Error(
+    //     `${res.tx_response.raw_log}\nFailed tx hash: ${res.tx_response.txhash}`,
+    //   );
+    // }
+    // return res?.tx_response;
   }
 
   async executeContract(
@@ -716,24 +799,25 @@ export class WalletWrapper {
       amount: [{ denom: this.chain.denom, amount: '10000' }],
     },
   ): Promise<BroadcastTx200ResponseTxResponse> {
-    const sender = this.wallet.address.toString();
-    const msgExecute =
-      new cosmwasmclient.proto.cosmwasm.wasm.v1.MsgExecuteContract({
-        sender,
-        contract,
-        msg: Buffer.from(msg),
-        funds,
-      });
+    return new Promise(() => 1);
+    // const sender = this.wallet.address.toString();
+    // const msgExecute =
+    //   new cosmwasmclient.proto.cosmwasm.wasm.v1.MsgExecuteContract({
+    //     sender,
+    //     contract,
+    //     msg: Buffer.from(msg),
+    //     funds,
+    //   });
 
-    const res = await this.execTx(fee, [
-      cosmosclient.codec.instanceToProtoAny(msgExecute),
-    ]);
-    if (res.tx_response.code !== 0) {
-      throw new Error(
-        `${res.tx_response.raw_log}\nFailed tx hash: ${res.tx_response.txhash}`,
-      );
-    }
-    return res?.tx_response;
+    // const res = await this.execTx(fee, [
+    //   cosmosclient.codec.instanceToProtoAny(msgExecute),
+    // ]);
+    // if (res.tx_response.code !== 0) {
+    //   throw new Error(
+    //     `${res.tx_response.raw_log}\nFailed tx hash: ${res.tx_response.txhash}`,
+    //   );
+    // }
+    // return res?.tx_response;
   }
 
   /**
@@ -751,25 +835,36 @@ export class WalletWrapper {
       gas_limit: Long.fromString('300000'),
       amount: [{ denom: this.chain.denom, amount: '1500' }],
     },
-    sequence: number = this.wallet.account.sequence,
-    mode: cosmosclient.rest.tx.BroadcastTxMode = cosmosclient.rest.tx
+    _kek: number = this.wallet.account.sequence,
+    _lul: cosmosclient.rest.tx.BroadcastTxMode = cosmosclient.rest.tx
       .BroadcastTxMode.Sync,
-  ): Promise<BroadcastTx200ResponseTxResponse> {
+  ): Promise<IndexedTx> {
     const { amount, denom = this.chain.denom } =
       typeof coin === 'string' ? { amount: coin } : coin;
-    const msgSend = new MsgSend({
-      fromAddress: this.wallet.address.toString(),
-      toAddress: to,
-      amount: [{ denom, amount }],
-    });
-    const res = await this.execTx(
-      fee,
-      [packAnyMsg('/cosmos.bank.v1beta1.MsgSend', msgSend)],
+    // const msgSend = new MsgSend({
+    //   fromAddress: this.wallet.address.toString(),
+    //   toAddress: to,
+    //   amount: [{ denom, amount }],
+    // });
+    console.log('from address: ' + this.wallet.address.toString());
+    const msgSendObject: MsgSendEncodeObject = {
+      typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+      value: {
+        fromAddress: this.wallet.address.toString(),
+        toAddress: to,
+        amount: [{ denom, amount }],
+      },
+    };
+
+    const res = await this.execTx2(
+      {
+        amount: fee.amount,
+        gas: fee.gas_limit + '',
+      },
+      [msgSendObject],
       10,
-      mode,
-      sequence,
     );
-    return res?.tx_response;
+    return res;
   }
 
   async msgSendDirectProposal(
@@ -933,7 +1028,7 @@ export class WalletWrapper {
   }
 }
 
-type TxResponseType = Awaited<ReturnType<typeof cosmosclient.rest.tx.getTx>>;
+// type TxResponseType = Awaited<ReturnType<typeof cosmosclient.rest.tx.getTx>>;
 
 export const getEventAttributesFromTx = (
   data: any,

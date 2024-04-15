@@ -97,12 +97,17 @@ export class TestStateLocalCosmosTestNet {
     const neutron = await walletSet(this.sdk1, neutronPrefix, this.config);
     const cosmos = await walletSet(this.sdk2, cosmosPrefix, this.config);
 
+    // TODO: add customization through variables
+    const rpcNeutron = 'http://localhost:26657';
+    const rpcGaia = 'http://localhost:26657';
+
     const qaNeutron = await this.createQaWallet(
       neutronPrefix,
       this.sdk1,
       this.blockWaiter1,
       neutron.demo1,
       NEUTRON_DENOM,
+      rpcNeutron,
       [
         {
           denom: NEUTRON_DENOM,
@@ -125,6 +130,7 @@ export class TestStateLocalCosmosTestNet {
       this.blockWaiter1,
       neutron.demo1,
       NEUTRON_DENOM,
+      rpcNeutron,
     );
 
     const qaNeutronFour = await this.createQaWallet(
@@ -133,6 +139,7 @@ export class TestStateLocalCosmosTestNet {
       this.blockWaiter1,
       neutron.demo1,
       NEUTRON_DENOM,
+      rpcNeutron,
     );
 
     const qaNeutronFive = await this.createQaWallet(
@@ -141,6 +148,7 @@ export class TestStateLocalCosmosTestNet {
       this.blockWaiter1,
       neutron.demo1,
       NEUTRON_DENOM,
+      rpcNeutron,
     );
 
     const qaCosmos = await this.createQaWallet(
@@ -149,6 +157,7 @@ export class TestStateLocalCosmosTestNet {
       this.blockWaiter2,
       cosmos.demo2,
       COSMOS_DENOM,
+      rpcGaia,
     );
 
     const qaCosmosTwo = await this.createQaWallet(
@@ -157,6 +166,7 @@ export class TestStateLocalCosmosTestNet {
       this.blockWaiter2,
       cosmos.demo2,
       COSMOS_DENOM,
+      rpcGaia,
     );
 
     this.wallets = {
@@ -177,7 +187,7 @@ export class TestStateLocalCosmosTestNet {
     to: cosmosclient.AccAddress,
     amount: string,
     denom = cm.chain.denom,
-    retryCount = 100,
+    retryCount = 10,
   ): Promise<void> => {
     const fee = {
       gas_limit: Long.fromString('200000'),
@@ -187,6 +197,7 @@ export class TestStateLocalCosmosTestNet {
     let res;
     while (retryCount > attemptCount) {
       try {
+        console.log('before: ' + cm.wallet.address.toString());
         const sequence = await cm.chain.getSeq(cm.wallet.address.toString());
         res = await cm.msgSend(
           to.toString(),
@@ -197,6 +208,7 @@ export class TestStateLocalCosmosTestNet {
         );
         break;
       } catch (e) {
+        console.log('error! result: ' + e);
         await cm.chain.blockWaiter.waitBlocks(1);
         attemptCount++;
       }
@@ -212,6 +224,7 @@ export class TestStateLocalCosmosTestNet {
     blockWaiter: BlockWaiter,
     wallet: Wallet,
     denom: string,
+    rpc: string,
     balances: ICoin[] = [],
   ) {
     if (balances.length === 0) {
@@ -223,9 +236,10 @@ export class TestStateLocalCosmosTestNet {
       ];
     }
     const cm = new WalletWrapper(
-      new CosmosWrapper(sdk, blockWaiter, denom),
+      new CosmosWrapper(sdk, blockWaiter, denom, rpc),
       wallet,
     );
+    console.log('cm: ' + cm.chain.sdk.url);
     const mnemonic = generateMnemonic();
     const newWallet = await mnemonicToWallet(
       cosmosclient.AccAddress,
