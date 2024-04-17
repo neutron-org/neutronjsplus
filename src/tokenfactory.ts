@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BroadcastTx200ResponseTxResponse } from '@cosmos-client/core/cjs/openapi/api';
-import { WalletWrapper, packAnyMsg } from './cosmos';
+import { packAnyMsg } from './cosmos';
+import { WalletWrapper } from './wallet_wrapper';
 import Long from 'long';
 import {
   MsgBurn,

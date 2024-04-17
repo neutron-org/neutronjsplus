@@ -8,6 +8,7 @@ import {
   ParamsInterchainqueriesInfo,
   ParamsTokenfactoryInfo,
 } from './proposal';
+import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 
 export type AcknowledgementResult =
   | { success: string[] }
@@ -336,12 +337,14 @@ export class Wallet {
   pubKey: cosmosclient.PubKey;
   privKey: cosmosclient.PrivKey;
   addrPrefix: string;
+  directwallet: DirectSecp256k1HdWallet;
   constructor(
     address: cosmosclient.AccAddress | cosmosclient.ValAddress,
     account: cosmosclient.proto.cosmos.auth.v1beta1.BaseAccount | null,
     pubKey: cosmosclient.PubKey,
     privKey: cosmosclient.PrivKey,
     addrPrefix: string,
+    directwallet: DirectSecp256k1HdWallet,
   ) {
     this.address = address;
     this.account = account;
@@ -358,6 +361,7 @@ export class Wallet {
       }
       throw new Error('unexpected addr type');
     };
+    this.directwallet = directwallet;
   }
 }
 

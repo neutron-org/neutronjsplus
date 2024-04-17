@@ -5,7 +5,6 @@ import {
   createBankSendMessage,
   getEventAttribute,
   packAnyMsg,
-  WalletWrapper,
   wrapMsg,
 } from './cosmos';
 import { BroadcastTx200ResponseTxResponse } from '@cosmos-client/core/cjs/openapi/api';
@@ -41,6 +40,8 @@ import {
 } from './proposal';
 import Long from 'long';
 import { ClientState } from './proto/neutron_thirdparty/ibc/lightclients/tendermint/v1/tendermint_pb';
+import { WalletWrapper } from './wallet_wrapper';
+import { ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 
 export type SubdaoProposalConfig = {
   threshold: any;
@@ -547,16 +548,11 @@ export class DaoMember {
   async voteYes(
     proposalId: number,
     customModule = 'single',
-    fee = {
-      gas_limit: Long.fromString('4000000'),
-      amount: [{ denom: this.user.chain.denom, amount: '10000' }],
-    },
-  ): Promise<BroadcastTx200ResponseTxResponse> {
+  ): Promise<ExecuteResult> {
     return await this.user.executeContract(
       this.dao.contracts.proposals[customModule].address,
       JSON.stringify({ vote: { proposal_id: proposalId, vote: 'yes' } }),
       [],
-      fee,
     );
   }
 
@@ -566,16 +562,11 @@ export class DaoMember {
   async voteNo(
     proposalId: number,
     customModule = 'single',
-    fee = {
-      gas_limit: Long.fromString('4000000'),
-      amount: [{ denom: this.user.chain.denom, amount: '10000' }],
-    },
-  ): Promise<BroadcastTx200ResponseTxResponse> {
+  ): Promise<ExecuteResult> {
     return await this.user.executeContract(
       this.dao.contracts.proposals[customModule].address,
       JSON.stringify({ vote: { proposal_id: proposalId, vote: 'no' } }),
       [],
-      fee,
     );
   }
 
@@ -585,7 +576,7 @@ export class DaoMember {
   async voteForOption(
     proposalId: number,
     optionId: number,
-  ): Promise<BroadcastTx200ResponseTxResponse> {
+  ): Promise<ExecuteResult> {
     return await this.user.executeContract(
       this.dao.contracts.proposals.multiple.address,
       JSON.stringify({
@@ -594,7 +585,7 @@ export class DaoMember {
     );
   }
 
-  async bondFunds(amount: string): Promise<BroadcastTx200ResponseTxResponse> {
+  async bondFunds(amount: string): Promise<ExecuteResult> {
     const vaultAddress = (this.dao.contracts.voting as VotingVaultsModule)
       .vaults.neutron.address;
     return await this.user.executeContract(
@@ -606,7 +597,7 @@ export class DaoMember {
     );
   }
 
-  async unbondFunds(amount: string): Promise<BroadcastTx200ResponseTxResponse> {
+  async unbondFunds(amount: string): Promise<ExecuteResult> {
     const vaultAddress = (this.dao.contracts.voting as VotingVaultsModule)
       .vaults.neutron.address;
     return await this.user.executeContract(
@@ -627,7 +618,7 @@ export class DaoMember {
     deposit = '',
     customModule = 'single',
     fee = {
-      gas_limit: Long.fromString('4000000'),
+      gas: '4000000',
       amount: [{ denom: this.user.chain.denom, amount: '10000' }],
     },
   ): Promise<number> {
@@ -662,7 +653,7 @@ export class DaoMember {
     if (proposalId < 0) {
       throw new Error(
         'failed to get proposal ID from the proposal creation tx attributes: ' +
-          proposalTx.raw_log,
+          JSON.stringify(proposalTx.events),
       );
     }
     return proposalId;
@@ -675,10 +666,10 @@ export class DaoMember {
     proposalId: number,
     customModule = 'single',
     fee = {
-      gas_limit: Long.fromString('4000000'),
+      gas: '4000000',
       amount: [{ denom: this.user.chain.denom, amount: '10000' }],
     },
-  ): Promise<BroadcastTx200ResponseTxResponse> {
+  ): Promise<ExecuteResult> {
     return await this.user.executeContract(
       this.dao.contracts.proposals[customModule].address,
       JSON.stringify({ execute: { proposal_id: proposalId } }),
@@ -690,7 +681,7 @@ export class DaoMember {
   async executeProposalWithAttempts(
     proposalId: number,
     fee = {
-      gas_limit: Long.fromString('4000000'),
+      gas: '4000000',
       amount: [{ denom: this.user.chain.denom, amount: '10000' }],
     },
   ) {
@@ -754,7 +745,7 @@ export class DaoMember {
     value: string,
     deposit: string,
     fee = {
-      gas_limit: Long.fromString('4000000'),
+      gas: '4000000',
       amount: [{ denom: this.user.chain.denom, amount: '10000' }],
     },
   ): Promise<number> {
@@ -854,7 +845,7 @@ export class DaoMember {
     if (proposalId < 0) {
       throw new Error(
         'failed to get proposal ID from the proposal creation tx attributes: ' +
-          proposalTx.raw_log,
+          JSON.stringify(proposalTx.events),
       );
     }
     return proposalId;
@@ -971,7 +962,7 @@ export class DaoMember {
   async executeTimelockedProposal(
     proposalId: number,
     customModule = 'single',
-  ): Promise<BroadcastTx200ResponseTxResponse> {
+  ): Promise<ExecuteResult> {
     return this.user.executeContract(
       this.dao.contracts.proposals[customModule].pre_propose.timelock.address,
       JSON.stringify({
@@ -985,7 +976,7 @@ export class DaoMember {
   async overruleTimelockedProposal(
     timelockAddress: string,
     proposalId: number,
-  ): Promise<BroadcastTx200ResponseTxResponse> {
+  ): Promise<ExecuteResult> {
     const overruleProposalId = await this.dao.getOverruleProposalId(
       timelockAddress,
       proposalId,
@@ -1038,7 +1029,7 @@ export class DaoMember {
     if (proposalId < 0) {
       throw new Error(
         'failed to get proposal ID from the proposal creation tx attributes: ' +
-          proposalTx.raw_log,
+          JSON.stringify(proposalTx.events),
       );
     }
     return proposalId1;
@@ -1710,19 +1701,13 @@ export const deploySubdao = async (
     main_dao: mainDaoCoreAddress,
     security_dao: securityDaoAddr,
   };
-  const res = await cm.instantiateContract(
+  const coreDaoContract = await cm.instantiateContract(
     coreCodeId,
     JSON.stringify(coreInstantiateMessage),
     'neutron.subdaos.test.core',
   );
 
-  const f = (arr: Record<string, string>[], id: number) =>
-    (arr.find((v) => Number(v.code_id) == id) || {})._contract_address;
-
-  return new Dao(
-    cm.chain,
-    await getSubDaoContracts(cm.chain, f(res, coreCodeId)),
-  );
+  return new Dao(cm.chain, await getSubDaoContracts(cm.chain, coreDaoContract));
 };
 
 export const setupSubDaoTimelockSet = async (
@@ -1778,15 +1763,12 @@ export const deployNeutronDao = async (
     description: 'a simple voting vault for testing purposes',
   };
 
-  const neutronVaultCodeIdRes = await cm.instantiateContract(
+  const neutronVaultAddress = await cm.instantiateContract(
     neutronVaultCodeId,
     JSON.stringify(neutronVaultInitMsg),
     DaoContractLabels.NEUTRON_VAULT,
   );
 
-  const f = (arr: Record<string, string>[], id: number) =>
-    (arr.find((v) => Number(v.code_id) == id) || {})._contract_address;
-  const neutronVaultAddress = f(neutronVaultCodeIdRes, neutronVaultCodeId);
   const votingRegistryInstantiateInfo = {
     admin: {
       core_module: {},
@@ -1931,11 +1913,11 @@ export const deployNeutronDao = async (
       },
     ],
   };
-  const res = await cm.instantiateContract(
+  const daoCoreContract = await cm.instantiateContract(
     coreCodeId,
     JSON.stringify(coreInstantiateMessage),
     DaoContractLabels.DAO_CORE,
   );
   await cm.chain.blockWaiter.waitBlocks(1);
-  return getDaoContracts(cm.chain, f(res, coreCodeId));
+  return getDaoContracts(cm.chain, daoCoreContract);
 };
