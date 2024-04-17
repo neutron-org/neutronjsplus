@@ -1,6 +1,7 @@
 import MerkleTree from 'merkletreejs';
 import crypto from 'crypto';
-import { CosmosWrapper, WalletWrapper, getEventAttribute } from './cosmos';
+import { CosmosWrapper, getEventAttribute } from './cosmos';
+import { WalletWrapper } from './wallet_wrapper';
 import {
   NativeToken,
   Token,
@@ -18,6 +19,7 @@ import {
 } from './dao';
 import { msgMintDenom, msgCreateDenom } from './tokenfactory';
 import { BroadcastTx200ResponseTxResponse } from '@cosmos-client/core/cjs/openapi/api';
+import { ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 
 // subdenom of rewards asset distributed by the generator contract.
 const ASTRO_SUBDENOM = 'uastro';
@@ -647,7 +649,7 @@ export const instantiateAuction = async (
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
 export const instantiateAirdrop = async (
@@ -680,7 +682,7 @@ export const instantiateAirdrop = async (
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
 export const executeAuctionUpdateConfig = async (
@@ -738,7 +740,7 @@ export const instantiateCredits = async (
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
 export const executeCreditsUpdateConfig = async (
@@ -802,7 +804,7 @@ export const instantiateCreditsVault = async (
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
 export const executeCreditsVaultUpdateConfig = async (
@@ -898,7 +900,7 @@ export const instantiateLockdrop = async (
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
 export const queryLockdropUserInfo = async (
@@ -953,7 +955,7 @@ export const instantiatePriceFeed = async (
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
 export const instantiateCoinRegistry = async (
@@ -971,7 +973,7 @@ export const instantiateCoinRegistry = async (
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
 export const instantiateAstroFactory = async (
@@ -1007,7 +1009,7 @@ export const instantiateAstroFactory = async (
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
 export const executeFactoryCreatePair = async (
@@ -1075,7 +1077,7 @@ export const instantiateAstroVesting = async (
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
 export type VestingAccountResponse = {
@@ -1115,7 +1117,7 @@ export const instantiateVestingLp = async (
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
 export const executeVestingLpSetVestingToken = async (
@@ -1185,7 +1187,7 @@ export const instantiateAstroGenerator = async (
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
 export const instantiateLockdropVault = async (
@@ -1216,7 +1218,7 @@ export const instantiateLockdropVault = async (
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
 export const executeLockdropVaultUpdateConfig = async (
@@ -1228,7 +1230,7 @@ export const executeLockdropVaultUpdateConfig = async (
   oracleAtomContract: string | null,
   name: string | null,
   description: string | null,
-): Promise<BroadcastTx200ResponseTxResponse> =>
+): Promise<ExecuteResult> =>
   cm.executeContract(
     contractAddress,
     JSON.stringify({
@@ -1305,7 +1307,7 @@ export const instantiateAstroportOracle = async (
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
 export const executeAstroportOracleSetAssetInfos = async (
@@ -1364,5 +1366,5 @@ export const instantiateVestingLpVault = async (
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };

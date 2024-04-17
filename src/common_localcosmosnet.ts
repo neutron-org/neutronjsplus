@@ -6,15 +6,18 @@ import {
   IBC_USDC_DENOM,
   mnemonicToWallet,
   NEUTRON_DENOM,
-  WalletWrapper,
 } from './cosmos';
 import { BlockWaiter } from './wait';
 import { generateMnemonic } from 'bip39';
 import Long from 'long';
 import cosmosclient from '@cosmos-client/core';
-import { Wallet } from './types';
 
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
+import { Wallet } from './types';
+import { defaultRegistryTypes, SigningStargateClient } from '@cosmjs/stargate';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { Registry } from '@cosmjs/proto-signing';
+import { WalletWrapper } from './wallet_wrapper';
 
 export const disconnectValidator = async (name: string) => {
   const { stdout } = exec(`docker stop ${name}`);
@@ -184,31 +187,35 @@ export class TestStateLocalCosmosTestNet {
 
   sendTokensWithRetry = async (
     cm: WalletWrapper,
-    to: cosmosclient.AccAddress,
+    to: string,
     amount: string,
     denom = cm.chain.denom,
     retryCount = 10,
   ): Promise<void> => {
     const fee = {
-      gas_limit: Long.fromString('200000'),
+      gas: '200000',
       amount: [{ denom: cm.chain.denom, amount: '1000' }],
     };
     let attemptCount = 0;
     let res;
     while (retryCount > attemptCount) {
       try {
-        console.log('before: ' + cm.wallet.address.toString());
-        const sequence = await cm.chain.getSeq(cm.wallet.address.toString());
-        res = await cm.msgSend(
-          to.toString(),
-          { amount, denom },
+        const res = await cm.client.sendTokens(
+          cm.wallet.address.toString(),
+          to,
+          [{ amount, denom }],
           fee,
-          sequence,
-          cosmosclient.rest.tx.BroadcastTxMode.Sync,
         );
+        if (res.code !== 0) {
+          console.log(
+            'sendTokensWithRetry error! result: ' + JSON.stringify(res.events),
+          );
+          attemptCount++;
+          continue;
+        }
         break;
       } catch (e) {
-        console.log('error! result: ' + e);
+        console.log('sendTokensWithRetry error! result: ' + e);
         await cm.chain.blockWaiter.waitBlocks(1);
         attemptCount++;
       }
@@ -235,11 +242,23 @@ export class TestStateLocalCosmosTestNet {
         },
       ];
     }
+
+    const client = await SigningStargateClient.connectWithSigner(
+      rpc,
+      wallet.directwallet,
+      { registry: new Registry(defaultRegistryTypes) },
+    );
+    const wasmClient = await SigningCosmWasmClient.connectWithSigner(
+      rpc,
+      wallet.directwallet,
+      { registry: new Registry(defaultRegistryTypes) },
+    );
     const cm = new WalletWrapper(
       new CosmosWrapper(sdk, blockWaiter, denom, rpc),
       wallet,
+      client,
+      wasmClient,
     );
-    console.log('cm: ' + cm.chain.sdk.url);
     const mnemonic = generateMnemonic();
     const newWallet = await mnemonicToWallet(
       cosmosclient.AccAddress,
@@ -251,7 +270,7 @@ export class TestStateLocalCosmosTestNet {
     for (const balance of balances) {
       await this.sendTokensWithRetry(
         cm,
-        newWallet.address,
+        await newWallet.address.toString(),
         balance.amount,
         balance.denom,
       );
