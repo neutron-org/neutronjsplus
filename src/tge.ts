@@ -19,7 +19,7 @@ import {
 } from './dao';
 import { msgMintDenom, msgCreateDenom } from './tokenfactory';
 import { BroadcastTx200ResponseTxResponse } from '@cosmos-client/core/cjs/openapi/api';
-import { ExecuteResult } from '@cosmjs/cosmwasm-stargate';
+import { ExecuteResult, IndexedTx } from '@cosmjs/cosmwasm-stargate';
 
 // subdenom of rewards asset distributed by the generator contract.
 const ASTRO_SUBDENOM = 'uastro';
@@ -1230,7 +1230,7 @@ export const executeLockdropVaultUpdateConfig = async (
   oracleAtomContract: string | null,
   name: string | null,
   description: string | null,
-): Promise<ExecuteResult> =>
+): Promise<IndexedTx> =>
   cm.executeContract(
     contractAddress,
     JSON.stringify({

@@ -305,13 +305,13 @@ export class WalletWrapper {
 
   async executeContract(
     contract: string,
-    msg: string,
+    msg: any,
     funds: Coin[] = [],
     fee = {
       gas: '4000000',
       amount: [{ denom: this.chain.denom, amount: '10000' }],
     },
-  ): Promise<ExecuteResult> {
+  ): Promise<IndexedTx> {
     const sender = this.wallet.address.toString();
     const res = await this.wasmClient.execute(
       sender,
@@ -321,7 +321,7 @@ export class WalletWrapper {
       '',
       funds,
     );
-    return res;
+    return await this.client.getTx(res.transactionHash);
   }
 
   /**

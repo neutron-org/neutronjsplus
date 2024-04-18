@@ -18,6 +18,7 @@ function getRandomValues(array: any) {
 
 export * as tokenfactory from './tokenfactory';
 export * as cosmosWrapper from './cosmos';
+export * as walletWrapper from './wallet_wrapper';
 export * as dao from './dao';
 export * as env from './env';
 export * as ica from './ica';
