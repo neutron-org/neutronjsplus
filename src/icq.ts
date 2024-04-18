@@ -150,12 +150,8 @@ export const registerTransfersQuery = async (
     }),
   );
 
-  const tx = await cosmosclient.rest.tx.getTx(
-    cm.chain.sdk as cosmosclient.CosmosSDK,
-    res.transactionHash as string,
-  );
-  if (tx?.data.tx_response?.code != 0) {
-    throw new Error('tx?.data.tx_response?.code != 0');
+  if (res.code != 0) {
+    throw new Error('res.code != 0');
   }
 };
 

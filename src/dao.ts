@@ -41,7 +41,7 @@ import {
 import Long from 'long';
 import { ClientState } from './proto/neutron_thirdparty/ibc/lightclients/tendermint/v1/tendermint_pb';
 import { WalletWrapper } from './wallet_wrapper';
-import { ExecuteResult } from '@cosmjs/cosmwasm-stargate';
+import { ExecuteResult, IndexedTx } from '@cosmjs/cosmwasm-stargate';
 
 export type SubdaoProposalConfig = {
   threshold: any;
@@ -548,7 +548,7 @@ export class DaoMember {
   async voteYes(
     proposalId: number,
     customModule = 'single',
-  ): Promise<ExecuteResult> {
+  ): Promise<IndexedTx> {
     return await this.user.executeContract(
       this.dao.contracts.proposals[customModule].address,
       JSON.stringify({ vote: { proposal_id: proposalId, vote: 'yes' } }),
@@ -562,7 +562,7 @@ export class DaoMember {
   async voteNo(
     proposalId: number,
     customModule = 'single',
-  ): Promise<ExecuteResult> {
+  ): Promise<IndexedTx> {
     return await this.user.executeContract(
       this.dao.contracts.proposals[customModule].address,
       JSON.stringify({ vote: { proposal_id: proposalId, vote: 'no' } }),
@@ -576,7 +576,7 @@ export class DaoMember {
   async voteForOption(
     proposalId: number,
     optionId: number,
-  ): Promise<ExecuteResult> {
+  ): Promise<IndexedTx> {
     return await this.user.executeContract(
       this.dao.contracts.proposals.multiple.address,
       JSON.stringify({
@@ -585,7 +585,7 @@ export class DaoMember {
     );
   }
 
-  async bondFunds(amount: string): Promise<ExecuteResult> {
+  async bondFunds(amount: string): Promise<IndexedTx> {
     const vaultAddress = (this.dao.contracts.voting as VotingVaultsModule)
       .vaults.neutron.address;
     return await this.user.executeContract(
@@ -597,7 +597,7 @@ export class DaoMember {
     );
   }
 
-  async unbondFunds(amount: string): Promise<ExecuteResult> {
+  async unbondFunds(amount: string): Promise<IndexedTx> {
     const vaultAddress = (this.dao.contracts.voting as VotingVaultsModule)
       .vaults.neutron.address;
     return await this.user.executeContract(
@@ -669,7 +669,7 @@ export class DaoMember {
       gas: '4000000',
       amount: [{ denom: this.user.chain.denom, amount: '10000' }],
     },
-  ): Promise<ExecuteResult> {
+  ): Promise<IndexedTx> {
     return await this.user.executeContract(
       this.dao.contracts.proposals[customModule].address,
       JSON.stringify({ execute: { proposal_id: proposalId } }),
@@ -962,7 +962,7 @@ export class DaoMember {
   async executeTimelockedProposal(
     proposalId: number,
     customModule = 'single',
-  ): Promise<ExecuteResult> {
+  ): Promise<IndexedTx> {
     return this.user.executeContract(
       this.dao.contracts.proposals[customModule].pre_propose.timelock.address,
       JSON.stringify({
@@ -976,7 +976,7 @@ export class DaoMember {
   async overruleTimelockedProposal(
     timelockAddress: string,
     proposalId: number,
-  ): Promise<ExecuteResult> {
+  ): Promise<IndexedTx> {
     const overruleProposalId = await this.dao.getOverruleProposalId(
       timelockAddress,
       proposalId,
