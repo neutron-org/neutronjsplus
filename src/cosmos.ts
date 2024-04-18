@@ -1010,15 +1010,19 @@ export const mnemonicToWallet = async (
   return new Wallet(address, account, pubKey, privKey, addrPrefix);
 };
 
-export const getSequenceId = (rawLog: string | undefined): number => {
+export const getSequenceId = (rawLog: BroadcastTx200ResponseTxResponse | undefined): number => {
   if (!rawLog) {
     throw 'getSequenceId: empty rawLog';
   }
-  const events = JSON.parse(rawLog)[0]['events'];
-  const sequence = events
-    .find((e) => e['type'] === 'send_packet')
-    ['attributes'].find((a) => a['key'] === 'packet_sequence').value;
-  return +sequence;
+  for (const event of rawLog.events) {
+    if (event.type === 'send_packet') {
+      const sequenceAttr = event.attributes.find(attr => attr.key === 'packet_sequence');
+      if (sequenceAttr) {
+        return parseInt(sequenceAttr.value);
+      }
+    }
+  }
+
 };
 
 export const getIBCDenom = (portName, channelName, denom: string): string => {
