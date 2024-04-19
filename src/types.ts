@@ -172,9 +172,11 @@ export const NeutronContract = {
   // https://github.com/CosmWasm/cosmwasm/tree/main/contracts/floaty
   FLOATY: '../contracts_thirdparty/floaty_2.0.wasm',
   DEX_STARGATE: 'dex_stargate.wasm',
+  DEX_DEV: 'dex.wasm',
 };
 
 export type MultiChoiceOption = {
+  title: string;
   description: string;
   msgs: any[];
 };
