@@ -9,8 +9,6 @@ import { ibc } from '@cosmos-client/ibc/cjs/proto';
 import { Wallet, CodeId } from './types';
 import { DEBUG_SUBMIT_TX, getContractBinary, getHeight } from './env';
 import { MsgSubmitProposalLegacy } from './proto/admin_module/cosmos/adminmodule/adminmodule/tx_pb';
-import { MsgTransfer } from './proto/neutron/neutron/transfer/v1/tx_pb';
-import { Height } from './proto/ibc_go/ibc/core/client/v1/client_pb';
 import { MsgAuctionBid } from './proto/block_sdk/sdk/auction/v1/tx_pb';
 import { ParameterChangeProposal } from './proto/cosmos_sdk/cosmos/params/v1beta1/params_pb';
 import { MsgSend } from './proto/cosmos_sdk/cosmos/bank/v1beta1/tx_pb';
@@ -23,10 +21,10 @@ import {
   StdFee,
 } from '@cosmjs/stargate';
 import {
-  ExecuteResult,
   MigrateResult,
   SigningCosmWasmClient,
 } from '@cosmjs/cosmwasm-stargate';
+import { MsgTransfer } from '@neutron-org/cosmjs-types/ibc/applications/transfer/v1/tx';
 
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 import IHeight = ibc.core.client.v1.IHeight;
@@ -494,31 +492,37 @@ export class WalletWrapper {
   async msgIBCTransfer(
     sourcePort: string,
     sourceChannel: string,
-    token: ICoin,
+    token: Coin,
     receiver: string,
     timeoutHeight: IHeight,
     memo?: string,
-  ): Promise<BroadcastTx200ResponseTxResponse> {
-    const newMsgSend = new MsgTransfer({
+  ): Promise<IndexedTx> {
+    const newMsgSend: MsgTransfer = {
       sourcePort: sourcePort,
       sourceChannel: sourceChannel,
       token: token,
       sender: this.wallet.address.toString(),
       receiver: receiver,
-      timeoutHeight: new Height({
+      timeoutHeight: {
         revisionHeight: timeoutHeight.revision_height,
         revisionNumber: timeoutHeight.revision_number,
-      }),
+      },
+      timeoutTimestamp: null,
       memo: memo,
-    });
+    };
 
-    const res = await this.execTx(
+    const msg = {
+      typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
+      value: newMsgSend,
+    };
+
+    const res = await this.execTx2(
       {
-        gas_limit: Long.fromString('200000'),
+        gas: '200000',
         amount: [{ denom: this.chain.denom, amount: '1000' }],
       },
-      [packAnyMsg('/ibc.applications.transfer.v1.MsgTransfer', newMsgSend)],
+      [msg],
     );
-    return res?.tx_response;
+    return res;
   }
 }
