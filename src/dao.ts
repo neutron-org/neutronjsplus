@@ -27,7 +27,7 @@ import {
   ParamsContractmanagerInfo,
   ParamsCronInfo,
   ParamsFeeburnerInfo,
-  ParamsFeerefunderInfo,
+  ParamsFeerefunderInfo, ParamsGlobalfeeInfo,
   ParamsInterchainqueriesInfo,
   ParamsInterchaintxsInfo,
   ParamsTokenfactoryInfo,
@@ -1294,6 +1294,20 @@ export class DaoMember {
     title: string,
     description: string,
     message: ParamsInterchaintxsInfo,
+    amount: string,
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      amount,
+    );
+  }
+
+  async submitUpdateParamsGlobalfeeProposal(
+    title: string,
+    description: string,
+    message: ParamsGlobalfeeInfo,
     amount: string,
   ): Promise<number> {
     return await this.submitSingleChoiceProposal(
