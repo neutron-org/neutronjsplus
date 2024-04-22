@@ -976,8 +976,6 @@ export class WalletWrapper {
   }
 }
 
-type TxResponseType = Awaited<ReturnType<typeof cosmosclient.rest.tx.getTx>>;
-
 export const getEventAttributesFromTx = (
   data: any,
   event: string,
@@ -1053,19 +1051,22 @@ export const mnemonicToWallet = async (
   return new Wallet(address, account, pubKey, privKey, addrPrefix);
 };
 
-export const getSequenceId = (rawLog: BroadcastTx200ResponseTxResponse | undefined): number => {
+export const getSequenceId = (
+  rawLog: BroadcastTx200ResponseTxResponse | undefined,
+): number => {
   if (!rawLog) {
     throw 'getSequenceId: empty rawLog';
   }
   for (const event of rawLog.events) {
     if (event.type === 'send_packet') {
-      const sequenceAttr = event.attributes.find(attr => attr.key === 'packet_sequence');
+      const sequenceAttr = event.attributes.find(
+        (attr) => attr.key === 'packet_sequence',
+      );
       if (sequenceAttr) {
         return parseInt(sequenceAttr.value);
       }
     }
   }
-
 };
 
 export const getIBCDenom = (portName, channelName, denom: string): string => {
