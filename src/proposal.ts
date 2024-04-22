@@ -1,5 +1,6 @@
 import { google } from '@cosmos-client/core/cjs/proto';
 import { ADMIN_MODULE_ADDRESS } from './cosmos';
+import cosmosclient from "@cosmos-client/core";
 
 export type ParamChangeProposalInfo = {
   title: string;
@@ -25,6 +26,7 @@ export type ParamsInterchainqueriesInfo = {
   tx_query_removal_limit: number;
 };
 
+
 export type ParamsTokenfactoryInfo = {
   denom_creation_fee: any;
   denom_creation_gas_consume: number;
@@ -40,6 +42,12 @@ export type ParamsFeerefunderInfo = {
     ack_fee: any;
     timeout_fee: any;
   };
+};
+
+export type ParamsGlobalfeeInfo = {
+  minimum_gas_prices: cosmosclient.proto.cosmos.base.v1beta1.ICoin[];
+  bypass_min_fee_msg_types: string[];
+  max_total_bypass_min_fee_msg_gas_usage: string;
 };
 
 export type ParamsCronInfo = {
@@ -308,6 +316,28 @@ export const updateFeeburnerParamsProposal = (
             authority: ADMIN_MODULE_ADDRESS,
             params: {
               treasury_address: info.treasury_address,
+            },
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateGlobalFeeParamsProposal = (
+  info: ParamsGlobalfeeInfo,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.globalfee.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params: {
+              minimum_gas_prices: info.minimum_gas_prices,
+              bypass_min_fee_msg_types: info.bypass_min_fee_msg_types,
+              max_total_bypass_min_fee_msg_gas_usage: info.max_total_bypass_min_fee_msg_gas_usage,
             },
           }),
         },
