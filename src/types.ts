@@ -8,7 +8,7 @@ import {
   ParamsInterchainqueriesInfo,
   ParamsTokenfactoryInfo,
 } from './proposal';
-import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import { AccountData, DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 
 export type AcknowledgementResult =
   | { success: string[] }
@@ -332,36 +332,19 @@ export type ParamsInterchainqueriesResponse = {
 };
 
 export class Wallet {
-  address: cosmosclient.AccAddress | cosmosclient.ValAddress;
-  account: cosmosclient.proto.cosmos.auth.v1beta1.BaseAccount | null;
-  pubKey: cosmosclient.PubKey;
-  privKey: cosmosclient.PrivKey;
   addrPrefix: string;
   directwallet: DirectSecp256k1HdWallet;
+  account: AccountData;
+  address: string;
   constructor(
-    address: cosmosclient.AccAddress | cosmosclient.ValAddress,
-    account: cosmosclient.proto.cosmos.auth.v1beta1.BaseAccount | null,
-    pubKey: cosmosclient.PubKey,
-    privKey: cosmosclient.PrivKey,
     addrPrefix: string,
     directwallet: DirectSecp256k1HdWallet,
+    account: AccountData,
   ) {
-    this.address = address;
-    this.account = account;
-    this.pubKey = pubKey;
-    this.privKey = privKey;
     this.addrPrefix = addrPrefix;
-    this.address.toString = () => {
-      if (this.address instanceof cosmosclient.AccAddress) {
-        const words = bech32.toWords(Buffer.from(this.address.value()));
-        return bech32.encode(addrPrefix, words);
-      } else if (this.address instanceof cosmosclient.ValAddress) {
-        const words = bech32.toWords(Buffer.from(this.address.value()));
-        return bech32.encode(addrPrefix + 'valoper', words);
-      }
-      throw new Error('unexpected addr type');
-    };
     this.directwallet = directwallet;
+    this.account = account;
+    this.address = this.account.address;
   }
 }
 

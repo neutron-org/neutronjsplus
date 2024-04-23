@@ -561,6 +561,7 @@ export class Tge {
         denom: this.astroDenom,
         amount: this.generatorRewardsTotal.toString(),
       },
+      this.instantiator.wallet.address.toString(),
     );
   }
 

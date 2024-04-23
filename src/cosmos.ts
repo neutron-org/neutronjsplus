@@ -462,8 +462,6 @@ export class CosmosWrapper {
   }
 }
 
-// type TxResponseType = Awaited<ReturnType<typeof cosmosclient.rest.tx.getTx>>;
-
 export const getEventAttributesFromTx = (
   data: any,
   event: string,
@@ -491,63 +489,14 @@ export const getEventAttributesFromTx = (
 };
 
 export const mnemonicToWallet = async (
-  walletType: {
-    fromPublicKey: (
-      k: cosmosclient.PubKey,
-    ) => cosmosclient.AccAddress | cosmosclient.ValAddress;
-  },
-  sdk: cosmosclient.CosmosSDK,
   mnemonic: string,
   addrPrefix: string,
-  validate = true,
 ): Promise<Wallet> => {
   const directwallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
     prefix: addrPrefix,
   });
-
-  const privKey = new cosmosclient.proto.cosmos.crypto.secp256k1.PrivKey({
-    key: await cosmosclient.generatePrivKeyFromMnemonic(mnemonic),
-  });
-
-  const pubKey = privKey.pubKey();
-  let account = null;
-  cosmosclient.config.setBech32Prefix({
-    accAddr: addrPrefix,
-    accPub: `${addrPrefix}pub`,
-    valAddr: `${addrPrefix}valoper`,
-    valPub: `${addrPrefix}valoperpub`,
-    consAddr: `${addrPrefix}valcons`,
-    consPub: `${addrPrefix}valconspub`,
-  });
-  const address = walletType.fromPublicKey(pubKey);
-  // eslint-disable-next-line no-prototype-builtins
-  if (cosmosclient.ValAddress !== walletType && validate) {
-    account = await cosmosclient.rest.auth
-      .account(sdk, address.toString())
-      .then((res) =>
-        cosmosclient.codec.protoJSONToInstance(
-          cosmosclient.codec.castProtoJSONOfProtoAny(res.data.account),
-        ),
-      )
-      .catch((e) => {
-        console.log(e);
-        throw e;
-      });
-
-    if (
-      !(account instanceof cosmosclient.proto.cosmos.auth.v1beta1.BaseAccount)
-    ) {
-      throw new Error("can't get account");
-    }
-  }
-  return new Wallet(
-    address,
-    account,
-    pubKey,
-    privKey,
-    addrPrefix,
-    directwallet,
-  );
+  const account = (await directwallet.getAccounts())[0];
+  return new Wallet(addrPrefix, directwallet, account);
 };
 
 export const getSequenceId = (

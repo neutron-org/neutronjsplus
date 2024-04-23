@@ -1217,10 +1217,10 @@
     wrap-ansi "^8.1.0"
     wrap-ansi-cjs "npm:wrap-ansi@^7.0.0"
 
-"@neutron-org/cosmjs-types@^0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@neutron-org/cosmjs-types/-/cosmjs-types-0.9.0.tgz#43e267066cf2fabffa73bfbc7d3152e70c3818a2"
-  integrity sha512-+J7cRkQmtDzO/SSa45xC7iiWZhEUplP2Rm2l2LnEyvU6ABNdzaXStSOx8nM7R3SeW4abKoTmzi/tht4lvJit6w==
+"@neutron-org/cosmjs-types@^0.9.1":
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/@neutron-org/cosmjs-types/-/cosmjs-types-0.9.1.tgz#efe52eb19eb0be7f24fd3f5ac4a693a063655eed"
+  integrity sha512-b7MZy5dzE5E2E+sUiPVYzi3Qt0gXozGQBVXLJLXjGxRqikGtDeMNXv3yc0svpHBASAUCotSz/sf864CTqzVYJw==
 
 "@noble/hashes@^1", "@noble/hashes@^1.0.0", "@noble/hashes@^1.2.0":
   version "1.3.1"

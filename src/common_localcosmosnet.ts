@@ -10,10 +10,9 @@ import { BlockWaiter } from './wait';
 import { generateMnemonic } from 'bip39';
 import cosmosclient from '@cosmos-client/core';
 
-import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 import { Wallet } from './types';
 import { defaultRegistryTypes, SigningStargateClient } from '@cosmjs/stargate';
-import { Registry } from '@cosmjs/proto-signing';
+import { Coin, Registry } from '@cosmjs/proto-signing';
 
 export const disconnectValidator = async (name: string) => {
   const { stdout } = exec(`docker stop ${name}`);
@@ -21,46 +20,15 @@ export const disconnectValidator = async (name: string) => {
 };
 
 const walletSet = async (
-  sdk: cosmosclient.CosmosSDK,
   prefix: string,
   config: any,
 ): Promise<Record<string, Wallet>> => ({
-  val1: await mnemonicToWallet(
-    cosmosclient.ValAddress,
-    sdk,
-    config.VAL_MNEMONIC_1,
-    prefix,
-  ),
-  demo1: await mnemonicToWallet(
-    cosmosclient.AccAddress,
-    sdk,
-    config.DEMO_MNEMONIC_1,
-    prefix,
-  ),
-  demo2: await mnemonicToWallet(
-    cosmosclient.AccAddress,
-    sdk,
-    config.DEMO_MNEMONIC_2,
-    prefix,
-  ),
-  icq: await mnemonicToWallet(
-    cosmosclient.AccAddress,
-    sdk,
-    config.DEMO_MNEMONIC_3,
-    prefix,
-  ),
-  rly1: await mnemonicToWallet(
-    cosmosclient.AccAddress,
-    sdk,
-    config.RLY_MNEMONIC_1,
-    prefix,
-  ),
-  rly2: await mnemonicToWallet(
-    cosmosclient.AccAddress,
-    sdk,
-    config.RLY_MNEMONIC_2,
-    prefix,
-  ),
+  val1: await mnemonicToWallet(config.VAL_MNEMONIC_1, prefix + 'valoper'),
+  demo1: await mnemonicToWallet(config.DEMO_MNEMONIC_1, prefix),
+  demo2: await mnemonicToWallet(config.DEMO_MNEMONIC_2, prefix),
+  icq: await mnemonicToWallet(config.DEMO_MNEMONIC_3, prefix),
+  rly1: await mnemonicToWallet(config.RLY_MNEMONIC_1, prefix),
+  rly2: await mnemonicToWallet(config.RLY_MNEMONIC_2, prefix),
 });
 
 export class TestStateLocalCosmosTestNet {
@@ -101,8 +69,8 @@ export class TestStateLocalCosmosTestNet {
     );
 
     this.wallets = {};
-    const neutron = await walletSet(this.sdk1, neutronPrefix, this.config);
-    const cosmos = await walletSet(this.sdk2, cosmosPrefix, this.config);
+    const neutron = await walletSet(neutronPrefix, this.config);
+    const cosmos = await walletSet(cosmosPrefix, this.config);
 
     const qaNeutron = await this.createQaWallet(
       neutronPrefix,
@@ -185,7 +153,7 @@ export class TestStateLocalCosmosTestNet {
     wallet: Wallet,
     denom: string,
     rpc: string,
-    balances: ICoin[] = [],
+    balances: Coin[] = [],
   ) {
     if (balances.length === 0) {
       balances = [
@@ -202,17 +170,11 @@ export class TestStateLocalCosmosTestNet {
       { registry: new Registry(defaultRegistryTypes) },
     );
     const mnemonic = generateMnemonic();
-    const newWallet = await mnemonicToWallet(
-      cosmosclient.AccAddress,
-      sdk,
-      mnemonic,
-      prefix,
-      false,
-    );
+    const newWallet = await mnemonicToWallet(mnemonic, prefix);
     for (const balance of balances) {
       await client.sendTokens(
-        wallet.address.toString(),
-        newWallet.address.toString(),
+        wallet.account.address.toString(),
+        newWallet.account.address.toString(),
         [{ amount: balance.amount, denom: balance.denom }],
         {
           gas: '200000',
@@ -220,12 +182,7 @@ export class TestStateLocalCosmosTestNet {
         },
       );
     }
-    const wal = await mnemonicToWallet(
-      cosmosclient.AccAddress,
-      sdk,
-      mnemonic,
-      prefix,
-    );
+    const wal = await mnemonicToWallet(mnemonic, prefix);
     return { genQaWal1: wal };
   }
 }
