@@ -7,7 +7,6 @@ import {
   packAnyMsg,
   wrapMsg,
 } from './cosmos';
-import { BroadcastTx200ResponseTxResponse } from '@cosmos-client/core/cjs/openapi/api';
 import { getWithAttempts } from './wait';
 import {
   MultiChoiceOption,
@@ -26,7 +25,8 @@ import {
   ParamsContractmanagerInfo,
   ParamsCronInfo,
   ParamsFeeburnerInfo,
-  ParamsFeerefunderInfo, ParamsGlobalfeeInfo,
+  ParamsFeerefunderInfo,
+  ParamsGlobalfeeInfo,
   ParamsInterchainqueriesInfo,
   ParamsInterchaintxsInfo,
   ParamsTokenfactoryInfo,
@@ -38,10 +38,9 @@ import {
   updateAdminProposal,
   upgradeProposal,
 } from './proposal';
-import Long from 'long';
 import { ClientState } from './proto/neutron_thirdparty/ibc/lightclients/tendermint/v1/tendermint_pb';
 import { WalletWrapper } from './wallet_wrapper';
-import { ExecuteResult, IndexedTx } from '@cosmjs/cosmwasm-stargate';
+import { IndexedTx } from '@cosmjs/cosmwasm-stargate';
 
 export type SubdaoProposalConfig = {
   threshold: any;
@@ -537,8 +536,8 @@ export class DaoMember {
   readonly user: WalletWrapper;
   readonly dao: Dao;
 
-  constructor(cm: WalletWrapper, dao: Dao) {
-    this.user = cm;
+  constructor(user: WalletWrapper, dao: Dao) {
+    this.user = user;
     this.dao = dao;
   }
 

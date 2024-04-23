@@ -26,6 +26,7 @@ import { Message } from '@bufbuild/protobuf';
 
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import { BroadcastTx200ResponseTxResponse } from '@cosmos-client/core/cjs/openapi/api';
 
 export const NEUTRON_DENOM = process.env.NEUTRON_DENOM || 'untrn';
 export const IBC_ATOM_DENOM = process.env.IBC_ATOM_DENOM || 'uibcatom';
@@ -549,19 +550,22 @@ export const mnemonicToWallet = async (
   );
 };
 
-export const getSequenceId = (rawLog: BroadcastTx200ResponseTxResponse | undefined): number => {
+export const getSequenceId = (
+  rawLog: BroadcastTx200ResponseTxResponse | undefined,
+): number => {
   if (!rawLog) {
     throw 'getSequenceId: empty rawLog';
   }
   for (const event of rawLog.events) {
     if (event.type === 'send_packet') {
-      const sequenceAttr = event.attributes.find(attr => attr.key === 'packet_sequence');
+      const sequenceAttr = event.attributes.find(
+        (attr) => attr.key === 'packet_sequence',
+      );
       if (sequenceAttr) {
         return parseInt(sequenceAttr.value);
       }
     }
   }
-
 };
 
 export const getIBCDenom = (portName, channelName, denom: string): string => {

@@ -14,26 +14,21 @@ import { ParameterChangeProposal } from './proto/cosmos_sdk/cosmos/params/v1beta
 import { MsgSend } from './proto/cosmos_sdk/cosmos/bank/v1beta1/tx_pb';
 import { MsgRemoveInterchainQueryRequest } from './proto/neutron/neutron/interchainqueries/tx_pb';
 import {
-  defaultRegistryTypes,
   IndexedTx,
   MsgSendEncodeObject,
-  SigningStargateClient,
   StdFee,
+  defaultRegistryTypes,
 } from '@cosmjs/stargate';
 import {
   MigrateResult,
   SigningCosmWasmClient,
+  wasmTypes,
 } from '@cosmjs/cosmwasm-stargate';
 import { MsgTransfer } from '@neutron-org/cosmjs-types/ibc/applications/transfer/v1/tx';
 
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 import IHeight = ibc.core.client.v1.IHeight;
-import {
-  Coin,
-  DirectSecp256k1Wallet,
-  EncodeObject,
-  Registry,
-} from '@cosmjs/proto-signing';
+import { Coin, EncodeObject, Registry } from '@cosmjs/proto-signing';
 import {
   BalancesResponse,
   CosmosWrapper,
@@ -41,21 +36,31 @@ import {
   packAnyMsg,
 } from './cosmos';
 
+// contructor for WalletWrapper
+export async function createWalletWrapper(
+  chain: CosmosWrapper,
+  wallet: Wallet,
+) {
+  const wasmClient = await SigningCosmWasmClient.connectWithSigner(
+    chain.rpc,
+    wallet.directwallet,
+    { registry: new Registry([...defaultRegistryTypes, ...wasmTypes]) },
+  );
+  return new WalletWrapper(chain, wallet, wasmClient);
+}
+
 export class WalletWrapper {
   readonly chain: CosmosWrapper;
   readonly wallet: Wallet;
-  readonly client: SigningStargateClient;
   readonly wasmClient: SigningCosmWasmClient;
 
   constructor(
-    cw: CosmosWrapper,
+    chain: CosmosWrapper,
     wallet: Wallet,
-    client: SigningStargateClient,
     wasmClient: SigningCosmWasmClient,
   ) {
-    this.chain = cw;
+    this.chain = chain;
     this.wallet = wallet;
-    this.client = client;
     this.wasmClient = wasmClient;
   }
 
@@ -76,18 +81,9 @@ export class WalletWrapper {
     numAttempts = 10,
     memo?: string,
   ): Promise<IndexedTx> {
-    const wallet2 = await DirectSecp256k1Wallet.fromKey(
-      this.wallet.privKey.bytes(),
-      this.wallet.addrPrefix,
-    );
-    const client = await SigningStargateClient.connectWithSigner(
-      this.chain.rpc,
-      wallet2,
-      { registry: new Registry(defaultRegistryTypes) },
-    );
     memo ||= '';
 
-    const result = await client.signAndBroadcast(
+    const result = await this.wasmClient.signAndBroadcast(
       this.wallet.address.toString(),
       msgs,
       fee,
@@ -105,7 +101,7 @@ export class WalletWrapper {
     while (numAttempts > 0) {
       await this.chain.blockWaiter.waitBlocks(1);
       numAttempts--;
-      const data = await client.getTx(result.transactionHash);
+      const data = await this.wasmClient.getTx(result.transactionHash);
       if (data != null) {
         if (DEBUG_SUBMIT_TX) {
           const code = +data.code;
@@ -319,7 +315,7 @@ export class WalletWrapper {
       '',
       funds,
     );
-    return await this.client.getTx(res.transactionHash);
+    return await this.wasmClient.getTx(res.transactionHash);
   }
 
   /**

@@ -45,27 +45,7 @@ For exact code, see gen-proto.sh in root.
 ## Usage Example
 
 ```typescript
-import { 
-    cosmosWrapper,
-    NEUTRON_DENOM,
-    TestStateLocalCosmosTestNet,
-} from '@neutron-org/neutronjsplus';
-
-const config = require('./config.json');
-
-const testState = new TestStateLocalCosmosTestNet(config);
- await testState.init();
-const neutronChain = new cosmosWrapper.CosmosWrapper(
-    testState.sdk1,
-    testState.blockWaiter1,
-    NEUTRON_DENOM,
-);
-neutronAccount = new cosmosWrapper.WalletWrapper(
-    neutronChain,
-    testState.wallets.qaNeutron.genQaWal1,
-);
-const res = await neutronAccount.msgSend('<blockchain account address>', '1000000');
-console.log(res);
+TODO
 ```
 
 ## License

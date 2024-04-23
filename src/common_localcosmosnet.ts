@@ -1,7 +1,6 @@
 import { exec } from 'child_process';
 import {
   COSMOS_DENOM,
-  CosmosWrapper,
   IBC_ATOM_DENOM,
   IBC_USDC_DENOM,
   mnemonicToWallet,
@@ -9,28 +8,12 @@ import {
 } from './cosmos';
 import { BlockWaiter } from './wait';
 import { generateMnemonic } from 'bip39';
-import Long from 'long';
 import cosmosclient from '@cosmos-client/core';
-import {
-  MsgClearAdmin,
-  MsgExecuteContract,
-  MsgInstantiateContract,
-  MsgInstantiateContract2,
-  MsgMigrateContract,
-  MsgStoreCode,
-  MsgUpdateAdmin,
-} from 'cosmjs-types/cosmwasm/wasm/v1/tx';
 
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 import { Wallet } from './types';
-import {
-  defaultRegistryTypes,
-  DeliverTxResponse,
-  SigningStargateClient,
-} from '@cosmjs/stargate';
-import { SigningCosmWasmClient, wasmTypes } from '@cosmjs/cosmwasm-stargate';
+import { defaultRegistryTypes, SigningStargateClient } from '@cosmjs/stargate';
 import { Registry } from '@cosmjs/proto-signing';
-import { WalletWrapper } from './wallet_wrapper';
 
 export const disconnectValidator = async (name: string) => {
   const { stdout } = exec(`docker stop ${name}`);
@@ -89,10 +72,6 @@ export class TestStateLocalCosmosTestNet {
   icq_web_host: string;
   rpc1: string;
   rpc2: string;
-  client1: SigningStargateClient;
-  wasmClient1: SigningCosmWasmClient;
-  client2: SigningStargateClient;
-  wasmClient2: SigningCosmWasmClient;
 
   constructor(private config: any) {}
 
@@ -103,9 +82,9 @@ export class TestStateLocalCosmosTestNet {
     const host1 = process.env.NODE1_URL || 'http://localhost:1317';
     const host2 = process.env.NODE2_URL || 'http://localhost:1316';
 
-    // TODO: add customization through variables
-    const rpcNeutron = 'http://localhost:26657';
-    const rpcGaia = 'http://localhost:16657';
+    const rpcNeutron = process.env.NODE1_RPC || 'http://localhost:26657';
+    const rpcGaia = process.env.NODE2_RPC || 'http://localhost:16657';
+
     this.rpc1 = rpcNeutron;
     this.rpc2 = rpcGaia;
 
@@ -125,11 +104,9 @@ export class TestStateLocalCosmosTestNet {
     const neutron = await walletSet(this.sdk1, neutronPrefix, this.config);
     const cosmos = await walletSet(this.sdk2, cosmosPrefix, this.config);
 
-    console.log('createQaWallet neutron');
     const qaNeutron = await this.createQaWallet(
       neutronPrefix,
       this.sdk1,
-      this.blockWaiter1,
       neutron.demo1,
       NEUTRON_DENOM,
       rpcNeutron,
@@ -152,7 +129,6 @@ export class TestStateLocalCosmosTestNet {
     const qaNeutronThree = await this.createQaWallet(
       neutronPrefix,
       this.sdk1,
-      this.blockWaiter1,
       neutron.demo1,
       NEUTRON_DENOM,
       rpcNeutron,
@@ -161,7 +137,6 @@ export class TestStateLocalCosmosTestNet {
     const qaNeutronFour = await this.createQaWallet(
       neutronPrefix,
       this.sdk1,
-      this.blockWaiter1,
       neutron.demo1,
       NEUTRON_DENOM,
       rpcNeutron,
@@ -170,17 +145,14 @@ export class TestStateLocalCosmosTestNet {
     const qaNeutronFive = await this.createQaWallet(
       neutronPrefix,
       this.sdk1,
-      this.blockWaiter1,
       neutron.demo1,
       NEUTRON_DENOM,
       rpcNeutron,
     );
 
-    console.log('createQaWallet gaia');
     const qaCosmos = await this.createQaWallet(
       cosmosPrefix,
       this.sdk2,
-      this.blockWaiter2,
       cosmos.demo2,
       COSMOS_DENOM,
       rpcGaia,
@@ -189,32 +161,9 @@ export class TestStateLocalCosmosTestNet {
     const qaCosmosTwo = await this.createQaWallet(
       cosmosPrefix,
       this.sdk2,
-      this.blockWaiter2,
       cosmos.demo2,
       COSMOS_DENOM,
       rpcGaia,
-    );
-
-    this.client1 = await SigningStargateClient.connectWithSigner(
-      this.rpc1,
-      qaNeutron.genQaWal1.directwallet,
-      { registry: new Registry(defaultRegistryTypes) },
-    );
-    this.wasmClient1 = await SigningCosmWasmClient.connectWithSigner(
-      this.rpc1,
-      qaNeutron.genQaWal1.directwallet,
-      { registry: new Registry(wasmTypes) },
-    );
-
-    this.client2 = await SigningStargateClient.connectWithSigner(
-      this.rpc2,
-      qaCosmos.genQaWal1.directwallet,
-      { registry: new Registry(defaultRegistryTypes) },
-    );
-    this.wasmClient2 = await SigningCosmWasmClient.connectWithSigner(
-      this.rpc2,
-      qaCosmos.genQaWal1.directwallet,
-      { registry: new Registry(wasmTypes) },
     );
 
     this.wallets = {
@@ -230,50 +179,9 @@ export class TestStateLocalCosmosTestNet {
     return this.wallets;
   }
 
-  sendTokensWithRetry = async (
-    cm: WalletWrapper,
-    to: string,
-    amount: string,
-    denom = cm.chain.denom,
-    retryCount = 10,
-  ): Promise<void> => {
-    const fee = {
-      gas: '200000',
-      amount: [{ denom: cm.chain.denom, amount: '1000' }],
-    };
-    let attemptCount = 0;
-    let res: DeliverTxResponse;
-    while (retryCount > attemptCount) {
-      try {
-        res = await cm.client.sendTokens(
-          cm.wallet.account.address.toString(),
-          to,
-          [{ amount, denom }],
-          fee,
-        );
-        if (res.code !== 0) {
-          console.log(
-            'sendTokensWithRetry error! result: ' + JSON.stringify(res.events),
-          );
-          attemptCount++;
-          continue;
-        }
-        break;
-      } catch (e) {
-        console.log('sendTokensWithRetry error! result: ' + e);
-        await cm.chain.blockWaiter.waitBlocks(1);
-        attemptCount++;
-      }
-    }
-    if (!res) {
-      throw new Error(`Failed to send tokens after ${retryCount} retries.`);
-    }
-  };
-
   async createQaWallet(
     prefix: string,
     sdk: cosmosclient.CosmosSDK,
-    blockWaiter: BlockWaiter,
     wallet: Wallet,
     denom: string,
     rpc: string,
@@ -293,17 +201,6 @@ export class TestStateLocalCosmosTestNet {
       wallet.directwallet,
       { registry: new Registry(defaultRegistryTypes) },
     );
-    const wasmClient = await SigningCosmWasmClient.connectWithSigner(
-      rpc,
-      wallet.directwallet,
-      { registry: new Registry(wasmTypes) },
-    );
-    const cm = new WalletWrapper(
-      new CosmosWrapper(sdk, blockWaiter, denom, rpc),
-      wallet,
-      client,
-      wasmClient,
-    );
     const mnemonic = generateMnemonic();
     const newWallet = await mnemonicToWallet(
       cosmosclient.AccAddress,
@@ -313,11 +210,14 @@ export class TestStateLocalCosmosTestNet {
       false,
     );
     for (const balance of balances) {
-      await this.sendTokensWithRetry(
-        cm,
+      await client.sendTokens(
+        wallet.address.toString(),
         newWallet.address.toString(),
-        balance.amount,
-        balance.denom,
+        [{ amount: balance.amount, denom: balance.denom }],
+        {
+          gas: '200000',
+          amount: [{ denom: denom, amount: '1000' }],
+        },
       );
     }
     const wal = await mnemonicToWallet(
