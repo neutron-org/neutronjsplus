@@ -36,7 +36,7 @@ import {
   packAnyMsg,
 } from './cosmos';
 
-// contructor for WalletWrapper
+// constructor for WalletWrapper
 export async function createWalletWrapper(
   chain: CosmosWrapper,
   wallet: Wallet,
