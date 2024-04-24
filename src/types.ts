@@ -1,5 +1,4 @@
 import cosmosclient from '@cosmos-client/core';
-import bech32 from 'bech32';
 import {
   ParamsContractmanagerInfo,
   ParamsCronInfo,

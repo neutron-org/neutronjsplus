@@ -2,7 +2,6 @@ import axios, { AxiosResponse } from 'axios';
 import { CosmosWrapper } from './cosmos';
 import { WalletWrapper } from './wallet_wrapper';
 import { getWithAttempts } from './wait';
-import cosmosclient from '@cosmos-client/core';
 
 /**
  * getRegisteredQuery queries the contract for a registered query details registered by the given
@@ -139,16 +138,13 @@ export const registerTransfersQuery = async (
   updatePeriod: number,
   recipient: string,
 ) => {
-  const res = await cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      register_transfers_query: {
-        connection_id: connectionId,
-        update_period: updatePeriod,
-        recipient: recipient,
-      },
-    }),
-  );
+  const res = await cm.executeContract(contractAddress, {
+    register_transfers_query: {
+      connection_id: connectionId,
+      update_period: updatePeriod,
+      recipient: recipient,
+    },
+  });
 
   if (res.code != 0) {
     throw new Error('res.code != 0');

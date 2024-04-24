@@ -22,12 +22,7 @@ import { MsgTransfer } from '@neutron-org/cosmjs-types/ibc/applications/transfer
 
 import IHeight = ibc.core.client.v1.IHeight;
 import { Coin, EncodeObject, Registry } from '@cosmjs/proto-signing';
-import {
-  BalancesResponse,
-  CosmosWrapper,
-  NEUTRON_DENOM,
-  packAnyMsg,
-} from './cosmos';
+import { BalancesResponse, CosmosWrapper, NEUTRON_DENOM } from './cosmos';
 
 // constructor for WalletWrapper
 export async function createWalletWrapper(
@@ -119,14 +114,14 @@ export class WalletWrapper {
 
   async instantiateContract(
     codeId: number,
-    msg: string,
+    msg: any,
     label: string,
     admin: string = this.wallet.address.toString(),
   ): Promise<string> {
     const instantiateRes = await this.wasmClient.instantiate(
       this.wallet.address.toString(),
       codeId,
-      Buffer.from(msg),
+      msg,
       label,
       {
         amount: [{ denom: NEUTRON_DENOM, amount: '2000000' }],
@@ -140,22 +135,13 @@ export class WalletWrapper {
   async migrateContract(
     contract: string,
     codeId: number,
-    msg: string | Record<string, unknown>,
+    msg: any,
   ): Promise<MigrateResult> {
     const sender = this.wallet.address.toString();
-    const msgRaw = Buffer.from(
-      typeof msg === 'string' ? msg : JSON.stringify(msg),
-    );
-    const res = await this.wasmClient.migrate(
-      sender,
-      contract,
-      codeId,
-      msgRaw,
-      {
-        gas: '5000000',
-        amount: [{ denom: this.chain.denom, amount: '20000' }],
-      },
-    );
+    const res = await this.wasmClient.migrate(sender, contract, codeId, msg, {
+      gas: '5000000',
+      amount: [{ denom: this.chain.denom, amount: '20000' }],
+    });
     // TODO: throw error if unsuccessful?
     return res;
   }
