@@ -33,7 +33,8 @@ export class Params extends Message<Params> {
   denomCreationGasConsume = protoInt64.zero;
 
   /**
-   * FeeCollectorAddress is the address where fees collected from denom creation are sent to
+   * FeeCollectorAddress is the address where fees collected from denom creation
+   * are sent to
    *
    * @generated from field: string fee_collector_address = 3;
    */

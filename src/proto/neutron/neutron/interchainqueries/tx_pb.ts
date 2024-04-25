@@ -7,7 +7,7 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Any, Message, proto3, protoInt64 } from "@bufbuild/protobuf";
 import { KVKey } from "./genesis_pb.js";
 import { Proof, ProofOps } from "../../tendermint/crypto/proof_pb.js";
-import { ResponseDeliverTx } from "../../tendermint/abci/types_pb.js";
+import { ExecTxResult } from "../../tendermint/abci/types_pb.js";
 import { Params } from "./params_pb.js";
 
 /**
@@ -370,9 +370,9 @@ export class Block extends Message<Block> {
  */
 export class TxValue extends Message<TxValue> {
   /**
-   * @generated from field: tendermint.abci.ResponseDeliverTx response = 1;
+   * @generated from field: tendermint.abci.ExecTxResult response = 1;
    */
-  response?: ResponseDeliverTx;
+  response?: ExecTxResult;
 
   /**
    * is the Merkle Proof which proves existence of response in block with height
@@ -405,7 +405,7 @@ export class TxValue extends Message<TxValue> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "neutron.interchainqueries.TxValue";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "response", kind: "message", T: ResponseDeliverTx },
+    { no: 1, name: "response", kind: "message", T: ExecTxResult },
     { no: 2, name: "delivery_proof", kind: "message", T: Proof },
     { no: 3, name: "inclusion_proof", kind: "message", T: Proof },
     { no: 4, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },

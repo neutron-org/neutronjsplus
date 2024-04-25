@@ -420,8 +420,9 @@ export class MsgPlaceLimitOrderResponse extends Message<MsgPlaceLimitOrderRespon
 
   /**
    * Total amount of coin received from the taker portion of the limit order
-   * This is the amount of coin immediately available in the users account after executing the
-   * limit order. It does not include any future proceeds from the maker portion which will have withdrawn in the future
+   * This is the amount of coin immediately available in the users account after
+   * executing the limit order. It does not include any future proceeds from the
+   * maker portion which will have withdrawn in the future
    *
    * @generated from field: cosmos.base.v1beta1.Coin taker_coin_out = 3;
    */
@@ -672,8 +673,8 @@ export class MsgMultiHopSwap extends Message<MsgMultiHopSwap> {
   exitLimitPrice = "";
 
   /**
-   * If pickBestRoute == true then all routes are run and the route with the best price is chosen
-   * otherwise, the first succesful route is used.
+   * If pickBestRoute == true then all routes are run and the route with the
+   * best price is chosen otherwise, the first succesful route is used.
    *
    * @generated from field: bool pick_best_route = 6;
    */

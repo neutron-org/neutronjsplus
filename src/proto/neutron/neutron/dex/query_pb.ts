@@ -105,6 +105,11 @@ export class QueryGetLimitOrderTrancheUserRequest extends Message<QueryGetLimitO
    */
   trancheKey = "";
 
+  /**
+   * @generated from field: bool calc_withdrawable_shares = 3;
+   */
+  calcWithdrawableShares = false;
+
   constructor(data?: PartialMessage<QueryGetLimitOrderTrancheUserRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -115,6 +120,7 @@ export class QueryGetLimitOrderTrancheUserRequest extends Message<QueryGetLimitO
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "tranche_key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "calc_withdrawable_shares", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetLimitOrderTrancheUserRequest {
@@ -143,6 +149,11 @@ export class QueryGetLimitOrderTrancheUserResponse extends Message<QueryGetLimit
    */
   limitOrderTrancheUser?: LimitOrderTrancheUser;
 
+  /**
+   * @generated from field: string withdrawable_shares = 2;
+   */
+  withdrawableShares = "";
+
   constructor(data?: PartialMessage<QueryGetLimitOrderTrancheUserResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -152,6 +163,7 @@ export class QueryGetLimitOrderTrancheUserResponse extends Message<QueryGetLimit
   static readonly typeName = "neutron.dex.QueryGetLimitOrderTrancheUserResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "limit_order_tranche_user", kind: "message", T: LimitOrderTrancheUser },
+    { no: 2, name: "withdrawable_shares", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetLimitOrderTrancheUserResponse {
@@ -449,6 +461,11 @@ export class QueryAllUserDepositsRequest extends Message<QueryAllUserDepositsReq
    */
   pagination?: PageRequest;
 
+  /**
+   * @generated from field: bool include_pool_data = 3;
+   */
+  includePoolData = false;
+
   constructor(data?: PartialMessage<QueryAllUserDepositsRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -459,6 +476,7 @@ export class QueryAllUserDepositsRequest extends Message<QueryAllUserDepositsReq
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "pagination", kind: "message", T: PageRequest },
+    { no: 3, name: "include_pool_data", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllUserDepositsRequest {
@@ -1085,8 +1103,8 @@ export class QueryEstimateMultiHopSwapRequest extends Message<QueryEstimateMulti
   exitLimitPrice = "";
 
   /**
-   * If pickBestRoute == true then all routes are run and the route with the best price is chosen
-   * otherwise, the first succesful route is used.
+   * If pickBestRoute == true then all routes are run and the route with the
+   * best price is chosen otherwise, the first succesful route is used.
    *
    * @generated from field: bool pick_best_route = 6;
    */
@@ -1255,7 +1273,8 @@ export class QueryEstimatePlaceLimitOrderRequest extends Message<QueryEstimatePl
 export class QueryEstimatePlaceLimitOrderResponse extends Message<QueryEstimatePlaceLimitOrderResponse> {
   /**
    * Total amount of coin used for the limit order
-   * You can derive makerLimitInCoin using the equation: totalInCoin = swapInCoin + makerLimitInCoin
+   * You can derive makerLimitInCoin using the equation: totalInCoin =
+   * swapInCoin + makerLimitInCoin
    *
    * @generated from field: cosmos.base.v1beta1.Coin total_in_coin = 1;
    */
@@ -1270,8 +1289,9 @@ export class QueryEstimatePlaceLimitOrderResponse extends Message<QueryEstimateP
 
   /**
    * Total amount of coin received from the taker portion of the limit order
-   * This is the amount of coin immediately available in the users account after executing the
-   * limit order. It does not include any future proceeds from the maker portion which will have withdrawn in the future
+   * This is the amount of coin immediately available in the users account after
+   * executing the limit order. It does not include any future proceeds from the
+   * maker portion which will have withdrawn in the future
    *
    * @generated from field: cosmos.base.v1beta1.Coin swap_out_coin = 3;
    */
@@ -1472,9 +1492,9 @@ export class QueryGetPoolMetadataRequest extends Message<QueryGetPoolMetadataReq
  */
 export class QueryGetPoolMetadataResponse extends Message<QueryGetPoolMetadataResponse> {
   /**
-   * @generated from field: neutron.dex.PoolMetadata Pool_metadata = 1;
+   * @generated from field: neutron.dex.PoolMetadata pool_metadata = 1;
    */
-  PoolMetadata?: PoolMetadata;
+  poolMetadata?: PoolMetadata;
 
   constructor(data?: PartialMessage<QueryGetPoolMetadataResponse>) {
     super();
@@ -1484,7 +1504,7 @@ export class QueryGetPoolMetadataResponse extends Message<QueryGetPoolMetadataRe
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "neutron.dex.QueryGetPoolMetadataResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "Pool_metadata", kind: "message", T: PoolMetadata },
+    { no: 1, name: "pool_metadata", kind: "message", T: PoolMetadata },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetPoolMetadataResponse {
