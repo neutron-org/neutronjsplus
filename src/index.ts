@@ -5,6 +5,7 @@ so this polifill will fix it.
 */
 import crypto from 'crypto';
 if (typeof global === 'object' && !('crypto' in global)) {
+  //@ts-ignore
   global.crypto = require('crypto');
 }
 
