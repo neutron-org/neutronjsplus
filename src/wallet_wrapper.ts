@@ -1,6 +1,6 @@
 import Long from 'long';
 import { ibc } from '@cosmos-client/ibc/cjs/proto';
-import { Wallet, CodeId, osmosisTypes } from './types';
+import { Wallet, CodeId } from './types';
 import { DEBUG_SUBMIT_TX, getContractBinary } from './env';
 // import { MsgSubmitProposalLegacy } from '@neutron-org/cosmjs-types/'
 // import { MsgAuctionBid } from './proto/block_sdk/sdk/auction/v1/tx_pb';

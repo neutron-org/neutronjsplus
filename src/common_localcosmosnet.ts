@@ -74,7 +74,6 @@ export class TestStateLocalCosmosTestNet {
 
     const qaNeutron = await this.createQaWallet(
       neutronPrefix,
-      this.sdk1,
       neutron.demo1,
       NEUTRON_DENOM,
       rpcNeutron,
@@ -96,7 +95,6 @@ export class TestStateLocalCosmosTestNet {
 
     const qaNeutronThree = await this.createQaWallet(
       neutronPrefix,
-      this.sdk1,
       neutron.demo1,
       NEUTRON_DENOM,
       rpcNeutron,
@@ -104,7 +102,6 @@ export class TestStateLocalCosmosTestNet {
 
     const qaNeutronFour = await this.createQaWallet(
       neutronPrefix,
-      this.sdk1,
       neutron.demo1,
       NEUTRON_DENOM,
       rpcNeutron,
@@ -112,7 +109,6 @@ export class TestStateLocalCosmosTestNet {
 
     const qaNeutronFive = await this.createQaWallet(
       neutronPrefix,
-      this.sdk1,
       neutron.demo1,
       NEUTRON_DENOM,
       rpcNeutron,
@@ -120,7 +116,6 @@ export class TestStateLocalCosmosTestNet {
 
     const qaCosmos = await this.createQaWallet(
       cosmosPrefix,
-      this.sdk2,
       cosmos.demo2,
       COSMOS_DENOM,
       rpcGaia,
@@ -128,7 +123,6 @@ export class TestStateLocalCosmosTestNet {
 
     const qaCosmosTwo = await this.createQaWallet(
       cosmosPrefix,
-      this.sdk2,
       cosmos.demo2,
       COSMOS_DENOM,
       rpcGaia,
@@ -149,7 +143,6 @@ export class TestStateLocalCosmosTestNet {
 
   async createQaWallet(
     prefix: string,
-    sdk: cosmosclient.CosmosSDK,
     wallet: Wallet,
     denom: string,
     rpc: string,
