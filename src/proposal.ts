@@ -323,7 +323,7 @@ export const updateFeeburnerParamsProposal = (
   },
 });
 
-export const updateGlgobalFeeParamsProposal = (
+export const updateGlobalFeeParamsProposal = (
   info: ParamsGlobalfeeInfo,
 ): any => ({
   custom: {
