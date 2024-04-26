@@ -1,6 +1,6 @@
 import Long from 'long';
 import { ibc } from '@cosmos-client/ibc/cjs/proto';
-import { Wallet, CodeId } from './types';
+import { Wallet, CodeId, osmosisTypes } from './types';
 import { DEBUG_SUBMIT_TX, getContractBinary } from './env';
 // import { MsgSubmitProposalLegacy } from '@neutron-org/cosmjs-types/'
 // import { MsgAuctionBid } from './proto/block_sdk/sdk/auction/v1/tx_pb';
@@ -23,6 +23,14 @@ import { MsgTransfer } from '@neutron-org/cosmjs-types/ibc/applications/transfer
 import IHeight = ibc.core.client.v1.IHeight;
 import { Coin, EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { BalancesResponse, CosmosWrapper, NEUTRON_DENOM } from './cosmos';
+import {
+  MsgBurn,
+  MsgChangeAdmin,
+  MsgCreateDenom,
+  MsgMint,
+  MsgSetBeforeSendHook,
+} from '@neutron-org/cosmjs-types/osmosis/tokenfactory/v1beta1/tx';
+// import { TelescopeGeneratedType } from '@cosmjs/proto-signing/build/registry';
 
 // constructor for WalletWrapper
 export async function createWalletWrapper(
@@ -32,7 +40,17 @@ export async function createWalletWrapper(
   const wasmClient = await SigningCosmWasmClient.connectWithSigner(
     chain.rpc,
     wallet.directwallet,
-    { registry: new Registry([...defaultRegistryTypes, ...wasmTypes]) },
+    {
+      registry: new Registry([
+        ...defaultRegistryTypes,
+        ...wasmTypes,
+        [MsgMint.typeUrl, MsgMint as any],
+        [MsgCreateDenom.typeUrl, MsgCreateDenom as any],
+        [MsgBurn.typeUrl, MsgBurn as any],
+        [MsgChangeAdmin.typeUrl, MsgChangeAdmin as any],
+        [MsgSetBeforeSendHook.typeUrl, MsgSetBeforeSendHook as any],
+      ]),
+    },
   );
   return new WalletWrapper(chain, wallet, wasmClient);
 }

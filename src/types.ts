@@ -8,6 +8,8 @@ import {
   ParamsTokenfactoryInfo,
 } from './proposal';
 import { AccountData, DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import { MsgMint } from '@neutron-org/cosmjs-types/osmosis/tokenfactory/v1beta1/tx';
+import { TelescopeGeneratedType } from '@cosmjs/proto-signing/build/registry';
 
 export type AcknowledgementResult =
   | { success: string[] }
@@ -349,3 +351,7 @@ export class Wallet {
 }
 
 export type CodeId = number;
+
+// export const osmosisTypes: ReadonlyArray<[string, TelescopeGeneratedType]> = [
+//   [MsgMint.typeUrl, MsgMint],
+// ];
