@@ -81,16 +81,15 @@ export class LimitOrderTranche extends Message<LimitOrderTranche> {
   totalMakerDenom = "";
 
   /**
-   * GoodTilDate is represented as seconds since  January 1, year 1, 00:00:00.00 UTC
-   * LimitOrders with goodTilDate set are valid as long as blockTime <= goodTilDate
+   * LimitOrders with expiration_time set are valid as long as blockTime <= expiration_time
    *
    * @generated from field: string total_taker_denom = 5;
    */
   totalTakerDenom = "";
 
   /**
-   * JIT orders also use goodTilDate to handle deletion but represent a special case
-   * All JIT orders have a goodTilDate of 0 and an exception is made to still still treat these orders as live
+   * JIT orders also use expiration_time to handle deletion but represent a special case
+   * All JIT orders have a expiration_time of 0 and an exception is made to still treat these orders as live
    * Order deletion still functions the same and the orders will be deleted at the end of the block
    *
    * @generated from field: google.protobuf.Timestamp expiration_time = 6;

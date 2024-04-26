@@ -10,7 +10,7 @@ mkdir $REPOS
 npx buf generate buf.build/protocolbuffers/wellknowntypes --template $TEMPLATE --output $OUT/wellknowntypes --include-imports
 
 # ===== neutron ===============
-git clone https://github.com/neutron-org/neutron $REPOS/neutron --branch v2.0.0 --depth 1
+git clone https://github.com/neutron-org/neutron $REPOS/neutron --branch fix/pool_metadata_proto --depth 1
 npx buf generate $REPOS/neutron/proto --template $TEMPLATE --output $OUT/neutron --include-imports
 npx buf generate $REPOS/neutron/third_party/proto --template $TEMPLATE --output $OUT/neutron_thirdparty --include-imports
 
