@@ -318,7 +318,7 @@ export const updateFeeburnerParamsProposal = (
   },
 });
 
-export const updateGlobalFeeParamsProposal = (
+export const updateGlgobalFeeParamsProposal = (
   info: ParamsGlobalfeeInfo,
 ): any => ({
   custom: {
@@ -326,7 +326,7 @@ export const updateGlobalFeeParamsProposal = (
       admin_proposal: {
         proposal_execute_message: {
           message: JSON.stringify({
-            '@type': '/neutron.globalfee.MsgUpdateParams',
+            '@type': '/gaia.globalfee.v1beta1.MsgUpdateParams',
             authority: ADMIN_MODULE_ADDRESS,
             params: {
               minimum_gas_prices: info.minimum_gas_prices,

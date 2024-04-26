@@ -772,6 +772,7 @@ export class DaoMember {
     deposit: string,
   ): Promise<number> {
     const messages: MultiChoiceOption[] = choices.map((choice, idx) => ({
+      title: 'choice' + idx,
       description: 'choice' + idx,
       msgs: [
         createBankSendMessage(choice.to, parseInt(choice.amount), choice.denom),
@@ -795,6 +796,7 @@ export class DaoMember {
     deposit: string,
   ): Promise<number> {
     const messages: MultiChoiceOption[] = choices.map((choice, idx) => ({
+      title: 'choice' + idx,
       description: 'choice' + idx,
       msgs: [paramChangeProposal(choice)],
     }));
@@ -1296,12 +1298,18 @@ export class DaoMember {
     description: string,
     message: ParamsGlobalfeeInfo,
     amount: string,
+    fee = {
+      gas: '4000000',
+      amount: [{ denom: this.user.chain.denom, amount: '10000' }],
+    },
   ): Promise<number> {
     return await this.submitSingleChoiceProposal(
       title,
       description,
       [message],
       amount,
+      'single',
+      fee,
     );
   }
 
