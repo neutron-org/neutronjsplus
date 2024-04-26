@@ -105,6 +105,11 @@ export class QueryGetLimitOrderTrancheUserRequest extends Message<QueryGetLimitO
    */
   trancheKey = "";
 
+  /**
+   * @generated from field: bool calc_withdrawable_shares = 3;
+   */
+  calcWithdrawableShares = false;
+
   constructor(data?: PartialMessage<QueryGetLimitOrderTrancheUserRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -115,6 +120,7 @@ export class QueryGetLimitOrderTrancheUserRequest extends Message<QueryGetLimitO
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "tranche_key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "calc_withdrawable_shares", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetLimitOrderTrancheUserRequest {
@@ -143,6 +149,11 @@ export class QueryGetLimitOrderTrancheUserResponse extends Message<QueryGetLimit
    */
   limitOrderTrancheUser?: LimitOrderTrancheUser;
 
+  /**
+   * @generated from field: string withdrawable_shares = 2;
+   */
+  withdrawableShares = "";
+
   constructor(data?: PartialMessage<QueryGetLimitOrderTrancheUserResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -152,6 +163,7 @@ export class QueryGetLimitOrderTrancheUserResponse extends Message<QueryGetLimit
   static readonly typeName = "neutron.dex.QueryGetLimitOrderTrancheUserResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "limit_order_tranche_user", kind: "message", T: LimitOrderTrancheUser },
+    { no: 2, name: "withdrawable_shares", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetLimitOrderTrancheUserResponse {
@@ -449,6 +461,11 @@ export class QueryAllUserDepositsRequest extends Message<QueryAllUserDepositsReq
    */
   pagination?: PageRequest;
 
+  /**
+   * @generated from field: bool include_pool_data = 3;
+   */
+  includePoolData = false;
+
   constructor(data?: PartialMessage<QueryAllUserDepositsRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -459,6 +476,7 @@ export class QueryAllUserDepositsRequest extends Message<QueryAllUserDepositsReq
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "pagination", kind: "message", T: PageRequest },
+    { no: 3, name: "include_pool_data", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllUserDepositsRequest {
@@ -522,9 +540,9 @@ export class QueryAllUserDepositsResponse extends Message<QueryAllUserDepositsRe
 }
 
 /**
- * @generated from message neutron.dex.QueryAllUserLimitOrdersRequest
+ * @generated from message neutron.dex.QueryAllLimitOrderTrancheUserByAddressRequest
  */
-export class QueryAllUserLimitOrdersRequest extends Message<QueryAllUserLimitOrdersRequest> {
+export class QueryAllLimitOrderTrancheUserByAddressRequest extends Message<QueryAllLimitOrderTrancheUserByAddressRequest> {
   /**
    * @generated from field: string address = 1;
    */
@@ -535,39 +553,39 @@ export class QueryAllUserLimitOrdersRequest extends Message<QueryAllUserLimitOrd
    */
   pagination?: PageRequest;
 
-  constructor(data?: PartialMessage<QueryAllUserLimitOrdersRequest>) {
+  constructor(data?: PartialMessage<QueryAllLimitOrderTrancheUserByAddressRequest>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "neutron.dex.QueryAllUserLimitOrdersRequest";
+  static readonly typeName = "neutron.dex.QueryAllLimitOrderTrancheUserByAddressRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "pagination", kind: "message", T: PageRequest },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllUserLimitOrdersRequest {
-    return new QueryAllUserLimitOrdersRequest().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllLimitOrderTrancheUserByAddressRequest {
+    return new QueryAllLimitOrderTrancheUserByAddressRequest().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryAllUserLimitOrdersRequest {
-    return new QueryAllUserLimitOrdersRequest().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryAllLimitOrderTrancheUserByAddressRequest {
+    return new QueryAllLimitOrderTrancheUserByAddressRequest().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryAllUserLimitOrdersRequest {
-    return new QueryAllUserLimitOrdersRequest().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryAllLimitOrderTrancheUserByAddressRequest {
+    return new QueryAllLimitOrderTrancheUserByAddressRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryAllUserLimitOrdersRequest | PlainMessage<QueryAllUserLimitOrdersRequest> | undefined, b: QueryAllUserLimitOrdersRequest | PlainMessage<QueryAllUserLimitOrdersRequest> | undefined): boolean {
-    return proto3.util.equals(QueryAllUserLimitOrdersRequest, a, b);
+  static equals(a: QueryAllLimitOrderTrancheUserByAddressRequest | PlainMessage<QueryAllLimitOrderTrancheUserByAddressRequest> | undefined, b: QueryAllLimitOrderTrancheUserByAddressRequest | PlainMessage<QueryAllLimitOrderTrancheUserByAddressRequest> | undefined): boolean {
+    return proto3.util.equals(QueryAllLimitOrderTrancheUserByAddressRequest, a, b);
   }
 }
 
 /**
- * @generated from message neutron.dex.QueryAllUserLimitOrdersResponse
+ * @generated from message neutron.dex.QueryAllLimitOrderTrancheUserByAddressResponse
  */
-export class QueryAllUserLimitOrdersResponse extends Message<QueryAllUserLimitOrdersResponse> {
+export class QueryAllLimitOrderTrancheUserByAddressResponse extends Message<QueryAllLimitOrderTrancheUserByAddressResponse> {
   /**
    * @generated from field: repeated neutron.dex.LimitOrderTrancheUser limit_orders = 1;
    */
@@ -578,32 +596,32 @@ export class QueryAllUserLimitOrdersResponse extends Message<QueryAllUserLimitOr
    */
   pagination?: PageResponse;
 
-  constructor(data?: PartialMessage<QueryAllUserLimitOrdersResponse>) {
+  constructor(data?: PartialMessage<QueryAllLimitOrderTrancheUserByAddressResponse>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "neutron.dex.QueryAllUserLimitOrdersResponse";
+  static readonly typeName = "neutron.dex.QueryAllLimitOrderTrancheUserByAddressResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "limit_orders", kind: "message", T: LimitOrderTrancheUser, repeated: true },
     { no: 2, name: "pagination", kind: "message", T: PageResponse },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllUserLimitOrdersResponse {
-    return new QueryAllUserLimitOrdersResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllLimitOrderTrancheUserByAddressResponse {
+    return new QueryAllLimitOrderTrancheUserByAddressResponse().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryAllUserLimitOrdersResponse {
-    return new QueryAllUserLimitOrdersResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryAllLimitOrderTrancheUserByAddressResponse {
+    return new QueryAllLimitOrderTrancheUserByAddressResponse().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryAllUserLimitOrdersResponse {
-    return new QueryAllUserLimitOrdersResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryAllLimitOrderTrancheUserByAddressResponse {
+    return new QueryAllLimitOrderTrancheUserByAddressResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryAllUserLimitOrdersResponse | PlainMessage<QueryAllUserLimitOrdersResponse> | undefined, b: QueryAllUserLimitOrdersResponse | PlainMessage<QueryAllUserLimitOrdersResponse> | undefined): boolean {
-    return proto3.util.equals(QueryAllUserLimitOrdersResponse, a, b);
+  static equals(a: QueryAllLimitOrderTrancheUserByAddressResponse | PlainMessage<QueryAllLimitOrderTrancheUserByAddressResponse> | undefined, b: QueryAllLimitOrderTrancheUserByAddressResponse | PlainMessage<QueryAllLimitOrderTrancheUserByAddressResponse> | undefined): boolean {
+    return proto3.util.equals(QueryAllLimitOrderTrancheUserByAddressResponse, a, b);
   }
 }
 
@@ -1085,8 +1103,8 @@ export class QueryEstimateMultiHopSwapRequest extends Message<QueryEstimateMulti
   exitLimitPrice = "";
 
   /**
-   * If pickBestRoute == true then all routes are run and the route with the best price is chosen
-   * otherwise, the first succesful route is used.
+   * If pickBestRoute == true then all routes are run and the route with the
+   * best price is chosen otherwise, the first succesful route is used.
    *
    * @generated from field: bool pick_best_route = 6;
    */
@@ -1255,7 +1273,8 @@ export class QueryEstimatePlaceLimitOrderRequest extends Message<QueryEstimatePl
 export class QueryEstimatePlaceLimitOrderResponse extends Message<QueryEstimatePlaceLimitOrderResponse> {
   /**
    * Total amount of coin used for the limit order
-   * You can derive makerLimitInCoin using the equation: totalInCoin = swapInCoin + makerLimitInCoin
+   * You can derive makerLimitInCoin using the equation: totalInCoin =
+   * swapInCoin + makerLimitInCoin
    *
    * @generated from field: cosmos.base.v1beta1.Coin total_in_coin = 1;
    */
@@ -1270,8 +1289,9 @@ export class QueryEstimatePlaceLimitOrderResponse extends Message<QueryEstimateP
 
   /**
    * Total amount of coin received from the taker portion of the limit order
-   * This is the amount of coin immediately available in the users account after executing the
-   * limit order. It does not include any future proceeds from the maker portion which will have withdrawn in the future
+   * This is the amount of coin immediately available in the users account after
+   * executing the limit order. It does not include any future proceeds from the
+   * maker portion which will have withdrawn in the future
    *
    * @generated from field: cosmos.base.v1beta1.Coin swap_out_coin = 3;
    */
