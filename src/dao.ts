@@ -1311,12 +1311,18 @@ export class DaoMember {
     description: string,
     message: ParamsGlobalfeeInfo,
     amount: string,
+    fee = {
+      gas_limit: Long.fromString('4000000'),
+      amount: [{ denom: this.user.chain.denom, amount: '10000' },],
+    },
   ): Promise<number> {
     return await this.submitSingleChoiceProposal(
       title,
       description,
       [message],
       amount,
+      'single',
+      fee,
     );
   }
 
