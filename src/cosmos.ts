@@ -160,11 +160,6 @@ export class CosmosWrapper {
       }
       throw new Error('Error: ' + error.message);
     });
-    console.log(
-      `SUCCESS query contract to ${contract}:\n\tquery: ${JSON.stringify(
-        query,
-      )}\n\tresp: ${JSON.stringify(resp.data.data)}\n`,
-    );
     return resp.data.data as T;
   }
 
@@ -734,16 +729,10 @@ export class WalletWrapper {
       cosmosclient.codec.instanceToProtoAny(msgExecute),
     ]);
     if (res.tx_response.code !== 0) {
-      console.log(
-        `FAILED exec contract to ${contract}:\n\tmsg: ${msg}\n\ttx hash: ${res.tx_response.txhash}\n`,
-      );
       throw new Error(
         `${res.tx_response.raw_log}\nFailed tx hash: ${res.tx_response.txhash}`,
       );
     }
-    console.log(
-      `SUCCESS exec contract to ${contract}:\n\tmsg: ${msg}\n\ttx hash: ${res.tx_response.txhash}\n`,
-    );
     return res?.tx_response;
   }
 
