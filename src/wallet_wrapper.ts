@@ -168,7 +168,7 @@ export class WalletWrapper {
     funds: Coin[] = [],
     fee = {
       gas: '4000000',
-      amount: [{ denom: this.chain.denom, amount: '10000' }],
+      amount: [{ denom: this.chain.denom, amount: '40000' }],
     },
   ): Promise<IndexedTx> {
     const sender = this.wallet.address;

@@ -581,7 +581,6 @@ export class DaoMember {
     return await this.user.executeContract(
       this.dao.contracts.proposals[customModule].address,
       { vote: { proposal_id: proposalId, vote: 'yes' } },
-      [],
     );
   }
 
