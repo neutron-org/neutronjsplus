@@ -27,7 +27,7 @@ import { Message } from '@bufbuild/protobuf';
 import { GetPriceResponse } from './oracle';
 import { GetAllCurrencyPairsResponse, GetPricesResponse } from './oracle';
 import { Coin, DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
-import { BroadcastTx200ResponseTxResponse } from '@cosmos-client/core/cjs/openapi/api';
+import { IndexedTx } from '@cosmjs/stargate';
 
 export const NEUTRON_DENOM = process.env.NEUTRON_DENOM || 'untrn';
 export const IBC_ATOM_DENOM = process.env.IBC_ATOM_DENOM || 'uibcatom';
@@ -546,13 +546,11 @@ export const mnemonicToWallet = async (
   return new Wallet(addrPrefix, directwallet, account, accountValoper);
 };
 
-export const getSequenceId = (
-  rawLog: BroadcastTx200ResponseTxResponse | undefined,
-): number => {
-  if (!rawLog) {
+export const getSequenceId = (tx: IndexedTx | undefined): number => {
+  if (!tx) {
     throw 'getSequenceId: empty rawLog';
   }
-  for (const event of rawLog.events) {
+  for (const event of tx.events) {
     if (event.type === 'send_packet') {
       const sequenceAttr = event.attributes.find(
         (attr) => attr.key === 'packet_sequence',
