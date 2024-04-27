@@ -1,4 +1,3 @@
-import cosmosclient from '@cosmos-client/core';
 import {
   ParamsContractmanagerInfo,
   ParamsCronInfo,
@@ -354,7 +353,3 @@ export class Wallet {
 }
 
 export type CodeId = number;
-
-// export const osmosisTypes: ReadonlyArray<[string, TelescopeGeneratedType]> = [
-//   [MsgMint.typeUrl, MsgMint],
-// ];
