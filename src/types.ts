@@ -8,8 +8,7 @@ import {
   ParamsTokenfactoryInfo,
 } from './proposal';
 import { AccountData, DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
-import { MsgMint } from '@neutron-org/cosmjs-types/osmosis/tokenfactory/v1beta1/tx';
-import { TelescopeGeneratedType } from '@cosmjs/proto-signing/build/registry';
+// import { MsgMint } from '@neutron-org/cosmjs-types/osmosis/tokenfactory/v1beta1/tx';
 
 export type AcknowledgementResult =
   | { success: string[] }

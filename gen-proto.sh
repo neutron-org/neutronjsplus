@@ -30,4 +30,9 @@ npx buf generate $REPOS/ibc-go/proto --template $TEMPLATE --output $OUT/ibc_go -
 git clone git@github.com:skip-mev/block-sdk.git $REPOS/block-sdk --branch v1.1.0 --depth 1
 npx buf generate $REPOS/block-sdk/proto --template $TEMPLATE --output $OUT/block_sdk --include-imports
 
+# ===== slinky ================
+# TODO: change version after ICS and audited version release
+git clone git@github.com:skip-mev/slinky.git $REPOS/slinky --branch v0.3.1 --depth 1
+npx buf generate $REPOS/slinky/proto --template $TEMPLATE --output $OUT/slinky --include-imports
+
 rm -rf $REPOS

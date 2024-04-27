@@ -85,6 +85,11 @@ export type UpgradeInfo = {
   upgraded_client_state: google.protobuf.Any;
 };
 
+export type CurrencyPairInfo = {
+  Base: string;
+  Quote: string;
+};
+
 export type SendProposalInfo = {
   to: string;
   denom: string;
@@ -461,6 +466,24 @@ export const upgradeProposal = (info: UpgradeInfo): any => ({
             info: info.info,
           },
           upgraded_client_state: info.upgraded_client_state,
+        },
+      },
+    },
+  },
+});
+
+export const addCurrencyPairsProposal = (
+  currencyPairs: CurrencyPairInfo[],
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/slinky.oracle.v1.MsgAddCurrencyPairs',
+            authority: ADMIN_MODULE_ADDRESS,
+            currency_pairs: currencyPairs,
+          }),
         },
       },
     },

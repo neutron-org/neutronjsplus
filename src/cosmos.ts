@@ -25,6 +25,8 @@ import {
 import { Message } from '@bufbuild/protobuf';
 
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
+import { GetPriceResponse } from './oracle';
+import { GetAllCurrencyPairsResponse, GetPricesResponse } from './oracle';
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { BroadcastTx200ResponseTxResponse } from '@cosmos-client/core/cjs/openapi/api';
 
@@ -459,6 +461,47 @@ export class CosmosWrapper {
   async queryContractAdmin(address: string): Promise<string> {
     const resp = await this.getContractInfo(address);
     return resp.contract_info.admin;
+  }
+
+  async queryOraclePrice(
+    base: string,
+    quote: string,
+  ): Promise<GetPriceResponse> {
+    try {
+      const req = await axios.get<any>(
+        `${this.sdk.url}/slinky/oracle/v1/get_price`,
+        {
+          params: {
+            'currency_pair.Base': base,
+            'currency_pair.Quote': quote,
+          },
+        },
+      );
+      return req.data;
+    } catch (e) {
+      if (e.response?.data?.message !== undefined) {
+        throw new Error(e.response?.data?.message);
+      }
+      throw e;
+    }
+  }
+
+  async queryOraclePrices(
+    currencyPairIds: string[],
+  ): Promise<GetPricesResponse> {
+    const req = await axios.get(`${this.sdk.url}/slinky/oracle/v1/get_prices`, {
+      params: { currency_pair_ids: currencyPairIds.join(',') },
+    });
+
+    return req.data;
+  }
+
+  async queryOracleAllCurrencyPairs(): Promise<GetAllCurrencyPairsResponse> {
+    const req = await axios.get(
+      `${this.sdk.url}/slinky/oracle/v1/get_all_tickers`,
+    );
+
+    return req.data;
   }
 }
 
