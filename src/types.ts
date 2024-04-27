@@ -190,6 +190,7 @@ export const NeutronContract = {
 };
 
 export type MultiChoiceOption = {
+  title: string;
   description: string;
   msgs: any[];
 };
