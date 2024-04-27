@@ -6,6 +6,7 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
 import { PairID } from "./pair_id_pb.js";
+import { Pool } from "./pool_pb.js";
 
 /**
  * @generated from message neutron.dex.DepositRecord
@@ -41,6 +42,16 @@ export class DepositRecord extends Message<DepositRecord> {
    */
   fee = protoInt64.zero;
 
+  /**
+   * @generated from field: string total_shares = 7;
+   */
+  totalShares = "";
+
+  /**
+   * @generated from field: neutron.dex.Pool pool = 8;
+   */
+  pool?: Pool;
+
   constructor(data?: PartialMessage<DepositRecord>) {
     super();
     proto3.util.initPartial(data, this);
@@ -55,6 +66,8 @@ export class DepositRecord extends Message<DepositRecord> {
     { no: 4, name: "lower_tick_index", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
     { no: 5, name: "upper_tick_index", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
     { no: 6, name: "fee", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 7, name: "total_shares", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "pool", kind: "message", T: Pool },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DepositRecord {
