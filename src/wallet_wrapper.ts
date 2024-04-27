@@ -4,7 +4,6 @@ import { DEBUG_SUBMIT_TX, getContractBinary } from './env';
 // import { MsgSubmitProposalLegacy } from '@neutron-org/cosmjs-types/'
 // import { MsgAuctionBid } from './proto/block_sdk/sdk/auction/v1/tx_pb';
 // import { ParameterChangeProposal } from './proto/cosmos_sdk/cosmos/params/v1beta1/params_pb';
-// import { MsgRemoveInterchainQueryRequest } from './proto/neutron/neutron/interchainqueries/tx_pb';
 import { MsgRemoveInterchainQueryRequest } from '@neutron-org/cosmjs-types/neutron/interchainqueries/tx';
 import {
   IndexedTx,
@@ -46,6 +45,11 @@ export async function createWalletWrapper(
         [MsgBurn.typeUrl, MsgBurn as any],
         [MsgChangeAdmin.typeUrl, MsgChangeAdmin as any],
         [MsgSetBeforeSendHook.typeUrl, MsgSetBeforeSendHook as any],
+
+        [
+          MsgRemoveInterchainQueryRequest.typeUrl,
+          MsgRemoveInterchainQueryRequest as any,
+        ],
       ]),
     },
   );
