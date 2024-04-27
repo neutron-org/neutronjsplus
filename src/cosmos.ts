@@ -23,6 +23,7 @@ import {
   ParamsTokenfactoryResponse,
 } from './types';
 import { Message } from '@bufbuild/protobuf';
+import { Event as CosmosEvent } from '@cosmjs/stargate';
 
 import { GetPriceResponse } from './oracle';
 import { GetAllCurrencyPairsResponse, GetPricesResponse } from './oracle';
@@ -590,7 +591,7 @@ export const createBankSendMessage = (
 });
 
 export const getEventAttribute = (
-  events: { type: string; attributes: { key: string; value: string }[] }[],
+  events: readonly CosmosEvent[],
   eventType: string,
   attribute: string,
 ): string => {

@@ -670,7 +670,7 @@ export class DaoMember {
     );
 
     const attribute = getEventAttribute(
-      (proposalTx as any).events,
+      proposalTx.events,
       'wasm',
       'proposal_id',
     );
@@ -864,7 +864,7 @@ export class DaoMember {
     );
 
     const attribute = getEventAttribute(
-      (proposalTx as any).events,
+      proposalTx.events,
       'wasm',
       'proposal_id',
     );
@@ -1048,7 +1048,7 @@ export class DaoMember {
     );
 
     const attribute = getEventAttribute(
-      (proposalTx as any).events,
+      proposalTx.events,
       'wasm',
       'proposal_id',
     );
