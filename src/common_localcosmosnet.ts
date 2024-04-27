@@ -166,8 +166,8 @@ export class TestStateLocalCosmosTestNet {
     const newWallet = await mnemonicToWallet(mnemonic, prefix);
     for (const balance of balances) {
       await client.sendTokens(
-        wallet.account.address.toString(),
-        newWallet.account.address.toString(),
+        wallet.account.address,
+        newWallet.account.address,
         [{ amount: balance.amount, denom: balance.denom }],
         {
           gas: '200000',

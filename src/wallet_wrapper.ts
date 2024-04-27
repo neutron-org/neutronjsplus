@@ -68,14 +68,11 @@ export class WalletWrapper {
   }
 
   async queryBalances(): Promise<BalancesResponse> {
-    return await this.chain.queryBalances(this.wallet.address.toString());
+    return await this.chain.queryBalances(this.wallet.address);
   }
 
   async queryDenomBalance(denom: string): Promise<number> {
-    return await this.chain.queryDenomBalance(
-      this.wallet.address.toString(),
-      denom,
-    );
+    return await this.chain.queryDenomBalance(this.wallet.address, denom);
   }
 
   async execTx2(
@@ -87,7 +84,7 @@ export class WalletWrapper {
     memo ||= '';
 
     const result = await this.wasmClient.signAndBroadcast(
-      this.wallet.address.toString(),
+      this.wallet.address,
       msgs,
       fee,
       memo,
@@ -118,7 +115,7 @@ export class WalletWrapper {
 
   // storeWasm stores the wasm code by the passed path on the blockchain.
   async storeWasm(fileName: string): Promise<CodeId> {
-    const sender = this.wallet.address.toString();
+    const sender = this.wallet.address;
     const wasmCode = await getContractBinary(fileName);
     const res = await this.wasmClient.upload(sender, wasmCode, {
       amount: [{ denom: NEUTRON_DENOM, amount: '250000' }],
@@ -131,10 +128,10 @@ export class WalletWrapper {
     codeId: number,
     msg: any,
     label: string,
-    admin: string = this.wallet.address.toString(),
+    admin: string = this.wallet.address,
   ): Promise<string> {
     const instantiateRes = await this.wasmClient.instantiate(
-      this.wallet.address.toString(),
+      this.wallet.address,
       codeId,
       msg,
       label,
@@ -152,7 +149,7 @@ export class WalletWrapper {
     codeId: number,
     msg: any,
   ): Promise<MigrateResult> {
-    const sender = this.wallet.address.toString();
+    const sender = this.wallet.address;
     const res = await this.wasmClient.migrate(sender, contract, codeId, msg, {
       gas: '5000000',
       amount: [{ denom: this.chain.denom, amount: '20000' }],
@@ -170,7 +167,7 @@ export class WalletWrapper {
       amount: [{ denom: this.chain.denom, amount: '10000' }],
     },
   ): Promise<IndexedTx> {
-    const sender = this.wallet.address.toString();
+    const sender = this.wallet.address;
     const res = await this.wasmClient.execute(
       sender,
       contract,
@@ -203,7 +200,7 @@ export class WalletWrapper {
     const msgSendObject: MsgSendEncodeObject = {
       typeUrl: '/cosmos.bank.v1beta1.MsgSend',
       value: {
-        fromAddress: this.wallet.address.toString(),
+        fromAddress: this.wallet.address,
         toAddress: to,
         amount: [{ denom, amount }],
       },
@@ -301,7 +298,7 @@ export class WalletWrapper {
     };
 
     return this.msgSend(
-      this.wallet.address.toString(),
+      this.wallet.address,
       { denom: this.chain.denom, amount: '1' },
       fee,
     );
@@ -351,7 +348,7 @@ export class WalletWrapper {
       sourcePort: sourcePort,
       sourceChannel: sourceChannel,
       token: token,
-      sender: this.wallet.address.toString(),
+      sender: this.wallet.address,
       receiver: receiver,
       timeoutHeight: timeoutHeight,
       timeoutTimestamp: null,

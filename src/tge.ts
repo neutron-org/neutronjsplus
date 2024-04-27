@@ -221,7 +221,7 @@ export class Tge {
     this.contracts.credits = await instantiateCredits(
       this.instantiator,
       this.codeIds.TGE_CREDITS,
-      this.instantiator.wallet.address.toString(),
+      this.instantiator.wallet.address,
     );
 
     this.airdrop = new Airdrop(this.airdropAccounts);
@@ -244,7 +244,7 @@ export class Tge {
       this.creditsVaultName,
       this.creditsVaultDescription,
       this.contracts.credits,
-      this.instantiator.wallet.address.toString(),
+      this.instantiator.wallet.address,
       this.contracts.airdrop,
     );
 
@@ -359,13 +359,13 @@ export class Tge {
     this.contracts.vestingAtomLp = await instantiateVestingLp(
       this.instantiator,
       this.codeIds.VESTING_LP,
-      this.tokenInfoManager.wallet.address.toString(),
+      this.tokenInfoManager.wallet.address,
       'vesting_atom_lp',
     );
     this.contracts.vestingUsdcLp = await instantiateVestingLp(
       this.instantiator,
       this.codeIds.VESTING_LP,
-      this.tokenInfoManager.wallet.address.toString(),
+      this.tokenInfoManager.wallet.address,
       'vesting_usdc_lp',
     );
 
@@ -386,7 +386,7 @@ export class Tge {
       this.instantiator,
       this.codeIds.TGE_AUCTION,
       null,
-      this.tokenInfoManager.wallet.address.toString(),
+      this.tokenInfoManager.wallet.address,
       this.contracts.priceFeed,
       null,
       this.reserve,
@@ -416,7 +416,7 @@ export class Tge {
       this.instantiator,
       this.codeIds.TGE_LOCKDROP,
       null,
-      this.tokenInfoManager.wallet.address.toString(),
+      this.tokenInfoManager.wallet.address,
       this.contracts.credits,
       this.contracts.auction,
       this.times.lockdropInit,
@@ -482,7 +482,7 @@ export class Tge {
       this.codeIds.ORACLE_HISTORY,
       this.contracts.astroFactory,
       1,
-      this.tokenInfoManager.wallet.address.toString(),
+      this.tokenInfoManager.wallet.address,
       'astroport_oracle_atom',
     );
     this.contracts.oracleUsdc = await instantiateAstroportOracle(
@@ -490,7 +490,7 @@ export class Tge {
       this.codeIds.ORACLE_HISTORY,
       this.contracts.astroFactory,
       1,
-      this.tokenInfoManager.wallet.address.toString(),
+      this.tokenInfoManager.wallet.address,
       'astroport_oracle_usdc',
     );
 
@@ -514,8 +514,8 @@ export class Tge {
       this.contracts.lockdrop,
       this.contracts.oracleUsdc,
       this.contracts.oracleAtom,
-      this.instantiator.wallet.address.toString(),
-      this.tokenInfoManager.wallet.address.toString(),
+      this.instantiator.wallet.address,
+      this.tokenInfoManager.wallet.address,
     );
 
     this.contracts.vestingLpVault = await instantiateVestingLpVault(
@@ -528,15 +528,15 @@ export class Tge {
       this.contracts.oracleUsdc,
       this.contracts.vestingAtomLp,
       this.contracts.vestingUsdcLp,
-      this.instantiator.wallet.address.toString(),
-      this.tokenInfoManager.wallet.address.toString(),
+      this.instantiator.wallet.address,
+      this.tokenInfoManager.wallet.address,
     );
   }
 
   async createNativeAstroDenom() {
     const data = await msgCreateDenom(
       this.instantiator,
-      this.instantiator.wallet.address.toString(),
+      this.instantiator.wallet.address,
       ASTRO_SUBDENOM,
     );
     this.astroDenom = getEventAttribute(
@@ -546,12 +546,12 @@ export class Tge {
     );
     await msgMintDenom(
       this.instantiator,
-      this.instantiator.wallet.address.toString(),
+      this.instantiator.wallet.address,
       {
         denom: this.astroDenom,
         amount: this.generatorRewardsTotal.toString(),
       },
-      this.instantiator.wallet.address.toString(),
+      this.instantiator.wallet.address,
     );
   }
 
@@ -939,7 +939,7 @@ export const instantiateCoinRegistry = async (
   const res = await cm.instantiateContract(
     codeId,
     {
-      owner: cm.wallet.address.toString(),
+      owner: cm.wallet.address,
     },
     label,
   );
@@ -973,7 +973,7 @@ export const instantiateAstroFactory = async (
         },
       ],
       token_code_id: astroTokenCodeId,
-      owner: cm.wallet.address.toString(),
+      owner: cm.wallet.address,
       whitelist_code_id: 0,
       coin_registry_address: coinRegistryAddress,
     },
@@ -1039,7 +1039,7 @@ export const instantiateAstroVesting = async (
   const res = await cm.instantiateContract(
     codeId,
     {
-      owner: cm.wallet.address.toString(),
+      owner: cm.wallet.address,
       vesting_token: vestingToken,
     },
     label,
@@ -1078,7 +1078,7 @@ export const instantiateVestingLp = async (
   const res = await cm.instantiateContract(
     codeId,
     {
-      owner: cm.wallet.address.toString(),
+      owner: cm.wallet.address,
       token_info_manager: tokenInfoManager,
       vesting_managers: [],
     },
@@ -1140,7 +1140,7 @@ export const instantiateAstroGenerator = async (
         },
       },
       factory: factoryContract,
-      owner: cm.wallet.address.toString(),
+      owner: cm.wallet.address,
       start_block: startBlock,
       tokens_per_block: tokensPerBlock,
       vesting_contract: vestingContract,
@@ -1313,7 +1313,7 @@ export const instantiateVestingLpVault = async (
       usdc_oracle_contract: usdcOracle,
       atom_vesting_lp_contract: atomVestingLp,
       usdc_vesting_lp_contract: usdcVestingLp,
-      owner: cm.wallet.address.toString(),
+      owner: cm.wallet.address,
       manager: tokenInfoManager,
     },
     label,

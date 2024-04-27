@@ -1623,7 +1623,7 @@ export class DaoMember {
   }
 
   async queryVotingPower(): Promise<VotingPowerAtHeightResponse> {
-    return await this.dao.queryVotingPower(this.user.wallet.address.toString());
+    return await this.dao.queryVotingPower(this.user.wallet.address);
   }
 
   async addSubdaoToDao(subDaoCore: string) {
@@ -1663,7 +1663,7 @@ export const deploySubdao = async (
       cw4_group_code_id: cw4GroupCodeId,
       initial_members: [
         {
-          addr: cm.wallet.address.toString(),
+          addr: cm.wallet.address,
           weight: 1,
         },
       ],
@@ -1786,7 +1786,7 @@ export const setupSubDaoTimelockSet = async (
   const daoContracts = await getDaoContracts(cm.chain, mainDaoAddress);
   const subDao = await deploySubdao(
     cm,
-    mockMainDao ? cm.wallet.address.toString() : daoContracts.core.address,
+    mockMainDao ? cm.wallet.address : daoContracts.core.address,
     daoContracts.proposals.overrule.pre_propose.address,
     securityDaoAddr,
     closeProposalOnExecutionFailure,
@@ -1823,7 +1823,7 @@ export const deployNeutronDao = async (
 
   const neutronVaultCodeId = await cm.storeWasm(NeutronContract.NEUTRON_VAULT);
   const neutronVaultInitMsg = {
-    owner: cm.wallet.address.toString(),
+    owner: cm.wallet.address,
     name: 'voting vault',
     denom: cm.chain.denom,
     description: 'a simple voting vault for testing purposes',
@@ -1842,7 +1842,7 @@ export const deployNeutronDao = async (
     code_id: votingRegistryCodeId,
     label: DaoContractLabels.DAO_VOTING_REGISTRY,
     msg: wrapMsg({
-      owner: cm.wallet.address.toString(),
+      owner: cm.wallet.address,
       voting_vaults: [neutronVaultAddress],
     }),
   };
