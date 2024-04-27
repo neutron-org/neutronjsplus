@@ -1,5 +1,4 @@
 import Long from 'long';
-import { ibc } from '@cosmos-client/ibc/cjs/proto';
 import { Wallet, CodeId } from './types';
 import { DEBUG_SUBMIT_TX, getContractBinary } from './env';
 // import { MsgSubmitProposalLegacy } from '@neutron-org/cosmjs-types/'
@@ -20,7 +19,6 @@ import {
 } from '@cosmjs/cosmwasm-stargate';
 import { MsgTransfer } from '@neutron-org/cosmjs-types/ibc/applications/transfer/v1/tx';
 
-import IHeight = ibc.core.client.v1.IHeight;
 import { Coin, EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { BalancesResponse, CosmosWrapper, NEUTRON_DENOM } from './cosmos';
 import {
@@ -30,7 +28,6 @@ import {
   MsgMint,
   MsgSetBeforeSendHook,
 } from '@neutron-org/cosmjs-types/osmosis/tokenfactory/v1beta1/tx';
-// import { TelescopeGeneratedType } from '@cosmjs/proto-signing/build/registry';
 
 // constructor for WalletWrapper
 export async function createWalletWrapper(
@@ -344,7 +341,10 @@ export class WalletWrapper {
     sourceChannel: string,
     token: Coin,
     receiver: string,
-    timeoutHeight: IHeight,
+    timeoutHeight: {
+      revisionHeight: bigint;
+      revisionNumber: bigint;
+    },
     memo?: string,
   ): Promise<IndexedTx> {
     const value: MsgTransfer = {
@@ -353,10 +353,7 @@ export class WalletWrapper {
       token: token,
       sender: this.wallet.address.toString(),
       receiver: receiver,
-      timeoutHeight: {
-        revisionHeight: timeoutHeight.revision_height,
-        revisionNumber: timeoutHeight.revision_number,
-      },
+      timeoutHeight: timeoutHeight,
       timeoutTimestamp: null,
       memo: memo,
     };

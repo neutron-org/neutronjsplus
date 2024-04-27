@@ -536,7 +536,14 @@ export const mnemonicToWallet = async (
     prefix: addrPrefix,
   });
   const account = (await directwallet.getAccounts())[0];
-  return new Wallet(addrPrefix, directwallet, account);
+  const directwalletValoper = await DirectSecp256k1HdWallet.fromMnemonic(
+    mnemonic,
+    {
+      prefix: addrPrefix + 'valoper',
+    },
+  );
+  const accountValoper = (await directwalletValoper.getAccounts())[0];
+  return new Wallet(addrPrefix, directwallet, account, accountValoper);
 };
 
 export const getSequenceId = (

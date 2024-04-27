@@ -340,15 +340,18 @@ export class Wallet {
   directwallet: DirectSecp256k1HdWallet;
   account: AccountData;
   address: string;
+  valAddress: string;
   constructor(
     addrPrefix: string,
     directwallet: DirectSecp256k1HdWallet,
     account: AccountData,
+    valAccount: AccountData,
   ) {
     this.addrPrefix = addrPrefix;
     this.directwallet = directwallet;
     this.account = account;
     this.address = this.account.address;
+    this.valAddress = valAccount.address;
   }
 }
 

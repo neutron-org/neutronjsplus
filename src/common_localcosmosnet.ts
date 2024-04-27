@@ -23,7 +23,7 @@ const walletSet = async (
   prefix: string,
   config: any,
 ): Promise<Record<string, Wallet>> => ({
-  val1: await mnemonicToWallet(config.VAL_MNEMONIC_1, prefix + 'valoper'),
+  val1: await mnemonicToWallet(config.VAL_MNEMONIC_1, prefix),
   demo1: await mnemonicToWallet(config.DEMO_MNEMONIC_1, prefix),
   demo2: await mnemonicToWallet(config.DEMO_MNEMONIC_2, prefix),
   icq: await mnemonicToWallet(config.DEMO_MNEMONIC_3, prefix),
