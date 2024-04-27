@@ -24,10 +24,9 @@ import {
 } from './types';
 import { Message } from '@bufbuild/protobuf';
 
-import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 import { GetPriceResponse } from './oracle';
 import { GetAllCurrencyPairsResponse, GetPricesResponse } from './oracle';
-import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import { Coin, DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { BroadcastTx200ResponseTxResponse } from '@cosmos-client/core/cjs/openapi/api';
 
 export const NEUTRON_DENOM = process.env.NEUTRON_DENOM || 'untrn';
@@ -41,7 +40,7 @@ export const ADMIN_MODULE_ADDRESS =
 
 // BalancesResponse is the response model for the bank balances query.
 export type BalancesResponse = {
-  balances: ICoin[];
+  balances: Coin[];
   pagination: {
     next_key: string;
     total: string;
@@ -55,7 +54,7 @@ type DenomTraceResponse = {
 };
 
 export type TotalSupplyByDenomResponse = {
-  amount: ICoin;
+  amount: Coin;
 };
 
 export type DenomMetadataResponse = {
@@ -86,18 +85,19 @@ export type DenomMetadataResponse = {
 // TotalBurnedNeutronsAmountResponse is the response model for the feeburner's total-burned-neutrons.
 export type TotalBurnedNeutronsAmountResponse = {
   total_burned_neutrons_amount: {
-    coin: ICoin;
+    coin: Coin;
   };
 };
 
 export class CosmosWrapper {
-  readonly sdk: cosmosclient.CosmosSDK;
+  readonly sdk: cosmosclient.CosmosSDK; // TODO: remove
   readonly blockWaiter: BlockWaiter;
   readonly denom: string;
+  readonly rest: string;
   readonly rpc: string;
 
   constructor(
-    sdk: cosmosclient.CosmosSDK,
+    sdk: cosmosclient.CosmosSDK, // TODO: remove
     blockWaiter: BlockWaiter,
     denom: string,
     rpc: string,
@@ -106,6 +106,7 @@ export class CosmosWrapper {
     this.sdk = sdk;
     this.blockWaiter = blockWaiter;
     this.rpc = rpc;
+    this.rest = sdk.url; // TODO: just pass rest string without sdk
   }
 
   async queryContractWithWait<T>(
@@ -134,7 +135,7 @@ export class CosmosWrapper {
     query: Record<string, unknown>,
   ): Promise<T> {
     const url = `${
-      this.sdk.url
+      this.rest
     }/cosmwasm/wasm/v1/contract/${contract}/smart/${Buffer.from(
       JSON.stringify(query),
     ).toString('base64')}?encoding=base64`;
@@ -154,7 +155,7 @@ export class CosmosWrapper {
   }
 
   async getContractInfo(contract: string): Promise<any> {
-    const url = `${this.sdk.url}/cosmwasm/wasm/v1/contract/${contract}`;
+    const url = `${this.rest}/cosmwasm/wasm/v1/contract/${contract}`;
     try {
       const resp = await axios.get(url);
       return resp.data;
@@ -187,43 +188,41 @@ export class CosmosWrapper {
 
   async queryInterchainqueriesParams(): Promise<ParamsInterchainqueriesResponse> {
     const req = await axios.get(
-      `${this.sdk.url}/neutron/interchainqueries/params`,
+      `${this.rest}/neutron/interchainqueries/params`,
     );
 
     return req.data;
   }
 
   async queryFeeburnerParams(): Promise<ParamsFeeburnerResponse> {
-    const req = await axios.get(`${this.sdk.url}/neutron/feeburner/params`);
+    const req = await axios.get(`${this.rest}/neutron/feeburner/params`);
 
     return req.data;
   }
 
   async queryFeerefunderParams(): Promise<ParamsFeerefunderResponse> {
     const req = await axios.get(
-      `${this.sdk.url}/neutron-org/neutron/feerefunder/params`,
+      `${this.rest}/neutron-org/neutron/feerefunder/params`,
     );
 
     return req.data;
   }
 
   async queryContractmanagerParams(): Promise<ParamsContractmanagerResponse> {
-    const req = await axios.get(
-      `${this.sdk.url}/neutron/contractmanager/params`,
-    );
+    const req = await axios.get(`${this.rest}/neutron/contractmanager/params`);
 
     return req.data;
   }
 
   async queryCronParams(): Promise<ParamsCronResponse> {
-    const req = await axios.get(`${this.sdk.url}/neutron/cron/params`);
+    const req = await axios.get(`${this.rest}/neutron/cron/params`);
 
     return req.data;
   }
 
   async queryTokenfactoryParams(): Promise<ParamsTokenfactoryResponse> {
     const req = await axios.get(
-      `${this.sdk.url}/osmosis/tokenfactory/v1beta1/params`,
+      `${this.rest}/osmosis/tokenfactory/v1beta1/params`,
     );
 
     return req.data;
@@ -250,7 +249,7 @@ export class CosmosWrapper {
 
   async queryDenomTrace(ibcDenom: string): Promise<DenomTraceResponse> {
     const data = axios.get<{ denom_trace: DenomTraceResponse }>(
-      `${this.sdk.url}/ibc/apps/transfer/v1/denom_traces/${ibcDenom}`,
+      `${this.rest}/ibc/apps/transfer/v1/denom_traces/${ibcDenom}`,
     );
     return data.then((res) => res.data.denom_trace);
   }
@@ -261,7 +260,7 @@ export class CosmosWrapper {
   ): Promise<AckFailuresResponse> {
     try {
       const req = await axios.get<AckFailuresResponse>(
-        `${this.sdk.url}/neutron/contractmanager/failures/${addr}`,
+        `${this.rest}/neutron/contractmanager/failures/${addr}`,
         { params: pagination },
       );
       return req.data;
@@ -275,14 +274,14 @@ export class CosmosWrapper {
 
   async listIBCChannels(): Promise<ChannelsList> {
     const res = await axios.get<ChannelsList>(
-      `${this.sdk.url}/ibc/core/channel/v1/channels`,
+      `${this.rest}/ibc/core/channel/v1/channels`,
     );
     return res.data;
   }
 
   async getIBCClientStatus(clientId: string): Promise<IBCClientStatus> {
     const res = await axios.get<IBCClientStatus>(
-      `${this.sdk.url}/ibc/core/client/v1/client_status/${clientId}`,
+      `${this.rest}/ibc/core/client/v1/client_status/${clientId}`,
     );
     return res.data;
   }
@@ -290,7 +289,7 @@ export class CosmosWrapper {
   async queryTotalBurnedNeutronsAmount(): Promise<TotalBurnedNeutronsAmountResponse> {
     try {
       const req = await axios.get<TotalBurnedNeutronsAmountResponse>(
-        `${this.sdk.url}/neutron/feeburner/total_burned_neutrons_amount`,
+        `${this.rest}/neutron/feeburner/total_burned_neutrons_amount`,
       );
       return req.data;
     } catch (e) {
@@ -306,7 +305,7 @@ export class CosmosWrapper {
   ): Promise<TotalSupplyByDenomResponse> {
     try {
       const req = await axios.get<TotalSupplyByDenomResponse>(
-        `${this.sdk.url}/cosmos/bank/v1beta1/supply/by_denom?denom=${denom}`,
+        `${this.rest}/cosmos/bank/v1beta1/supply/by_denom?denom=${denom}`,
       );
       return req.data;
     } catch (e) {
@@ -322,7 +321,7 @@ export class CosmosWrapper {
   ): Promise<DenomMetadataResponse> {
     try {
       const req = await axios.get<DenomMetadataResponse>(
-        `${this.sdk.url}/cosmos/bank/v1beta1/denoms_metadata`,
+        `${this.rest}/cosmos/bank/v1beta1/denoms_metadata`,
         { params: pagination },
       );
       return req.data;
@@ -335,7 +334,7 @@ export class CosmosWrapper {
   }
 
   async getChainAdmins() {
-    const url = `${this.sdk.url}/cosmos/adminmodule/adminmodule/admins`;
+    const url = `${this.rest}/cosmos/adminmodule/adminmodule/admins`;
     const resp = await axios.get<{
       admins: [string];
     }>(url);
@@ -364,7 +363,7 @@ export class CosmosWrapper {
   async getCodeDataHash(codeId: number): Promise<string> {
     try {
       const res = await axios.get(
-        `${this.sdk.url}/cosmwasm/wasm/v1/code/${codeId}`,
+        `${this.rest}/cosmwasm/wasm/v1/code/${codeId}`,
       );
       return res.data.code_info.data_hash;
     } catch (e) {
@@ -378,7 +377,7 @@ export class CosmosWrapper {
   async querySchedules(pagination?: PageRequest): Promise<ScheduleResponse> {
     try {
       const req = await axios.get<ScheduleResponse>(
-        `${this.sdk.url}/neutron/cron/schedule`,
+        `${this.rest}/neutron/cron/schedule`,
         { params: pagination },
       );
       return req.data;
@@ -393,7 +392,7 @@ export class CosmosWrapper {
   async queryCurrentUpgradePlan(): Promise<CurrentPlanResponse> {
     try {
       const req = await axios.get<CurrentPlanResponse>(
-        `${this.sdk.url}/cosmos/upgrade/v1beta1/current_plan`,
+        `${this.rest}/cosmos/upgrade/v1beta1/current_plan`,
         {},
       );
       return req.data;
@@ -408,7 +407,7 @@ export class CosmosWrapper {
   async queryPinnedCodes(): Promise<PinnedCodesResponse> {
     try {
       const req = await axios.get<PinnedCodesResponse>(
-        `${this.sdk.url}/cosmwasm/wasm/v1/codes/pinned`,
+        `${this.rest}/cosmwasm/wasm/v1/codes/pinned`,
         {},
       );
       return req.data;
@@ -423,7 +422,7 @@ export class CosmosWrapper {
   async queryHostEnabled(): Promise<boolean> {
     try {
       const req = await axios.get<IcaHostParamsResponse>(
-        `${this.sdk.url}/ibc/apps/interchain_accounts/host/v1/params`,
+        `${this.rest}/ibc/apps/interchain_accounts/host/v1/params`,
         {},
       );
       return req.data.params.host_enabled;
@@ -438,7 +437,7 @@ export class CosmosWrapper {
   async queryMaxTxsAllowed(): Promise<string> {
     try {
       const req = await axios.get<InterchaintxsParamsResponse>(
-        `${this.sdk.url}/neutron/interchaintxs/params`,
+        `${this.rest}/neutron/interchaintxs/params`,
         {},
       );
       return req.data.params.msg_submit_tx_max_messages;
@@ -451,9 +450,7 @@ export class CosmosWrapper {
   }
 
   async queryGlobalfeeParams(): Promise<GlobalfeeParamsResponse> {
-    const req = await axios.get(
-      `${this.sdk.url}/gaia/globalfee/v1beta1/params`,
-    );
+    const req = await axios.get(`${this.rest}/gaia/globalfee/v1beta1/params`);
 
     return req.data.params;
   }
@@ -469,7 +466,7 @@ export class CosmosWrapper {
   ): Promise<GetPriceResponse> {
     try {
       const req = await axios.get<any>(
-        `${this.sdk.url}/slinky/oracle/v1/get_price`,
+        `${this.rest}/slinky/oracle/v1/get_price`,
         {
           params: {
             'currency_pair.Base': base,
@@ -489,7 +486,7 @@ export class CosmosWrapper {
   async queryOraclePrices(
     currencyPairIds: string[],
   ): Promise<GetPricesResponse> {
-    const req = await axios.get(`${this.sdk.url}/slinky/oracle/v1/get_prices`, {
+    const req = await axios.get(`${this.rest}/slinky/oracle/v1/get_prices`, {
       params: { currency_pair_ids: currencyPairIds.join(',') },
     });
 
@@ -498,7 +495,7 @@ export class CosmosWrapper {
 
   async queryOracleAllCurrencyPairs(): Promise<GetAllCurrencyPairsResponse> {
     const req = await axios.get(
-      `${this.sdk.url}/slinky/oracle/v1/get_all_tickers`,
+      `${this.rest}/slinky/oracle/v1/get_all_tickers`,
     );
 
     return req.data;
@@ -607,7 +604,7 @@ export const getEventAttribute = (
   return attrValue;
 };
 
-export const filterIBCDenoms = (list: ICoin[]) =>
+export const filterIBCDenoms = (list: Coin[]) =>
   list.filter(
     (coin) =>
       coin.denom && ![IBC_ATOM_DENOM, IBC_USDC_DENOM].includes(coin.denom),

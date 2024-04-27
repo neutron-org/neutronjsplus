@@ -1,6 +1,7 @@
 import { google } from '@cosmos-client/core/cjs/proto';
 import { ADMIN_MODULE_ADDRESS } from './cosmos';
 import cosmosclient from '@cosmos-client/core';
+import { Coin } from '@cosmjs/proto-signing';
 
 export type ParamChangeProposalInfo = {
   title: string;
@@ -44,7 +45,7 @@ export type ParamsFeerefunderInfo = {
 };
 
 export type ParamsGlobalfeeInfo = {
-  minimum_gas_prices: cosmosclient.proto.cosmos.base.v1beta1.ICoin[];
+  minimum_gas_prices: Coin[];
   bypass_min_fee_msg_types: string[];
   max_total_bypass_min_fee_msg_gas_usage: string;
 };

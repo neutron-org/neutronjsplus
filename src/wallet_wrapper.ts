@@ -263,7 +263,7 @@ export class WalletWrapper {
   // TODO
   // async msgSendAuction(
   //   bidder: string,
-  //   bid: ICoin,
+  //   bid: Coin,
   //   transactions: Uint8Array[],
   //   fee = {
   //     gas_limit: Long.fromString('200000'),

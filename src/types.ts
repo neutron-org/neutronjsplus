@@ -7,7 +7,11 @@ import {
   ParamsInterchainqueriesInfo,
   ParamsTokenfactoryInfo,
 } from './proposal';
-import { AccountData, DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import {
+  AccountData,
+  Coin,
+  DirectSecp256k1HdWallet,
+} from '@cosmjs/proto-signing';
 // import { MsgMint } from '@neutron-org/cosmjs-types/osmosis/tokenfactory/v1beta1/tx';
 
 export type AcknowledgementResult =
@@ -298,7 +302,7 @@ export type InterchaintxsParamsResponse = {
 };
 
 export type GlobalfeeParamsResponse = {
-  minimum_gas_prices: cosmosclient.proto.cosmos.base.v1beta1.ICoin[];
+  minimum_gas_prices: Coin[];
   bypass_min_fee_msg_types: string[];
   max_total_bypass_min_fee_msg_gas_usage: string;
 };
