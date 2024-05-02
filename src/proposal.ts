@@ -1,6 +1,7 @@
 import { google } from '@cosmos-client/core/cjs/proto';
 import { ADMIN_MODULE_ADDRESS } from './cosmos';
 import { Coin } from '@cosmjs/proto-signing';
+import { Any } from '@neutron-org/cosmjs-types/google/protobuf/any';
 
 export type ParamChangeProposalInfo = {
   title: string;
@@ -82,7 +83,7 @@ export type UpgradeInfo = {
   name: string;
   height: number;
   info: string;
-  upgraded_client_state: google.protobuf.Any;
+  upgraded_client_state: Any;
 };
 
 export type CurrencyPairInfo = {

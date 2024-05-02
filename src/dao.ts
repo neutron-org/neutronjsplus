@@ -38,9 +38,12 @@ import {
   updateAdminProposal,
   upgradeProposal,
 } from './proposal';
-import { ClientState } from './proto/neutron_thirdparty/ibc/lightclients/tendermint/v1/tendermint_pb';
+// import { ClientState } from './proto/neutron_thirdparty/ibc/lightclients/tendermint/v1/tendermint_pb';
 import { WalletWrapper } from './wallet_wrapper';
 import { IndexedTx } from '@cosmjs/cosmwasm-stargate';
+import { ClientState } from '@neutron-org/cosmjs-types/ibc/lightclients/tendermint/v1/tendermint';
+import { Registry } from '@cosmjs/proto-signing';
+import { defaultRegistryTypes } from '@cosmjs/stargate';
 
 export type SubdaoProposalConfig = {
   threshold: any;
@@ -1487,16 +1490,17 @@ export class DaoMember {
     info: string,
     amount: string,
   ): Promise<number> {
+    const registry = new Registry([ClientState.typeUrl, ClientState as any]);
     const message = upgradeProposal({
       title,
       description,
       name,
       height,
       info,
-      upgraded_client_state: packAnyMsg(
-        '/ibc.lightclients.tendermint.v1.ClientState',
-        new ClientState({}),
-      ),
+      upgraded_client_state: registry.encodeAsAny({
+        typeUrl: ClientState.typeUrl,
+        value: {},
+      }),
     });
     return await this.submitSingleChoiceProposal(
       title,

@@ -22,8 +22,14 @@ import {
   ParamsCronResponse,
   ParamsTokenfactoryResponse,
 } from './types';
+import { QueryClientImpl } from 'cosmjs-types/cosmos/bank/v1beta1/query';
 import { Message } from '@bufbuild/protobuf';
-import { Event as CosmosEvent } from '@cosmjs/stargate';
+import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
+import {
+  Event as CosmosEvent,
+  createProtobufRpcClient,
+  QueryClient,
+} from '@cosmjs/stargate';
 
 import { GetPriceResponse } from './oracle';
 import { GetAllCurrencyPairsResponse, GetPricesResponse } from './oracle';
@@ -42,10 +48,10 @@ export const ADMIN_MODULE_ADDRESS =
 // BalancesResponse is the response model for the bank balances query.
 export type BalancesResponse = {
   balances: Coin[];
-  pagination: {
-    next_key: string;
-    total: string;
-  };
+  // pagination: {
+  // next_key: string;
+  // total: string;
+  // };
 };
 
 // DenomTraceResponse is the response model for the ibc transfer denom trace query.
@@ -89,6 +95,11 @@ export type TotalBurnedNeutronsAmountResponse = {
     coin: Coin;
   };
 };
+
+// TODO?
+// export function createCosmosWrapper(rpc: string) {
+
+// }
 
 export class CosmosWrapper {
   readonly sdk: cosmosclient.CosmosSDK; // TODO: remove
@@ -207,23 +218,29 @@ export class CosmosWrapper {
     return req.data;
   }
 
-  async queryDelegations(delegatorAddr: cosmosclient.AccAddress): Promise<any> {
-    const balances = await cosmosclient.rest.staking.delegatorDelegations(
-      this.sdk,
-      delegatorAddr,
-    );
-    return balances.data;
-  }
-
   async queryBalances(addr: string): Promise<BalancesResponse> {
-    const balances = await cosmosclient.rest.bank.allBalances(this.sdk, addr);
-    return balances.data as BalancesResponse;
+    // TODO: fixme don't connect every time
+    const tendermint = await Tendermint37Client.connect(this.rpc);
+    const queryClient = new QueryClient(tendermint);
+    const rpcClient = createProtobufRpcClient(queryClient);
+    const bankQueryService = new QueryClientImpl(rpcClient);
+    const res = await bankQueryService.AllBalances({
+      address: addr,
+    });
+    return res;
   }
 
   async queryDenomBalance(addr: string, denom: string): Promise<number> {
-    const { data } = await cosmosclient.rest.bank.allBalances(this.sdk, addr);
-    const balance = data.balances.find((b) => b.denom === denom);
-    return parseInt(balance?.amount ?? '0', 10);
+    const tendermint = await Tendermint37Client.connect(this.rpc);
+    const queryClient = new QueryClient(tendermint);
+    const rpcClient = createProtobufRpcClient(queryClient);
+    const bankQueryService = new QueryClientImpl(rpcClient);
+    const res = await bankQueryService.Balance({
+      address: addr,
+      denom,
+    });
+
+    return parseInt(res?.balance.amount ?? '0', 10);
   }
 
   async queryDenomTrace(ibcDenom: string): Promise<DenomTraceResponse> {
