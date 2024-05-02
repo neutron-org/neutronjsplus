@@ -154,15 +154,19 @@ export const NeutronContract = {
   CW20_BASE: '../contracts_thirdparty/cw20_base.wasm',
   TGE_AUCTION: 'neutron_auction.wasm',
   TGE_LOCKDROP: 'neutron_lockdrop.wasm',
+  TGE_LOCKDROP_PCL: 'neutron_lockdrop_pcl.wasm',
   TGE_PRICE_FEED_MOCK: 'neutron_price_feed_mock.wasm',
-  ASTRO_PAIR: '../contracts_thirdparty/astroport_pair.wasm',
+  ASTRO_PAIR_XYK: '../contracts_thirdparty/astroport_pair.wasm',
+  ASTRO_PAIR_PCL: '../contracts_thirdparty/astroport_pair_concentrated.wasm',
   ASTRO_COIN_REGISTRY:
     '../contracts_thirdparty/astroport_native_coin_registry.wasm',
   ASTRO_FACTORY: '../contracts_thirdparty/astroport_factory.wasm',
-  ASTRO_TOKEN: '../contracts_thirdparty/astroport_token.wasm',
+  ASTRO_TOKEN: '../contracts_thirdparty/astroport_xastro_token.wasm',
   ASTRO_GENERATOR: '../contracts_thirdparty/astroport_generator.wasm',
+  ASTRO_INCENTIVES: '../contracts_thirdparty/astroport_incentives.wasm',
   ASTRO_WHITELIST: '../contracts_thirdparty/astroport_whitelist.wasm',
   ASTRO_VESTING: '../contracts_thirdparty/astroport_vesting.wasm',
+  VESTING_LP_PCL: 'vesting_lp_pcl.wasm',
   VESTING_LP: 'vesting_lp.wasm',
   VESTING_LP_VAULT: 'vesting_lp_vault.wasm',
   CREDITS_VAULT: 'credits_vault.wasm',
@@ -174,6 +178,19 @@ export const NeutronContract = {
   FLOATY: '../contracts_thirdparty/floaty_2.0.wasm',
   DEX_STARGATE: 'dex_stargate.wasm',
   DEX_DEV: 'dex.wasm',
+
+  // TGE liquidity migration related contracts with fixed versions
+
+  // pre-migration mainnet version of the lockdrop contract
+  TGE_LOCKDROP_CURRENT:
+    '../contracts_tge_migration/current_neutron_lockdrop.wasm',
+  // pre-migration mainnet version of the vesting lp contract
+  VESING_LP_CURRENT: '../contracts_tge_migration/current_vesting_lp.wasm',
+  // pre-migration mainnet version of the reserve contract
+  RESERVE_CURRENT: '../contracts_tge_migration/current_neutron_reserve.wasm',
+
+  VESTING_LP_VAULT_CL: 'vesting_lp_vault_for_cl_pools.wasm',
+  LOCKDROP_VAULT_CL: 'lockdrop_vault_for_cl_pools.wasm',
 };
 
 export type MultiChoiceOption = {
