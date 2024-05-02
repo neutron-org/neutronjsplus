@@ -106,7 +106,7 @@ export class WalletWrapper {
     let error = null;
     // TODO: probably does not make sense because it already waits being in the block
     while (numAttempts > 0) {
-      await this.chain.blockWaiter.waitBlocks(1);
+      await this.chain.waitBlocks(1);
       numAttempts--;
       const data = await this.wasmClient.getTx(result.transactionHash);
       if (data != null) {

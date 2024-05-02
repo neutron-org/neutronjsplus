@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { CosmosWrapper } from './cosmos';
 import { WalletWrapper } from './wallet_wrapper';
-import { getWithAttempts } from './wait';
 
 /**
  * getRegisteredQuery queries the contract for a registered query details registered by the given
@@ -50,8 +49,7 @@ export const waitForICQResultWithRemoteHeight = (
   targetHeight: number,
   numAttempts = 20,
 ) =>
-  getWithAttempts(
-    cm.blockWaiter,
+  cm.getWithAttempts(
     () => getRegisteredQuery(cm, contractAddress, queryId),
     async (query) =>
       query.registered_query.last_submitted_result_remote_height
@@ -82,8 +80,7 @@ export const waitForTransfersAmount = (
   expectedTransfersAmount: number,
   numAttempts = 50,
 ) =>
-  getWithAttempts(
-    cm.blockWaiter,
+  cm.getWithAttempts(
     async () =>
       (await queryTransfersNumber(cm, contractAddress)).transfers_number,
     async (amount) => amount == expectedTransfersAmount,

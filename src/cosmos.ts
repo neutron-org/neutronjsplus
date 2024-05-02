@@ -1,6 +1,6 @@
 import cosmosclient from '@cosmos-client/core';
 import axios from 'axios';
-import { BlockWaiter, getWithAttempts } from './wait';
+import { sleep } from './wait';
 import crypto from 'crypto';
 import {
   AckFailuresResponse,
@@ -28,6 +28,7 @@ import {
   Event as CosmosEvent,
   createProtobufRpcClient,
   QueryClient,
+  StargateClient,
 } from '@cosmjs/stargate';
 
 import { GetPriceResponse } from './oracle';
@@ -95,27 +96,19 @@ export type TotalBurnedNeutronsAmountResponse = {
   };
 };
 
-// TODO?
-// export function createCosmosWrapper(rpc: string) {
-
-// }
-
 export class CosmosWrapper {
   readonly sdk: cosmosclient.CosmosSDK; // TODO: remove
-  readonly blockWaiter: BlockWaiter;
   readonly denom: string;
   readonly rest: string;
   readonly rpc: string;
 
   constructor(
     sdk: cosmosclient.CosmosSDK, // TODO: remove
-    blockWaiter: BlockWaiter,
     denom: string,
     rpc: string,
   ) {
     this.denom = denom;
     this.sdk = sdk;
-    this.blockWaiter = blockWaiter;
     this.rpc = rpc;
     this.rest = sdk.url; // TODO: just pass rest string without sdk
   }
@@ -143,7 +136,7 @@ export class CosmosWrapper {
       }
 
       numAttempts--;
-      await this.blockWaiter.waitBlocks(1);
+      await this.waitBlocks(1);
     }
 
     throw new Error('failed to query contract');
@@ -248,6 +241,27 @@ export class CosmosWrapper {
     });
 
     return parseInt(res?.balance.amount ?? '0', 10);
+  }
+
+  async waitBlocks(blocks: number, timeout = 120000): Promise<void> {
+    const start = Date.now();
+    const client = await StargateClient.connect(this.rpc);
+    const initBlock = await client.getBlock();
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        const block = await client.getBlock();
+        if (block.header.height - initBlock.header.height >= blocks) {
+          break;
+        }
+        if (Date.now() - start > timeout) {
+          throw new Error('Timeout waiting for the specific block');
+        }
+      } catch (e) {
+        //noop
+      }
+      await sleep(1000);
+    }
   }
 
   async queryDenomTrace(ibcDenom: string): Promise<DenomTraceResponse> {
@@ -355,12 +369,26 @@ export class CosmosWrapper {
     readyFunc: (t: T) => Promise<boolean>,
     numAttempts = 20,
   ): Promise<T> {
-    return await getWithAttempts(
-      this.blockWaiter,
-      getFunc,
-      readyFunc,
-      numAttempts,
-    );
+    let error = null;
+    let data: T;
+    while (numAttempts > 0) {
+      numAttempts--;
+      try {
+        data = await getFunc();
+        if (await readyFunc(data)) {
+          return data;
+        }
+      } catch (e) {
+        error = e;
+      }
+      await this.waitBlocks(1);
+    }
+    throw error != null
+      ? error
+      : new Error(
+          'getWithAttempts: no attempts left. Latest get response: ' +
+            (data === Object(data) ? JSON.stringify(data) : data).toString(),
+        );
   }
 
   async getCodeDataHash(codeId: number): Promise<string> {

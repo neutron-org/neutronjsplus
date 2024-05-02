@@ -6,7 +6,6 @@ import {
   mnemonicToWallet,
   NEUTRON_DENOM,
 } from './cosmos';
-import { BlockWaiter } from './wait';
 import { generateMnemonic } from 'bip39';
 import cosmosclient from '@cosmos-client/core';
 
@@ -34,8 +33,6 @@ const walletSet = async (
 export class TestStateLocalCosmosTestNet {
   sdk1: cosmosclient.CosmosSDK;
   sdk2: cosmosclient.CosmosSDK;
-  blockWaiter1: BlockWaiter;
-  blockWaiter2: BlockWaiter;
   wallets: Record<string, Record<string, Wallet>>;
   icq_web_host: string;
   rpc1: string;
@@ -60,13 +57,6 @@ export class TestStateLocalCosmosTestNet {
     this.sdk2 = new cosmosclient.CosmosSDK(host2, this.config.CHAIN_ID_2);
 
     this.icq_web_host = 'http://localhost:9999';
-
-    this.blockWaiter1 = new BlockWaiter(
-      process.env.NODE1_WS_URL || 'ws://localhost:26657',
-    );
-    this.blockWaiter2 = new BlockWaiter(
-      process.env.NODE2_WS_URL || 'ws://localhost:16657',
-    );
 
     this.wallets = {};
     const neutron = await walletSet(neutronPrefix, this.config);

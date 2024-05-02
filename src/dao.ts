@@ -6,7 +6,6 @@ import {
   getEventAttribute,
   wrapMsg,
 } from './cosmos';
-import { getWithAttempts } from './wait';
 import {
   MultiChoiceOption,
   NeutronContract,
@@ -40,7 +39,6 @@ import {
 import { WalletWrapper } from './wallet_wrapper';
 import { IndexedTx } from '@cosmjs/cosmwasm-stargate';
 import { ClientState } from '@neutron-org/cosmjs-types/ibc/lightclients/tendermint/v1/tendermint';
-import { Registry } from '@cosmjs/proto-signing';
 
 export type SubdaoProposalConfig = {
   threshold: any;
@@ -381,8 +379,7 @@ export class Dao {
   }
 
   async checkPassedProposal(proposalId: number) {
-    await getWithAttempts(
-      this.chain.blockWaiter,
+    await this.chain.getWithAttempts(
       async () => await this.queryProposal(proposalId),
       async (response) => response.proposal.status === 'passed',
       20,
@@ -390,8 +387,7 @@ export class Dao {
   }
 
   async checkPassedMultiChoiceProposal(proposalId: number) {
-    await getWithAttempts(
-      this.chain.blockWaiter,
+    await this.chain.getWithAttempts(
       async () => await this.queryMultiChoiceProposal(proposalId),
       async (response) => response.proposal.status === 'passed',
       20,
@@ -399,8 +395,7 @@ export class Dao {
   }
 
   async checkExecutedMultiChoiceProposal(proposalId: number) {
-    await getWithAttempts(
-      this.chain.blockWaiter,
+    await this.chain.getWithAttempts(
       async () => await this.queryMultiChoiceProposal(proposalId),
       async (response) => response.proposal.status === 'executed',
       20,
@@ -490,15 +485,14 @@ export class Dao {
       msgs,
       deposit,
     );
-    await loyalVoters[0].user.chain.blockWaiter.waitBlocks(1);
+    await loyalVoters[0].user.chain.waitBlocks(1);
 
     for (const voter of loyalVoters) {
       await voter.voteYes(proposalId);
     }
     await loyalVoters[0].executeProposal(proposalId);
 
-    await getWithAttempts(
-      loyalVoters[0].user.chain.blockWaiter,
+    await loyalVoters[0].user.chain.getWithAttempts(
       async () => await this.queryProposal(proposalId),
       async (response) => response.proposal.status === 'executed',
       20,
@@ -723,8 +717,7 @@ export class DaoMember {
     },
   ) {
     await this.executeProposal(proposalId, 'single', fee);
-    await getWithAttempts(
-      this.user.chain.blockWaiter,
+    await this.user.chain.getWithAttempts(
       async () => await this.dao.queryProposal(proposalId),
       async (response) => response.proposal.status === 'executed',
       20,
@@ -733,8 +726,7 @@ export class DaoMember {
 
   async executeMultiChoiceProposalWithAttempts(proposalId: number) {
     await this.executeMultiChoiceProposal(proposalId);
-    await getWithAttempts(
-      this.user.chain.blockWaiter,
+    await this.user.chain.getWithAttempts(
       async () => await this.dao.queryMultiChoiceProposal(proposalId),
       async (response) => response.proposal.status === 'executed',
       20,
@@ -1997,6 +1989,6 @@ export const deployNeutronDao = async (
     coreInstantiateMessage,
     DaoContractLabels.DAO_CORE,
   );
-  await cm.chain.blockWaiter.waitBlocks(1);
+  await cm.chain.waitBlocks(1);
   return getDaoContracts(cm.chain, daoCoreContract);
 };
