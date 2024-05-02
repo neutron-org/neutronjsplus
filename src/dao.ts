@@ -4,7 +4,6 @@ import {
   CosmosWrapper,
   createBankSendMessage,
   getEventAttribute,
-  packAnyMsg,
   wrapMsg,
 } from './cosmos';
 import { getWithAttempts } from './wait';

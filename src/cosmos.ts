@@ -23,7 +23,6 @@ import {
   ParamsTokenfactoryResponse,
 } from './types';
 import { QueryClientImpl } from 'cosmjs-types/cosmos/bank/v1beta1/query';
-import { Message } from '@bufbuild/protobuf';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import {
   Event as CosmosEvent,
@@ -612,13 +611,3 @@ export const filterIBCDenoms = (list: Coin[]) =>
   );
 
 export const wrapMsg = (x) => Buffer.from(JSON.stringify(x)).toString('base64');
-
-// *packAnyMsg* packs the protobuf message inside an Any type with given typeUrl
-export const packAnyMsg = (
-  typeUrl: string,
-  msg: Message,
-): cosmosclient.proto.google.protobuf.Any =>
-  new cosmosclient.proto.google.protobuf.Any({
-    type_url: typeUrl,
-    value: msg.toBinary(),
-  });
