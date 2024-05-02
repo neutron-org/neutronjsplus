@@ -1,8 +1,6 @@
 import Long from 'long';
 import { Wallet, CodeId } from './types';
 import { DEBUG_SUBMIT_TX, getContractBinary, getHeight } from './env';
-// import { MsgSubmitProposalLegacy } from '@neutron-org/cosmjs-types/'
-// import { ParameterChangeProposal } from './proto/cosmos_sdk/cosmos/params/v1beta1/params_pb';
 import { MsgRemoveInterchainQueryRequest } from '@neutron-org/cosmjs-types/neutron/interchainqueries/tx';
 import {
   IndexedTx,
@@ -29,53 +27,57 @@ import {
   MsgSetBeforeSendHook,
 } from '@neutron-org/cosmjs-types/osmosis/tokenfactory/v1beta1/tx';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-import { ParameterChangeProposal } from './proto/cosmos_sdk/cosmos/params/v1beta1/params_pb';
-import cosmosclient from '@cosmos-client/core';
+import { ParameterChangeProposal } from '@neutron-org/cosmjs-types/cosmos/params/v1beta1/params';
 
 // constructor for WalletWrapper
 export async function createWalletWrapper(
   chain: CosmosWrapper,
   wallet: Wallet,
 ) {
+  const registry = new Registry([
+    ...defaultRegistryTypes,
+    ...wasmTypes,
+
+    // TODO: extract into neutron_types
+    [MsgMint.typeUrl, MsgMint as any],
+    [MsgCreateDenom.typeUrl, MsgCreateDenom as any],
+    [MsgBurn.typeUrl, MsgBurn as any],
+    [MsgChangeAdmin.typeUrl, MsgChangeAdmin as any],
+    [MsgSetBeforeSendHook.typeUrl, MsgSetBeforeSendHook as any],
+
+    [
+      MsgRemoveInterchainQueryRequest.typeUrl,
+      MsgRemoveInterchainQueryRequest as any,
+    ],
+    [MsgAuctionBid.typeUrl, MsgAuctionBid as any],
+    [MsgSubmitProposalLegacy.typeUrl, MsgSubmitProposalLegacy as any],
+    [ParameterChangeProposal.typeUrl, ParameterChangeProposal as any],
+  ]);
+
   const wasmClient = await SigningCosmWasmClient.connectWithSigner(
     chain.rpc,
     wallet.directwallet,
-    {
-      registry: new Registry([
-        ...defaultRegistryTypes,
-        ...wasmTypes,
-
-        // TODO: extract into neutron_types
-        [MsgMint.typeUrl, MsgMint as any],
-        [MsgCreateDenom.typeUrl, MsgCreateDenom as any],
-        [MsgBurn.typeUrl, MsgBurn as any],
-        [MsgChangeAdmin.typeUrl, MsgChangeAdmin as any],
-        [MsgSetBeforeSendHook.typeUrl, MsgSetBeforeSendHook as any],
-
-        [
-          MsgRemoveInterchainQueryRequest.typeUrl,
-          MsgRemoveInterchainQueryRequest as any,
-        ],
-        [MsgAuctionBid.typeUrl, MsgAuctionBid as any],
-      ]),
-    },
+    { registry },
   );
-  return new WalletWrapper(chain, wallet, wasmClient);
+  return new WalletWrapper(chain, wallet, wasmClient, registry);
 }
 
 export class WalletWrapper {
   readonly chain: CosmosWrapper;
   readonly wallet: Wallet;
   readonly wasmClient: SigningCosmWasmClient;
+  readonly registry: Registry;
 
   constructor(
     chain: CosmosWrapper,
     wallet: Wallet,
     wasmClient: SigningCosmWasmClient,
+    registry: Registry,
   ) {
     this.chain = chain;
     this.wallet = wallet;
     this.wasmClient = wasmClient;
+    this.registry = registry;
   }
 
   async queryBalances(): Promise<BalancesResponse> {
@@ -270,21 +272,24 @@ export class WalletWrapper {
       amount: [{ denom: this.chain.denom, amount: '1000' }],
     },
   ): Promise<IndexedTx> {
+    const proposal: ParameterChangeProposal = {
+      title: 'mock',
+      description: 'mock',
+      changes: [
+        {
+          key: key,
+          subspace: subspace,
+          value: value,
+        },
+      ],
+    };
     const val: MsgSubmitProposalLegacy = {
       content: {
         typeUrl: '/cosmos.params.v1beta1.ParameterChangeProposal',
-        value: new ParameterChangeProposal({
-          title: 'mock',
-          description: 'mock',
-          changes: [
-            new cosmosclient.proto.cosmos.params.v1beta1.ParamChange({
-              // TODO: remove cosmosclient
-              key: key,
-              subspace: subspace,
-              value: value,
-            }),
-          ],
-        }).toBinary(),
+        value: this.registry.encode({
+          typeUrl: ParameterChangeProposal.typeUrl,
+          value: proposal,
+        }),
       },
       proposer: this.wallet.account.address,
     };
