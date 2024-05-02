@@ -83,7 +83,10 @@ export type UpgradeInfo = {
   name: string;
   height: number;
   info: string;
-  upgraded_client_state: Any;
+  upgraded_client_state: {
+    type_url: string;
+    value: string;
+  };
 };
 
 export type CurrencyPairInfo = {
