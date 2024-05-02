@@ -1,8 +1,7 @@
 import Long from 'long';
 import { Wallet, CodeId } from './types';
-import { DEBUG_SUBMIT_TX, getContractBinary } from './env';
+import { DEBUG_SUBMIT_TX, getContractBinary, getHeight } from './env';
 // import { MsgSubmitProposalLegacy } from '@neutron-org/cosmjs-types/'
-// import { MsgAuctionBid } from './proto/block_sdk/sdk/auction/v1/tx_pb';
 // import { ParameterChangeProposal } from './proto/cosmos_sdk/cosmos/params/v1beta1/params_pb';
 import { MsgRemoveInterchainQueryRequest } from '@neutron-org/cosmjs-types/neutron/interchainqueries/tx';
 import {
@@ -17,6 +16,8 @@ import {
   wasmTypes,
 } from '@cosmjs/cosmwasm-stargate';
 import { MsgTransfer } from '@neutron-org/cosmjs-types/ibc/applications/transfer/v1/tx';
+import { MsgAuctionBid } from '@neutron-org/cosmjs-types/sdk/auction/v1/tx';
+import { MsgSubmitProposalLegacy } from '@neutron-org/cosmjs-types/cosmos/adminmodule/adminmodule/tx';
 
 import { Coin, EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { BalancesResponse, CosmosWrapper, NEUTRON_DENOM } from './cosmos';
@@ -27,6 +28,9 @@ import {
   MsgMint,
   MsgSetBeforeSendHook,
 } from '@neutron-org/cosmjs-types/osmosis/tokenfactory/v1beta1/tx';
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { ParameterChangeProposal } from './proto/cosmos_sdk/cosmos/params/v1beta1/params_pb';
+import cosmosclient from '@cosmos-client/core';
 
 // constructor for WalletWrapper
 export async function createWalletWrapper(
@@ -40,6 +44,8 @@ export async function createWalletWrapper(
       registry: new Registry([
         ...defaultRegistryTypes,
         ...wasmTypes,
+
+        // TODO: extract into neutron_types
         [MsgMint.typeUrl, MsgMint as any],
         [MsgCreateDenom.typeUrl, MsgCreateDenom as any],
         [MsgBurn.typeUrl, MsgBurn as any],
@@ -50,6 +56,7 @@ export async function createWalletWrapper(
           MsgRemoveInterchainQueryRequest.typeUrl,
           MsgRemoveInterchainQueryRequest as any,
         ],
+        [MsgAuctionBid.typeUrl, MsgAuctionBid as any],
       ]),
     },
   );
@@ -115,6 +122,39 @@ export class WalletWrapper {
     error = error ?? new Error('failed to submit tx');
 
     throw error;
+  }
+
+  async execTxWithSequence(
+    fee: StdFee,
+    msgs: EncodeObject[],
+    sequence: number,
+    memo?: string,
+    timeoutHeight?: bigint,
+  ): Promise<IndexedTx> {
+    const { accountNumber } = await this.wasmClient.getAccount(
+      this.wallet.address,
+    );
+    const chainId = await this.wasmClient.getChainId();
+    const signerData = {
+      accountNumber: accountNumber,
+      sequence: sequence,
+      chainId: chainId,
+    };
+    const txRaw = await this.wasmClient.sign(
+      this.wallet.address,
+      msgs,
+      fee,
+      memo,
+      signerData,
+      timeoutHeight,
+    );
+    const txBytes = TxRaw.encode(txRaw).finish();
+    const result = await this.wasmClient.broadcastTx(
+      txBytes,
+      this.wasmClient.broadcastTimeoutMs,
+      this.wasmClient.broadcastPollIntervalMs,
+    );
+    return await this.wasmClient.getTx(result.transactionHash);
   }
 
   // storeWasm stores the wasm code by the passed path on the blockchain.
@@ -221,72 +261,66 @@ export class WalletWrapper {
     return res;
   }
 
-  // TODO
-  // async msgSendDirectProposal(
-  //   subspace: string,
-  //   key: string,
-  //   value: string,
-  //   fee = {
-  //     gas: '200000',
-  //     amount: [{ denom: this.chain.denom, amount: '1000' }],
-  //   },
-  // ): Promise<IndexedTx> {
-  //   const value: MsgSubmitProposalLegacy = new {
-  //     content: {
-  //       typeUrl: '/cosmos.params.v1beta1.ParameterChangeProposal',
-  //       value: new ParameterChangeProposal({
-  //         title: 'mock',
-  //         description: 'mock',
-  //         changes: [
-  //           new cosmosclient.proto.cosmos.params.v1beta1.ParamChange({ // TODO: remove cosmosclient
-  //             key: key,
-  //             subspace: subspace,
-  //             value: value,
-  //           }),
-  //         ],
-  //       }).toBinary(),
-  //     },
-  //     proposer: this.wallet.account.address,
-  //   });
-  //   const msg = {
-  //     typeUrl: '',
-  //     value
-  //   };
-  //   return await this.execTx2(
-  //     fee,
-  //     [msg],
-  //   );
-  // }
+  async msgSendDirectProposal(
+    subspace: string,
+    key: string,
+    value: string,
+    fee = {
+      gas: '200000',
+      amount: [{ denom: this.chain.denom, amount: '1000' }],
+    },
+  ): Promise<IndexedTx> {
+    const val: MsgSubmitProposalLegacy = {
+      content: {
+        typeUrl: '/cosmos.params.v1beta1.ParameterChangeProposal',
+        value: new ParameterChangeProposal({
+          title: 'mock',
+          description: 'mock',
+          changes: [
+            new cosmosclient.proto.cosmos.params.v1beta1.ParamChange({
+              // TODO: remove cosmosclient
+              key: key,
+              subspace: subspace,
+              value: value,
+            }),
+          ],
+        }).toBinary(),
+      },
+      proposer: this.wallet.account.address,
+    };
+    const msg = {
+      typeUrl: MsgSubmitProposalLegacy.typeUrl,
+      value: val,
+    };
+    return await this.execTx2(fee, [msg]);
+  }
 
-  // TODO
-  // async msgSendAuction(
-  //   bidder: string,
-  //   bid: Coin,
-  //   transactions: Uint8Array[],
-  //   fee = {
-  //     gas_limit: Long.fromString('200000'),
-  //     amount: [{ denom: this.chain.denom, amount: '1000' }],
-  //   },
-  //   sequence: number = this.wallet.account.sequence,
-  //   mode: cosmosclient.rest.tx.BroadcastTxMode = cosmosclient.rest.tx
-  //     .BroadcastTxMode.Sync,
-  // ): Promise<BroadcastTx200ResponseTxResponse> {
-  //   const msg = new MsgAuctionBid({
-  //     bidder,
-  //     bid,
-  //     transactions,
-  //   });
-  //   const currentHeight = await getHeight(this.chain.sdk);
-  //   const res = await this.execTx(
-  //     fee,
-  //     [packAnyMsg('/sdk.auction.v1.MsgAuctionBid', msg)],
-  //     10,
-  //     mode,
-  //     sequence,
-  //     currentHeight + 1,
-  //   );
-  //   return res?.tx_response;
-  // }
+  async msgSendAuction(
+    bidder: string,
+    bid: Coin,
+    transactions: Uint8Array[],
+    fee = {
+      gas: '200000',
+      amount: [{ denom: this.chain.denom, amount: '1000' }],
+    },
+    sequence: number,
+  ): Promise<IndexedTx> {
+    const value: MsgAuctionBid = {
+      bidder,
+      bid,
+      transactions,
+    };
+    const msg = { typeUrl: MsgAuctionBid.typeUrl, value: value };
+    const currentHeight = await getHeight(this.chain.sdk);
+    const res = await this.execTxWithSequence(
+      fee,
+      [msg],
+      sequence,
+      '',
+      BigInt(currentHeight + 1),
+    );
+    return res;
+  }
 
   /* simulateFeeBurning simulates fee burning via send tx.
    */

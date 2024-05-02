@@ -165,28 +165,6 @@ export class CosmosWrapper {
     }
   }
 
-  async getSeq(address: string): Promise<number> {
-    const account = await cosmosclient.rest.auth
-      .account(this.sdk, address)
-      .then((res) =>
-        cosmosclient.codec.protoJSONToInstance(
-          cosmosclient.codec.castProtoJSONOfProtoAny(res.data.account),
-        ),
-      )
-      .catch((e) => {
-        console.log(e);
-        throw e;
-      });
-
-    if (
-      !(account instanceof cosmosclient.proto.cosmos.auth.v1beta1.BaseAccount)
-    ) {
-      throw new Error("can't get account");
-    }
-
-    return account.sequence;
-  }
-
   async queryInterchainqueriesParams(): Promise<ParamsInterchainqueriesResponse> {
     const req = await axios.get(
       `${this.rest}/neutron/interchainqueries/params`,
