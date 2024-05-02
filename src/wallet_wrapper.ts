@@ -1,6 +1,6 @@
 import Long from 'long';
 import { Wallet, CodeId } from './types';
-import { DEBUG_SUBMIT_TX, getContractBinary, getHeight } from './env';
+import { DEBUG_SUBMIT_TX, getContractBinary } from './env';
 import { MsgRemoveInterchainQueryRequest } from '@neutron-org/cosmjs-types/neutron/interchainqueries/tx';
 import {
   IndexedTx,
@@ -316,7 +316,8 @@ export class WalletWrapper {
       transactions,
     };
     const msg = { typeUrl: MsgAuctionBid.typeUrl, value: value };
-    const currentHeight = await getHeight(this.chain.sdk);
+
+    const currentHeight = await this.chain.getHeight();
     const res = await this.execTxWithSequence(
       fee,
       [msg],

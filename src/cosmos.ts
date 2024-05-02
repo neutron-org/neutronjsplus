@@ -120,6 +120,14 @@ export class CosmosWrapper {
     this.rest = sdk.url; // TODO: just pass rest string without sdk
   }
 
+  async getHeight(): Promise<number> {
+    // TODO: use higher level client instead of `Tendermint37Client`
+    const tendermint = await Tendermint37Client.connect(this.rpc);
+
+    const block = await tendermint.block();
+    return +block.block.header.height;
+  }
+
   async queryContractWithWait<T>(
     contract: string,
     query: Record<string, unknown>,

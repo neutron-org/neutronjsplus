@@ -1499,7 +1499,6 @@ export class DaoMember {
     info: string,
     amount: string,
   ): Promise<number> {
-    // const registry = new Registry([ClientState.typeUrl, ClientState as any]);
     const message = upgradeProposal({
       title,
       description,
@@ -1508,7 +1507,7 @@ export class DaoMember {
       info,
       upgraded_client_state: {
         type_url: ClientState.typeUrl,
-        value: '{}',
+        value: Buffer.from(JSON.stringify({})).toString('base64'),
       },
     });
     return await this.submitSingleChoiceProposal(

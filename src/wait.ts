@@ -15,6 +15,10 @@ export class BlockWaiter {
   }
 
   waitBlocks(n: number, timeout = 120000): Promise<void> {
+    // const socket = new StreamingSocket(wsUrl + path, 3000);
+    // socket.connect();
+    // socket.events.subscribe();
+
     return new Promise((resolve, reject) => {
       let ws = null;
       const x = setTimeout(() => {
