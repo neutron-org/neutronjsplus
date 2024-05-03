@@ -27,7 +27,8 @@ import {
   ParamsContractmanagerInfo,
   ParamsCronInfo,
   ParamsFeeburnerInfo,
-  ParamsFeerefunderInfo, ParamsGlobalfeeInfo,
+  ParamsFeerefunderInfo,
+  ParamsGlobalfeeInfo,
   ParamsInterchainqueriesInfo,
   ParamsInterchaintxsInfo,
   ParamsTokenfactoryInfo,
@@ -145,6 +146,36 @@ export type ProposalModule = {
     };
   };
 };
+
+export type NewMarkets = {
+  ticker: {
+    currency_pair: {
+      Base: string;
+      Quote: string;
+    };
+    decimals: number;
+    min_provider_count: number;
+    enabled: boolean;
+    metadata_JSON: string;
+  };
+  providers: {
+    providers: {
+      name: string;
+      off_chain_ticker: string;
+    }[];
+  };
+  paths: {
+    paths: {
+      operations: {
+        provider: string;
+        currency_pair: {
+          Base: string;
+          Quote: string;
+        };
+      }[];
+    }[];
+  };
+}[];
 
 export const DaoContractLabels = {
   DAO_CORE: 'neutron.core',
@@ -415,22 +446,34 @@ export class Dao {
     );
   }
 
-  async queryTotalVotingPower(): Promise<TotalPowerAtHeightResponse> {
+  async queryTotalVotingPower(
+    height?: number,
+  ): Promise<TotalPowerAtHeightResponse> {
     return await this.chain.queryContract<TotalPowerAtHeightResponse>(
       this.contracts.core.address,
       {
-        total_power_at_height: {},
+        total_power_at_height:
+          typeof height === 'undefined' ? {} : { height: height },
       },
     );
   }
 
-  async queryVotingPower(addr: string): Promise<VotingPowerAtHeightResponse> {
+  async queryVotingPower(
+    addr: string,
+    height?: number,
+  ): Promise<VotingPowerAtHeightResponse> {
     return await this.chain.queryContract<VotingPowerAtHeightResponse>(
       this.contracts.core.address,
       {
-        voting_power_at_height: {
-          address: addr,
-        },
+        voting_power_at_height:
+          typeof height === 'undefined'
+            ? {
+                address: addr,
+              }
+            : {
+                address: addr,
+                height: height,
+              },
       },
     );
   }
@@ -1311,12 +1354,18 @@ export class DaoMember {
     description: string,
     message: ParamsGlobalfeeInfo,
     amount: string,
+    fee = {
+      gas_limit: Long.fromString('4000000'),
+      amount: [{ denom: this.user.chain.denom, amount: '10000' }],
+    },
   ): Promise<number> {
     return await this.submitSingleChoiceProposal(
       title,
       description,
       [message],
       amount,
+      'single',
+      fee,
     );
   }
 
@@ -1567,8 +1616,45 @@ export class DaoMember {
     );
   }
 
-  async queryVotingPower(): Promise<VotingPowerAtHeightResponse> {
-    return await this.dao.queryVotingPower(this.user.wallet.address.toString());
+  /**
+   * submitRemoveSchedule creates proposal to remove added schedule.
+   */
+  async submitUpdateMarketMap(
+    title: string,
+    description: string,
+    newMarkets: NewMarkets,
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [
+        {
+          custom: {
+            submit_admin_proposal: {
+              admin_proposal: {
+                proposal_execute_message: {
+                  message: JSON.stringify({
+                    '@type': '/slinky.marketmap.v1.MsgUpdateMarketMap',
+                    signer: ADMIN_MODULE_ADDRESS,
+                    create_markets: newMarkets,
+                  }),
+                },
+              },
+            },
+          },
+        },
+      ],
+      '1000',
+    );
+  }
+
+  async queryVotingPower(
+    height?: number,
+  ): Promise<VotingPowerAtHeightResponse> {
+    return await this.dao.queryVotingPower(
+      this.user.wallet.address.toString(),
+      height,
+    );
   }
 
   async addSubdaoToDao(subDaoCore: string) {

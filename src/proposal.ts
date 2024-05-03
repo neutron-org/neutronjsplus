@@ -1,6 +1,6 @@
 import { google } from '@cosmos-client/core/cjs/proto';
 import { ADMIN_MODULE_ADDRESS } from './cosmos';
-import cosmosclient from "@cosmos-client/core";
+import cosmosclient from '@cosmos-client/core';
 
 export type ParamChangeProposalInfo = {
   title: string;
@@ -25,7 +25,6 @@ export type ParamsInterchainqueriesInfo = {
   query_deposit: null;
   tx_query_removal_limit: number;
 };
-
 
 export type ParamsTokenfactoryInfo = {
   denom_creation_fee: any;
@@ -84,6 +83,11 @@ export type UpgradeInfo = {
   height: number;
   info: string;
   upgraded_client_state: google.protobuf.Any;
+};
+
+export type CurrencyPairInfo = {
+  Base: string;
+  Quote: string;
 };
 
 export type SendProposalInfo = {
@@ -327,12 +331,13 @@ export const updateGlobalFeeParamsProposal = (
       admin_proposal: {
         proposal_execute_message: {
           message: JSON.stringify({
-            '@type': '/neutron.globalfee.MsgUpdateParams',
+            '@type': '/gaia.globalfee.v1beta1.MsgUpdateParams',
             authority: ADMIN_MODULE_ADDRESS,
             params: {
               minimum_gas_prices: info.minimum_gas_prices,
               bypass_min_fee_msg_types: info.bypass_min_fee_msg_types,
-              max_total_bypass_min_fee_msg_gas_usage: info.max_total_bypass_min_fee_msg_gas_usage,
+              max_total_bypass_min_fee_msg_gas_usage:
+                info.max_total_bypass_min_fee_msg_gas_usage,
             },
           }),
         },
@@ -461,6 +466,24 @@ export const upgradeProposal = (info: UpgradeInfo): any => ({
             info: info.info,
           },
           upgraded_client_state: info.upgraded_client_state,
+        },
+      },
+    },
+  },
+});
+
+export const addCurrencyPairsProposal = (
+  currencyPairs: CurrencyPairInfo[],
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/slinky.oracle.v1.MsgAddCurrencyPairs',
+            authority: ADMIN_MODULE_ADDRESS,
+            currency_pairs: currencyPairs,
+          }),
         },
       },
     },

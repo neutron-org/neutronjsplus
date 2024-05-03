@@ -42,6 +42,8 @@ import { MsgSend } from './proto/cosmos_sdk/cosmos/bank/v1beta1/tx_pb';
 import { MsgRemoveInterchainQueryRequest } from './proto/neutron/neutron/interchainqueries/tx_pb';
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 import IHeight = ibc.core.client.v1.IHeight;
+import { GetPriceResponse } from './oracle';
+import { GetAllCurrencyPairsResponse, GetPricesResponse } from './oracle';
 
 export const NEUTRON_DENOM = process.env.NEUTRON_DENOM || 'untrn';
 export const IBC_ATOM_DENOM = process.env.IBC_ATOM_DENOM || 'uibcatom';
@@ -471,6 +473,47 @@ export class CosmosWrapper {
   async queryContractAdmin(address: string): Promise<string> {
     const resp = await this.getContractInfo(address);
     return resp.contract_info.admin;
+  }
+
+  async queryOraclePrice(
+    base: string,
+    quote: string,
+  ): Promise<GetPriceResponse> {
+    try {
+      const req = await axios.get<any>(
+        `${this.sdk.url}/slinky/oracle/v1/get_price`,
+        {
+          params: {
+            'currency_pair.Base': base,
+            'currency_pair.Quote': quote,
+          },
+        },
+      );
+      return req.data;
+    } catch (e) {
+      if (e.response?.data?.message !== undefined) {
+        throw new Error(e.response?.data?.message);
+      }
+      throw e;
+    }
+  }
+
+  async queryOraclePrices(
+    currencyPairIds: string[],
+  ): Promise<GetPricesResponse> {
+    const req = await axios.get(`${this.sdk.url}/slinky/oracle/v1/get_prices`, {
+      params: { currency_pair_ids: currencyPairIds.join(',') },
+    });
+
+    return req.data;
+  }
+
+  async queryOracleAllCurrencyPairs(): Promise<GetAllCurrencyPairsResponse> {
+    const req = await axios.get(
+      `${this.sdk.url}/slinky/oracle/v1/get_all_tickers`,
+    );
+
+    return req.data;
   }
 }
 
@@ -933,8 +976,6 @@ export class WalletWrapper {
   }
 }
 
-type TxResponseType = Awaited<ReturnType<typeof cosmosclient.rest.tx.getTx>>;
-
 export const getEventAttributesFromTx = (
   data: any,
   event: string,
@@ -1010,19 +1051,22 @@ export const mnemonicToWallet = async (
   return new Wallet(address, account, pubKey, privKey, addrPrefix);
 };
 
-export const getSequenceId = (rawLog: BroadcastTx200ResponseTxResponse | undefined): number => {
+export const getSequenceId = (
+  rawLog: BroadcastTx200ResponseTxResponse | undefined,
+): number => {
   if (!rawLog) {
     throw 'getSequenceId: empty rawLog';
   }
   for (const event of rawLog.events) {
     if (event.type === 'send_packet') {
-      const sequenceAttr = event.attributes.find(attr => attr.key === 'packet_sequence');
+      const sequenceAttr = event.attributes.find(
+        (attr) => attr.key === 'packet_sequence',
+      );
       if (sequenceAttr) {
         return parseInt(sequenceAttr.value);
       }
     }
   }
-
 };
 
 export const getIBCDenom = (portName, channelName, denom: string): string => {

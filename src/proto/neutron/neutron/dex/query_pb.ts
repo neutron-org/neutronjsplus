@@ -1492,9 +1492,9 @@ export class QueryGetPoolMetadataRequest extends Message<QueryGetPoolMetadataReq
  */
 export class QueryGetPoolMetadataResponse extends Message<QueryGetPoolMetadataResponse> {
   /**
-   * @generated from field: neutron.dex.PoolMetadata Pool_metadata = 1;
+   * @generated from field: neutron.dex.PoolMetadata pool_metadata = 1;
    */
-  PoolMetadata?: PoolMetadata;
+  poolMetadata?: PoolMetadata;
 
   constructor(data?: PartialMessage<QueryGetPoolMetadataResponse>) {
     super();
@@ -1504,7 +1504,7 @@ export class QueryGetPoolMetadataResponse extends Message<QueryGetPoolMetadataRe
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "neutron.dex.QueryGetPoolMetadataResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "Pool_metadata", kind: "message", T: PoolMetadata },
+    { no: 1, name: "pool_metadata", kind: "message", T: PoolMetadata },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetPoolMetadataResponse {

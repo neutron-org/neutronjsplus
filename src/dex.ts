@@ -9,6 +9,7 @@ export type ParamsResponse = {
 
 export type LimitOrderTrancheUserResponse = {
   limit_order_tranche_user?: LimitOrderTrancheUser;
+  withdrawable_shares?: string;
 };
 
 export type AllLimitOrderTrancheUserResponse = {
