@@ -185,7 +185,7 @@ export const NeutronContract = {
   TGE_LOCKDROP_CURRENT:
     '../contracts_tge_migration/current_neutron_lockdrop.wasm',
   // pre-migration mainnet version of the vesting lp contract
-  VESING_LP_CURRENT: '../contracts_tge_migration/current_vesting_lp.wasm',
+  VESTING_LP_CURRENT: '../contracts_tge_migration/current_vesting_lp.wasm',
   // pre-migration mainnet version of the reserve contract
   RESERVE_CURRENT: '../contracts_tge_migration/current_neutron_reserve.wasm',
 

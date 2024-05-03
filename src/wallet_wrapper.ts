@@ -88,7 +88,7 @@ export class WalletWrapper {
     return await this.chain.queryDenomBalance(this.wallet.address, denom);
   }
 
-  async execTx2(
+  async execTx(
     fee: StdFee | 'auto' | number,
     msgs: EncodeObject[],
     numAttempts = 10,
@@ -124,39 +124,6 @@ export class WalletWrapper {
     error = error ?? new Error('failed to submit tx');
 
     throw error;
-  }
-
-  async execTxWithSequence(
-    fee: StdFee,
-    msgs: EncodeObject[],
-    sequence: number,
-    memo?: string,
-    timeoutHeight?: bigint,
-  ): Promise<IndexedTx> {
-    const { accountNumber } = await this.wasmClient.getAccount(
-      this.wallet.address,
-    );
-    const chainId = await this.wasmClient.getChainId();
-    const signerData = {
-      accountNumber: accountNumber,
-      sequence: sequence,
-      chainId: chainId,
-    };
-    const txRaw = await this.wasmClient.sign(
-      this.wallet.address,
-      msgs,
-      fee,
-      memo,
-      signerData,
-      timeoutHeight,
-    );
-    const txBytes = TxRaw.encode(txRaw).finish();
-    const result = await this.wasmClient.broadcastTx(
-      txBytes,
-      this.wasmClient.broadcastTimeoutMs,
-      this.wasmClient.broadcastPollIntervalMs,
-    );
-    return await this.wasmClient.getTx(result.transactionHash);
   }
 
   // storeWasm stores the wasm code by the passed path on the blockchain.
@@ -252,7 +219,7 @@ export class WalletWrapper {
       },
     };
 
-    const res = await this.execTx2(
+    const res = await this.execTx(
       {
         amount: fee.amount,
         gas: fee.gas_limit + '',
@@ -297,35 +264,7 @@ export class WalletWrapper {
       typeUrl: MsgSubmitProposalLegacy.typeUrl,
       value: val,
     };
-    return await this.execTx2(fee, [msg]);
-  }
-
-  async msgSendAuction(
-    bidder: string,
-    bid: Coin,
-    transactions: Uint8Array[],
-    fee = {
-      gas: '200000',
-      amount: [{ denom: this.chain.denom, amount: '1000' }],
-    },
-    sequence: number,
-  ): Promise<IndexedTx> {
-    const value: MsgAuctionBid = {
-      bidder,
-      bid,
-      transactions,
-    };
-    const msg = { typeUrl: MsgAuctionBid.typeUrl, value: value };
-
-    const currentHeight = await this.chain.getHeight();
-    const res = await this.execTxWithSequence(
-      fee,
-      [msg],
-      sequence,
-      '',
-      BigInt(currentHeight + 1),
-    );
-    return res;
+    return await this.execTx(fee, [msg]);
   }
 
   /* simulateFeeBurning simulates fee burning via send tx.
@@ -365,7 +304,7 @@ export class WalletWrapper {
       value,
     };
 
-    return await this.execTx2(
+    return await this.execTx(
       {
         gas: '200000',
         amount: [{ denom: this.chain.denom, amount: '1000' }],
@@ -409,6 +348,6 @@ export class WalletWrapper {
       amount: [{ denom: this.chain.denom, amount: '1000' }],
     };
 
-    return await this.execTx2(fee, [msg]);
+    return await this.execTx(fee, [msg]);
   }
 }

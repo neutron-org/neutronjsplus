@@ -43,7 +43,7 @@ export const msgMintDenom = async (
     amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
   };
 
-  return await cmNeutron.execTx2(fee, [msg]);
+  return await cmNeutron.execTx(fee, [msg]);
 };
 
 export const msgCreateDenom = async (
@@ -64,7 +64,7 @@ export const msgCreateDenom = async (
     amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
   };
 
-  return await cmNeutron.execTx2(fee, [msg]);
+  return await cmNeutron.execTx(fee, [msg]);
 };
 
 export const msgBurn = async (
@@ -91,7 +91,7 @@ export const msgBurn = async (
     amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
   };
 
-  return await cmNeutron.execTx2(fee, [msg]);
+  return await cmNeutron.execTx(fee, [msg]);
 };
 
 // Create MsgChangeAdmin message
@@ -115,7 +115,7 @@ export const msgChangeAdmin = async (
     amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
   };
 
-  return await cmNeutron.execTx2(fee, [msg]);
+  return await cmNeutron.execTx(fee, [msg]);
 };
 
 export const msgSetBeforeSendHook = async (
@@ -138,7 +138,7 @@ export const msgSetBeforeSendHook = async (
     amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
   };
 
-  return await cmNeutron.execTx2(fee, [msg]);
+  return await cmNeutron.execTx(fee, [msg]);
 };
 
 export const checkTokenfactoryParams = async (

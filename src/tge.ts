@@ -207,7 +207,7 @@ export class Tge {
       'ASTRO_WHITELIST',
       'ASTRO_VESTING',
       'ASTRO_COIN_REGISTRY',
-      'VESING_LP_CURRENT',
+      'VESTING_LP_CURRENT',
       'LOCKDROP_VAULT',
       'CREDITS_VAULT',
       'VESTING_LP_VAULT',
@@ -371,13 +371,13 @@ export class Tge {
 
     this.contracts.vestingAtomLp = await instantiateVestingLp(
       this.instantiator,
-      this.codeIds.VESING_LP_CURRENT,
+      this.codeIds.VESTING_LP_CURRENT,
       this.tokenInfoManager.wallet.address,
       'vesting_atom_lp',
     );
     this.contracts.vestingUsdcLp = await instantiateVestingLp(
       this.instantiator,
-      this.codeIds.VESING_LP_CURRENT,
+      this.codeIds.VESTING_LP_CURRENT,
       this.tokenInfoManager.wallet.address,
       'vesting_usdc_lp',
     );
@@ -1357,7 +1357,7 @@ export const instantiateAstroIncentives = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
+    {
       astro_token: {
         native_token: {
           denom,
@@ -1366,7 +1366,7 @@ export const instantiateAstroIncentives = async (
       factory: factoryContract,
       owner: cm.wallet.address.toString(),
       vesting_contract: vestingContract,
-    }),
+    },
     label,
   );
   if (!res) {
