@@ -19,8 +19,6 @@
     "@cosmjs/cosmwasm-stargate": "^0.32.3",
     "@cosmjs/proto-signing": "^0.32.3",
     "@cosmjs/stargate": "^0.32.3",
-    "@cosmos-client/core": "^0.47.4",
-    "@cosmos-client/ibc": "^1.2.1",
     "@neutron-org/cosmjs-types": "0.9.2-rc1",
     "axios": "^0.27.2",
     "long": "^5.2.1",

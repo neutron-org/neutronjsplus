@@ -7,7 +7,6 @@ import {
   NEUTRON_DENOM,
 } from './cosmos';
 import { generateMnemonic } from 'bip39';
-import cosmosclient from '@cosmos-client/core';
 
 import { Wallet } from './types';
 import { defaultRegistryTypes, SigningStargateClient } from '@cosmjs/stargate';
@@ -31,12 +30,12 @@ const walletSet = async (
 });
 
 export class TestStateLocalCosmosTestNet {
-  sdk1: cosmosclient.CosmosSDK;
-  sdk2: cosmosclient.CosmosSDK;
   wallets: Record<string, Record<string, Wallet>>;
   icq_web_host: string;
   rpc1: string;
   rpc2: string;
+  rest1: string;
+  rest2: string;
 
   constructor(private config: any) {}
 
@@ -44,8 +43,8 @@ export class TestStateLocalCosmosTestNet {
     const neutronPrefix = process.env.NEUTRON_ADDRESS_PREFIX || 'neutron';
     const cosmosPrefix = process.env.COSMOS_ADDRESS_PREFIX || 'cosmos';
 
-    const host1 = process.env.NODE1_URL || 'http://localhost:1317';
-    const host2 = process.env.NODE2_URL || 'http://localhost:1316';
+    const restNeutron = process.env.NODE1_URL || 'http://localhost:1317';
+    const restGaia = process.env.NODE2_URL || 'http://localhost:1316';
 
     const rpcNeutron = process.env.NODE1_RPC || 'http://localhost:26657';
     const rpcGaia = process.env.NODE2_RPC || 'http://localhost:16657';
@@ -53,8 +52,8 @@ export class TestStateLocalCosmosTestNet {
     this.rpc1 = rpcNeutron;
     this.rpc2 = rpcGaia;
 
-    this.sdk1 = new cosmosclient.CosmosSDK(host1, this.config.CHAIN_ID_1);
-    this.sdk2 = new cosmosclient.CosmosSDK(host2, this.config.CHAIN_ID_2);
+    this.rest1 = restNeutron;
+    this.rest2 = restGaia;
 
     this.icq_web_host = 'http://localhost:9999';
 

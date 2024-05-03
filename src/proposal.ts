@@ -1,7 +1,5 @@
-import { google } from '@cosmos-client/core/cjs/proto';
 import { ADMIN_MODULE_ADDRESS } from './cosmos';
 import { Coin } from '@cosmjs/proto-signing';
-import { Any } from '@neutron-org/cosmjs-types/google/protobuf/any';
 
 export type ParamChangeProposalInfo = {
   title: string;

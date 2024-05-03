@@ -1,4 +1,3 @@
-import cosmosclient from '@cosmos-client/core';
 import axios from 'axios';
 import { sleep } from './wait';
 import crypto from 'crypto';
@@ -48,6 +47,7 @@ export const ADMIN_MODULE_ADDRESS =
 // BalancesResponse is the response model for the bank balances query.
 export type BalancesResponse = {
   balances: Coin[];
+  // TODO: fixme?
   // pagination: {
   // next_key: string;
   // total: string;
@@ -97,20 +97,14 @@ export type TotalBurnedNeutronsAmountResponse = {
 };
 
 export class CosmosWrapper {
-  readonly sdk: cosmosclient.CosmosSDK; // TODO: remove
   readonly denom: string;
   readonly rest: string;
   readonly rpc: string;
 
-  constructor(
-    sdk: cosmosclient.CosmosSDK, // TODO: remove
-    denom: string,
-    rpc: string,
-  ) {
+  constructor(denom: string, rest: string, rpc: string) {
     this.denom = denom;
-    this.sdk = sdk;
     this.rpc = rpc;
-    this.rest = sdk.url; // TODO: just pass rest string without sdk
+    this.rest = rest;
   }
 
   async getHeight(): Promise<number> {

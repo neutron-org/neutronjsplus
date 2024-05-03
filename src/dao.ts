@@ -362,7 +362,7 @@ export const getSubDaoContracts = async (
 export const getTreasuryContract = async (
   cm: CosmosWrapper,
 ): Promise<string> => {
-  const url = `${cm.sdk.url}/neutron/feeburner/params`;
+  const url = `${cm.rest}/neutron/feeburner/params`;
   const resp = await axios.get<{
     params: { treasury_address: string };
   }>(url);
