@@ -1,5 +1,5 @@
-import { PageResponse } from './proto/cosmos_sdk/cosmos/base/query/v1beta1/pagination_pb';
-import { Coin } from './proto/cosmos_sdk/cosmos/base/v1beta1/coin_pb';
+import { PageResponse } from '@neutron-org/cosmjs-types/cosmos/base/query/v1beta1/pagination';
+import { Coin } from '@neutron-org/cosmjs-types/cosmos/base/v1beta1/coin';
 
 // DEX queries
 
