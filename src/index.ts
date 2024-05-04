@@ -28,7 +28,6 @@ export * as proposal from './proposal';
 export * as tge from './tge';
 export * as types from './types';
 export * as wait from './wait';
-export { TestStateLocalCosmosTestNet } from './common_localcosmosnet';
 export {
   NEUTRON_DENOM,
   IBC_ATOM_DENOM,

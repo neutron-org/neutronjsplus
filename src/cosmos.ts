@@ -11,7 +11,6 @@ import {
   CurrentPlanResponse,
   PinnedCodesResponse,
   IcaHostParamsResponse,
-  Wallet,
   GlobalfeeParamsResponse,
   InterchaintxsParamsResponse,
   ParamsFeeburnerResponse,
@@ -32,7 +31,7 @@ import {
 
 import { GetPriceResponse } from './oracle';
 import { GetAllCurrencyPairsResponse, GetPricesResponse } from './oracle';
-import { Coin, DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import { Coin } from '@cosmjs/proto-signing';
 import { IndexedTx } from '@cosmjs/stargate';
 
 export const NEUTRON_DENOM = process.env.NEUTRON_DENOM || 'untrn';
@@ -551,24 +550,6 @@ export const getEventAttributesFromTx = (
     }
   }
   return resp;
-};
-
-export const mnemonicToWallet = async (
-  mnemonic: string,
-  addrPrefix: string,
-): Promise<Wallet> => {
-  const directwallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
-    prefix: addrPrefix,
-  });
-  const account = (await directwallet.getAccounts())[0];
-  const directwalletValoper = await DirectSecp256k1HdWallet.fromMnemonic(
-    mnemonic,
-    {
-      prefix: addrPrefix + 'valoper',
-    },
-  );
-  const accountValoper = (await directwalletValoper.getAccounts())[0];
-  return new Wallet(addrPrefix, directwallet, account, accountValoper);
 };
 
 export const getSequenceId = (tx: IndexedTx | undefined): number => {

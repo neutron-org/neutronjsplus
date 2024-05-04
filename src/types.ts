@@ -11,7 +11,6 @@ import {
   Coin,
   DirectSecp256k1HdWallet,
 } from '@cosmjs/proto-signing';
-// import { MsgMint } from '@neutron-org/cosmjs-types/osmosis/tokenfactory/v1beta1/tx';
 
 export type AcknowledgementResult =
   | { success: string[] }

@@ -26,7 +26,6 @@ import {
   MsgMint,
   MsgSetBeforeSendHook,
 } from '@neutron-org/cosmjs-types/osmosis/tokenfactory/v1beta1/tx';
-import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { ParameterChangeProposal } from '@neutron-org/cosmjs-types/cosmos/params/v1beta1/params';
 
 // constructor for WalletWrapper
