@@ -1,57 +1,31 @@
 import Long from 'long';
 import { Wallet, CodeId } from './types';
-import { DEBUG_SUBMIT_TX, getContractBinary } from './env';
 import { MsgRemoveInterchainQueryRequest } from '@neutron-org/cosmjs-types/neutron/interchainqueries/tx';
-import {
-  IndexedTx,
-  MsgSendEncodeObject,
-  StdFee,
-  defaultRegistryTypes,
-} from '@cosmjs/stargate';
+import { IndexedTx, MsgSendEncodeObject, StdFee } from '@cosmjs/stargate';
 import {
   MigrateResult,
   SigningCosmWasmClient,
-  wasmTypes,
 } from '@cosmjs/cosmwasm-stargate';
+import { promises as fsPromise } from 'fs';
 import { MsgTransfer } from '@neutron-org/cosmjs-types/ibc/applications/transfer/v1/tx';
-import { MsgAuctionBid } from '@neutron-org/cosmjs-types/sdk/auction/v1/tx';
 import { MsgSubmitProposalLegacy } from '@neutron-org/cosmjs-types/cosmos/adminmodule/adminmodule/tx';
-
 import { Coin, EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { BalancesResponse, CosmosWrapper, NEUTRON_DENOM } from './cosmos';
-import {
-  MsgBurn,
-  MsgChangeAdmin,
-  MsgCreateDenom,
-  MsgMint,
-  MsgSetBeforeSendHook,
-} from '@neutron-org/cosmjs-types/osmosis/tokenfactory/v1beta1/tx';
 import { ParameterChangeProposal } from '@neutron-org/cosmjs-types/cosmos/params/v1beta1/params';
+import path from 'path';
+import { neutronTypes } from './neutronTypes';
+
+// TODO: remove copypaste?
+const CONTRACTS_PATH = process.env.CONTRACTS_PATH || './contracts';
+export const getContractBinary = async (fileName: string): Promise<Buffer> =>
+  fsPromise.readFile(path.resolve(CONTRACTS_PATH, fileName));
 
 // constructor for WalletWrapper
 export async function createWalletWrapper(
   chain: CosmosWrapper,
   wallet: Wallet,
 ) {
-  const registry = new Registry([
-    ...defaultRegistryTypes,
-    ...wasmTypes,
-
-    // TODO: extract into neutron_types
-    [MsgMint.typeUrl, MsgMint as any],
-    [MsgCreateDenom.typeUrl, MsgCreateDenom as any],
-    [MsgBurn.typeUrl, MsgBurn as any],
-    [MsgChangeAdmin.typeUrl, MsgChangeAdmin as any],
-    [MsgSetBeforeSendHook.typeUrl, MsgSetBeforeSendHook as any],
-
-    [
-      MsgRemoveInterchainQueryRequest.typeUrl,
-      MsgRemoveInterchainQueryRequest as any,
-    ],
-    [MsgAuctionBid.typeUrl, MsgAuctionBid as any],
-    [MsgSubmitProposalLegacy.typeUrl, MsgSubmitProposalLegacy as any],
-    [ParameterChangeProposal.typeUrl, ParameterChangeProposal as any],
-  ]);
+  const registry = new Registry(neutronTypes);
 
   const wasmClient = await SigningCosmWasmClient.connectWithSigner(
     chain.rpc,
@@ -66,17 +40,20 @@ export class WalletWrapper {
   readonly wallet: Wallet;
   readonly wasmClient: SigningCosmWasmClient;
   readonly registry: Registry;
+  debug: boolean;
 
   constructor(
     chain: CosmosWrapper,
     wallet: Wallet,
     wasmClient: SigningCosmWasmClient,
     registry: Registry,
+    debug = false,
   ) {
     this.chain = chain;
     this.wallet = wallet;
     this.wasmClient = wasmClient;
     this.registry = registry;
+    this.debug = debug;
   }
 
   async queryBalances(): Promise<BalancesResponse> {
@@ -109,7 +86,7 @@ export class WalletWrapper {
       numAttempts--;
       const data = await this.wasmClient.getTx(result.transactionHash);
       if (data != null) {
-        if (DEBUG_SUBMIT_TX) {
+        if (this.debug) {
           const code = +data.code;
           console.log('response code: ', code);
           if (code > 0) {
@@ -203,7 +180,7 @@ export class WalletWrapper {
         }
       | string,
     fee = {
-      gas_limit: Long.fromString('300000'),
+      gas: '300000',
       amount: [{ denom: this.chain.denom, amount: '1500' }],
     },
   ): Promise<IndexedTx> {
@@ -218,14 +195,7 @@ export class WalletWrapper {
       },
     };
 
-    const res = await this.execTx(
-      {
-        amount: fee.amount,
-        gas: fee.gas_limit + '',
-      },
-      [msgSendObject],
-      10,
-    );
+    const res = await this.execTx(fee, [msgSendObject], 10);
     return res;
   }
 
@@ -270,7 +240,7 @@ export class WalletWrapper {
    */
   async simulateFeeBurning(amount: number): Promise<IndexedTx> {
     const fee = {
-      gas_limit: Long.fromString('200000'),
+      gas: '200000',
       amount: [
         {
           denom: this.chain.denom,
