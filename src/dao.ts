@@ -631,12 +631,23 @@ export class DaoMember {
     );
   }
 
-  async unbondFunds(amount: string): Promise<IndexedTx> {
+  async unbondFunds(
+    amount: string,
+    fee = {
+      gas: '4000000',
+      amount: [{ denom: this.user.chain.denom, amount: '10000' }],
+    },
+  ): Promise<IndexedTx> {
     const vaultAddress = (this.dao.contracts.voting as VotingVaultsModule)
       .vaults.neutron.address;
-    return await this.user.executeContract(vaultAddress, {
-      unbond: { amount: amount },
-    });
+    return await this.user.executeContract(
+      vaultAddress,
+      {
+        unbond: { amount: amount },
+      },
+      [],
+      fee,
+    );
   }
 
   /**
