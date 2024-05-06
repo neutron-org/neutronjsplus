@@ -1,4 +1,3 @@
-import Long from 'long';
 import { Wallet, CodeId } from './types';
 import { MsgRemoveInterchainQueryRequest } from '@neutron-org/cosmjs-types/neutron/interchainqueries/tx';
 import { IndexedTx, MsgSendEncodeObject, StdFee } from '@cosmjs/stargate';
