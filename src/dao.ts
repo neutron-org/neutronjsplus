@@ -583,10 +583,16 @@ export class DaoMember {
   async voteYes(
     proposalId: number,
     customModule = 'single',
+    fee = {
+      gas: '4000000',
+      amount: [{ denom: this.user.chain.denom, amount: '10000' }],
+    },
   ): Promise<IndexedTx> {
     return await this.user.executeContract(
       this.dao.contracts.proposals[customModule].address,
       { vote: { proposal_id: proposalId, vote: 'yes' } },
+      [],
+      fee,
     );
   }
 
@@ -596,11 +602,16 @@ export class DaoMember {
   async voteNo(
     proposalId: number,
     customModule = 'single',
+    fee = {
+      gas: '4000000',
+      amount: [{ denom: this.user.chain.denom, amount: '10000' }],
+    },
   ): Promise<IndexedTx> {
     return await this.user.executeContract(
       this.dao.contracts.proposals[customModule].address,
       { vote: { proposal_id: proposalId, vote: 'no' } },
       [],
+      fee,
     );
   }
 
@@ -610,12 +621,18 @@ export class DaoMember {
   async voteForOption(
     proposalId: number,
     optionId: number,
+    fee = {
+      gas: '4000000',
+      amount: [{ denom: this.user.chain.denom, amount: '10000' }],
+    },
   ): Promise<IndexedTx> {
     return await this.user.executeContract(
       this.dao.contracts.proposals.multiple.address,
       {
         vote: { proposal_id: proposalId, vote: { option_id: optionId } },
       },
+      [],
+      fee,
     );
   }
 
