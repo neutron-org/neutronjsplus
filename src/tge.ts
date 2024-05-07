@@ -177,8 +177,8 @@ export class Tge {
     this.times.auctionInit = 0;
     this.times.auctionDepositWindow = 60;
     this.times.auctionWithdrawalWindow = 60;
-    this.times.lockdropDepositDuration = 60;
-    this.times.lockdropWithdrawalDuration = 60;
+    this.times.lockdropDepositDuration = 120;
+    this.times.lockdropWithdrawalDuration = 120;
     this.times.auctionVestingLpDuration = 20;
     this.times.lockdropInit = 0;
     this.times.vestTimestamp = 0;
