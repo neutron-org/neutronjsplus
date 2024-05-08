@@ -107,5 +107,5 @@ export type Ticker = {
   enabled: number;
   // MetadataJSON is a string of JSON that encodes any extra configuration
   // for the given ticker.
-  metadata_json: string;
+  metadata_JSON: string;
 };
