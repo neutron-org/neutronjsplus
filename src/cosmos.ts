@@ -19,7 +19,6 @@ import {
   ParamsContractmanagerResponse,
   ParamsCronResponse,
   ParamsTokenfactoryResponse,
-  BalancesResponse,
   DenomTraceResponse,
   TotalBurnedNeutronsAmountResponse,
   TotalSupplyByDenomResponse,
@@ -140,7 +139,7 @@ export class CosmosWrapper {
     return req.data;
   }
 
-  async queryBalances(addr: string): Promise<BalancesResponse> {
+  async queryBalances(addr: string): Promise<Coin[]> {
     // TODO: fixme don't connect every time
     const client = await connectComet(this.rpc);
     const queryClient = new QueryClient(client);
@@ -149,7 +148,7 @@ export class CosmosWrapper {
     const res = await bankQueryService.AllBalances({
       address: addr,
     });
-    return res;
+    return res.balances;
   }
 
   async queryDenomBalance(addr: string, denom: string): Promise<number> {

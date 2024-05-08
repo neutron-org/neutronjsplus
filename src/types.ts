@@ -114,7 +114,6 @@ type Schedule = {
   msgs: any[];
 };
 
-// BalancesResponse is the response model for the bank balances query.
 export type PauseInfoResponse = {
   paused: {
     until_height: number;
@@ -372,16 +371,6 @@ export class Wallet {
 }
 
 export type CodeId = number;
-
-// BalancesResponse is the response model for the bank balances query.
-export type BalancesResponse = {
-  balances: Coin[];
-  // TODO: fixme?
-  // pagination: {
-  // next_key: string;
-  // total: string;
-  // };
-};
 
 // DenomTraceResponse is the response model for the ibc transfer denom trace query.
 export type DenomTraceResponse = {

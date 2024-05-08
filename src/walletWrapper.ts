@@ -1,4 +1,4 @@
-import { Wallet, CodeId, BalancesResponse } from './types';
+import { Wallet, CodeId } from './types';
 import { MsgRemoveInterchainQueryRequest } from '@neutron-org/cosmjs-types/neutron/interchainqueries/tx';
 import { IndexedTx, MsgSendEncodeObject, StdFee } from '@cosmjs/stargate';
 import {
@@ -24,7 +24,7 @@ export class WalletWrapper {
     public debug = false,
   ) {}
 
-  async queryBalances(): Promise<BalancesResponse> {
+  async queryBalances(): Promise<Coin[]> {
     return await this.chain.queryBalances(this.wallet.address);
   }
 
