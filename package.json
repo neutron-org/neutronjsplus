@@ -10,7 +10,6 @@
   },
   "scripts": {
     "build": "rimraf ./build && tsc",
-    "proto": "mkdir -p ./src/generated && bash ./gen-proto.sh",
     "lint": "eslint ./src",
     "fmt": "eslint ./src --fix"
   },

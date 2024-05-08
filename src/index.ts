@@ -34,3 +34,4 @@ export {
   COSMOS_DENOM,
   IBC_RELAYER_NEUTRON_ADDRESS,
 } from './cosmos';
+export * as neutronTypes from './neutronTypes';

@@ -31,17 +31,6 @@ yarn add @neutron-org/neutronjsplus
 | < 2.0.0 | < 0.1.0       |
 | 2.0.0   | 0.1.0         |
 
-## Building protofiles
-
-If need updated protofiles, they can be generated using yarn:
-
-```bash
-yarn proto
-```
-
-What this does is it clones all needed repos with protofiles we use and runs `buf` with ts plugin.
-For exact code, see gen-proto.sh in root.
-
 ## Usage Example
 
 ```typescript
@@ -49,23 +38,25 @@ import {
     cosmosWrapper,
     walletWrapper,
     NEUTRON_DENOM,
+    neutronTypes,
 } from '@neutron-org/neutronjsplus';
-import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import { Registry, DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 
 const neutronChain = new cosmosWrapper.CosmosWrapper(
   NEUTRON_DENOM,
   'restendpoint',
   'rpcendpoint',
 );
+const addrPrefix = 'neutron';
 
-const directwallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+const directwallet = await DirectSecp256k1HdWallet.fromMnemonic('mnemonic', {
   prefix: addrPrefix,
 });
 
 const account = (await directwallet.getAccounts())[0];
 
 const directwalletValoper = await DirectSecp256k1HdWallet.fromMnemonic(
-  mnemonic,
+  'mnemonic',
   {
     prefix: addrPrefix + 'valoper',
   },
@@ -73,9 +64,20 @@ const directwalletValoper = await DirectSecp256k1HdWallet.fromMnemonic(
 
 const accountValoper = (await directwalletValoper.getAccounts())[0];
 
-const neutronAccount = await walletWrapper.createWalletWrapper(
+const registry = new Registry(neutronTypes);
+
+const wasmClient = await SigningCosmWasmClient.connectWithSigner(
+  neutronChain.rpc,
+  directwallet,
+  { registry },
+);
+
+const neutronAccount = new WalletWrapper(
   neutronChain,
-  new Wallet('addrPrefix', directwallet, account, accountValoper),
+  new Wallet(addrPrefix, directwallet, account, accountValoper),
+  wasmClient,
+  registry,
+  './contracts',
 );
 
 const res = await neutronAccount.msgSend('neutronaddress', '50000');

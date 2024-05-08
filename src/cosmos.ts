@@ -96,15 +96,7 @@ export type TotalBurnedNeutronsAmountResponse = {
 };
 
 export class CosmosWrapper {
-  readonly denom: string;
-  readonly rest: string;
-  readonly rpc: string;
-
-  constructor(denom: string, rest: string, rpc: string) {
-    this.denom = denom;
-    this.rpc = rpc;
-    this.rest = rest;
-  }
+  constructor(public denom: string, public rest: string, public rpc: string) {}
 
   async getHeight(): Promise<number> {
     // TODO: use higher level client instead of `Tendermint37Client`

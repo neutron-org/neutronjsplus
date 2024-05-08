@@ -6,54 +6,22 @@ import {
   SigningCosmWasmClient,
 } from '@cosmjs/cosmwasm-stargate';
 import { promises as fsPromise } from 'fs';
+import path from 'path';
 import { MsgTransfer } from '@neutron-org/cosmjs-types/ibc/applications/transfer/v1/tx';
 import { MsgSubmitProposalLegacy } from '@neutron-org/cosmjs-types/cosmos/adminmodule/adminmodule/tx';
 import { Coin, EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { BalancesResponse, CosmosWrapper, NEUTRON_DENOM } from './cosmos';
 import { ParameterChangeProposal } from '@neutron-org/cosmjs-types/cosmos/params/v1beta1/params';
-import path from 'path';
-import { neutronTypes } from './neutronTypes';
-
-// TODO: remove copypaste?
-const CONTRACTS_PATH = process.env.CONTRACTS_PATH || './contracts';
-export const getContractBinary = async (fileName: string): Promise<Buffer> =>
-  fsPromise.readFile(path.resolve(CONTRACTS_PATH, fileName));
-
-// constructor for WalletWrapper
-export async function createWalletWrapper(
-  chain: CosmosWrapper,
-  wallet: Wallet,
-) {
-  const registry = new Registry(neutronTypes);
-
-  const wasmClient = await SigningCosmWasmClient.connectWithSigner(
-    chain.rpc,
-    wallet.directwallet,
-    { registry },
-  );
-  return new WalletWrapper(chain, wallet, wasmClient, registry);
-}
 
 export class WalletWrapper {
-  readonly chain: CosmosWrapper;
-  readonly wallet: Wallet;
-  readonly wasmClient: SigningCosmWasmClient;
-  readonly registry: Registry;
-  debug: boolean;
-
   constructor(
-    chain: CosmosWrapper,
-    wallet: Wallet,
-    wasmClient: SigningCosmWasmClient,
-    registry: Registry,
-    debug = false,
-  ) {
-    this.chain = chain;
-    this.wallet = wallet;
-    this.wasmClient = wasmClient;
-    this.registry = registry;
-    this.debug = debug;
-  }
+    public chain: CosmosWrapper,
+    public wallet: Wallet,
+    public wasmClient: SigningCosmWasmClient,
+    public registry: Registry,
+    public contractsPath: string,
+    public debug = false,
+  ) {}
 
   async queryBalances(): Promise<BalancesResponse> {
     return await this.chain.queryBalances(this.wallet.address);
@@ -104,7 +72,7 @@ export class WalletWrapper {
   // storeWasm stores the wasm code by the passed path on the blockchain.
   async storeWasm(fileName: string): Promise<CodeId> {
     const sender = this.wallet.address;
-    const wasmCode = await getContractBinary(fileName);
+    const wasmCode = await this.getContractBinary(fileName);
     const res = await this.wasmClient.upload(sender, wasmCode, {
       amount: [{ denom: NEUTRON_DENOM, amount: '250000' }],
       gas: '60000000',
@@ -118,7 +86,7 @@ export class WalletWrapper {
     label: string,
     admin: string = this.wallet.address,
   ): Promise<string> {
-    const instantiateRes = await this.wasmClient.instantiate(
+    const res = await this.wasmClient.instantiate(
       this.wallet.address,
       codeId,
       msg,
@@ -129,7 +97,7 @@ export class WalletWrapper {
       },
       { admin },
     );
-    return instantiateRes.contractAddress;
+    return res.contractAddress;
   }
 
   async migrateContract(
@@ -138,12 +106,10 @@ export class WalletWrapper {
     msg: any,
   ): Promise<MigrateResult> {
     const sender = this.wallet.address;
-    const res = await this.wasmClient.migrate(sender, contract, codeId, msg, {
+    return await this.wasmClient.migrate(sender, contract, codeId, msg, {
       gas: '5000000',
       amount: [{ denom: this.chain.denom, amount: '20000' }],
     });
-    // TODO: throw error if unsuccessful?
-    return res;
   }
 
   async executeContract(
@@ -317,5 +283,9 @@ export class WalletWrapper {
     };
 
     return await this.execTx(fee, [msg]);
+  }
+
+  async getContractBinary(fileName: string): Promise<Buffer> {
+    return fsPromise.readFile(path.resolve(this.contractsPath, fileName));
   }
 }

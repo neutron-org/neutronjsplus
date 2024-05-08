@@ -169,6 +169,7 @@ export type NewMarkets = {
           Base: string;
           Quote: string;
         };
+        invert: boolean;
       }[];
     }[];
   };

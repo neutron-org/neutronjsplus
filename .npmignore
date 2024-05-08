@@ -9,6 +9,5 @@ yarn-error.log
 .vscode
 
 write-file-atomic*
-junit.xml
 src/
 proto-thirdparty/
