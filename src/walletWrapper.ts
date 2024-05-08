@@ -1,4 +1,4 @@
-import { Wallet, CodeId } from './types';
+import { Wallet, CodeId, BalancesResponse } from './types';
 import { MsgRemoveInterchainQueryRequest } from '@neutron-org/cosmjs-types/neutron/interchainqueries/tx';
 import { IndexedTx, MsgSendEncodeObject, StdFee } from '@cosmjs/stargate';
 import {
@@ -10,8 +10,9 @@ import path from 'path';
 import { MsgTransfer } from '@neutron-org/cosmjs-types/ibc/applications/transfer/v1/tx';
 import { MsgSubmitProposalLegacy } from '@neutron-org/cosmjs-types/cosmos/adminmodule/adminmodule/tx';
 import { Coin, EncodeObject, Registry } from '@cosmjs/proto-signing';
-import { BalancesResponse, CosmosWrapper, NEUTRON_DENOM } from './cosmos';
+import { CosmosWrapper } from './cosmos';
 import { ParameterChangeProposal } from '@neutron-org/cosmjs-types/cosmos/params/v1beta1/params';
+import { NEUTRON_DENOM } from './constants';
 
 export class WalletWrapper {
   constructor(

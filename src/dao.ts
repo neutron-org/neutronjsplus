@@ -1,6 +1,5 @@
 import axios from 'axios';
 import {
-  ADMIN_MODULE_ADDRESS,
   CosmosWrapper,
   createBankSendMessage,
   getEventAttribute,
@@ -36,9 +35,10 @@ import {
   updateAdminProposal,
   upgradeProposal,
 } from './proposal';
-import { WalletWrapper } from './wallet_wrapper';
+import { WalletWrapper } from './walletWrapper';
 import { IndexedTx } from '@cosmjs/cosmwasm-stargate';
 import { ClientState } from '@neutron-org/cosmjs-types/ibc/lightclients/tendermint/v1/tendermint';
+import { ADMIN_MODULE_ADDRESS } from './constants';
 
 export type SubdaoProposalConfig = {
   threshold: any;

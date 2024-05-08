@@ -1,7 +1,7 @@
 import MerkleTree from 'merkletreejs';
 import crypto from 'crypto';
 import { CosmosWrapper, getEventAttribute } from './cosmos';
-import { WalletWrapper } from './wallet_wrapper';
+import { WalletWrapper } from './walletWrapper';
 import {
   NativeToken,
   Token,

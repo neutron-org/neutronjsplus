@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { WalletWrapper } from './wallet_wrapper';
+import { WalletWrapper } from './walletWrapper';
 import axios from 'axios';
 import { IndexedTx } from '@cosmjs/stargate';
 import {

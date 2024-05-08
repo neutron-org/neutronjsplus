@@ -1,5 +1,5 @@
-import { ADMIN_MODULE_ADDRESS } from './cosmos';
 import { Coin } from '@cosmjs/proto-signing';
+import { ADMIN_MODULE_ADDRESS } from './constants';
 
 export type ParamChangeProposalInfo = {
   title: string;

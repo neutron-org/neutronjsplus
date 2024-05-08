@@ -19,7 +19,7 @@ function getRandomValues(array: any) {
 
 export * as tokenfactory from './tokenfactory';
 export * as cosmosWrapper from './cosmos';
-export * as walletWrapper from './wallet_wrapper';
+export * as walletWrapper from './walletWrapper';
 export * as dao from './dao';
 export * as ica from './ica';
 export * as icq from './icq';
@@ -33,5 +33,6 @@ export {
   IBC_USDC_DENOM,
   COSMOS_DENOM,
   IBC_RELAYER_NEUTRON_ADDRESS,
-} from './cosmos';
+  ADMIN_MODULE_ADDRESS,
+} from './constants';
 export * as neutronTypes from './neutronTypes';

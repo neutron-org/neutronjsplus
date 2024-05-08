@@ -372,3 +372,55 @@ export class Wallet {
 }
 
 export type CodeId = number;
+
+// BalancesResponse is the response model for the bank balances query.
+export type BalancesResponse = {
+  balances: Coin[];
+  // TODO: fixme?
+  // pagination: {
+  // next_key: string;
+  // total: string;
+  // };
+};
+
+// DenomTraceResponse is the response model for the ibc transfer denom trace query.
+export type DenomTraceResponse = {
+  path?: string;
+  base_denom?: string;
+};
+
+export type TotalSupplyByDenomResponse = {
+  amount: Coin;
+};
+
+export type DenomMetadataResponse = {
+  metadatas: [
+    {
+      description: string;
+      denom_units: [
+        {
+          denom: string;
+          exponent: number;
+          aliases: [string];
+        },
+      ];
+      base: string;
+      display: string;
+      name: string;
+      symbol: string;
+      uri: string;
+      uri_hash: string;
+    },
+  ];
+  pagination: {
+    next_key: string;
+    total: string;
+  };
+};
+
+// TotalBurnedNeutronsAmountResponse is the response model for the feeburner's total-burned-neutrons.
+export type TotalBurnedNeutronsAmountResponse = {
+  total_burned_neutrons_amount: {
+    coin: Coin;
+  };
+};

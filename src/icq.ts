@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { CosmosWrapper } from './cosmos';
-import { WalletWrapper } from './wallet_wrapper';
+import { WalletWrapper } from './walletWrapper';
 
 /**
  * getRegisteredQuery queries the contract for a registered query details registered by the given

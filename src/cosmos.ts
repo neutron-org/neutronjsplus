@@ -19,9 +19,14 @@ import {
   ParamsContractmanagerResponse,
   ParamsCronResponse,
   ParamsTokenfactoryResponse,
+  BalancesResponse,
+  DenomTraceResponse,
+  TotalBurnedNeutronsAmountResponse,
+  TotalSupplyByDenomResponse,
+  DenomMetadataResponse,
 } from './types';
 import { QueryClientImpl } from 'cosmjs-types/cosmos/bank/v1beta1/query';
-import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
+import { connectComet } from '@cosmjs/tendermint-rpc';
 import {
   Event as CosmosEvent,
   createProtobufRpcClient,
@@ -33,78 +38,10 @@ import { GetPriceResponse } from './oracle';
 import { GetAllCurrencyPairsResponse, GetPricesResponse } from './oracle';
 import { Coin } from '@cosmjs/proto-signing';
 import { IndexedTx } from '@cosmjs/stargate';
-
-export const NEUTRON_DENOM = process.env.NEUTRON_DENOM || 'untrn';
-export const IBC_ATOM_DENOM = process.env.IBC_ATOM_DENOM || 'uibcatom';
-export const IBC_USDC_DENOM = process.env.IBC_USDC_DENOM || 'uibcusdc';
-export const COSMOS_DENOM = process.env.COSMOS_DENOM || 'uatom';
-export const IBC_RELAYER_NEUTRON_ADDRESS =
-  'neutron1mjk79fjjgpplak5wq838w0yd982gzkyf8fxu8u';
-export const ADMIN_MODULE_ADDRESS =
-  'neutron1hxskfdxpp5hqgtjj6am6nkjefhfzj359x0ar3z';
-
-// BalancesResponse is the response model for the bank balances query.
-export type BalancesResponse = {
-  balances: Coin[];
-  // TODO: fixme?
-  // pagination: {
-  // next_key: string;
-  // total: string;
-  // };
-};
-
-// DenomTraceResponse is the response model for the ibc transfer denom trace query.
-type DenomTraceResponse = {
-  path?: string;
-  base_denom?: string;
-};
-
-export type TotalSupplyByDenomResponse = {
-  amount: Coin;
-};
-
-export type DenomMetadataResponse = {
-  metadatas: [
-    {
-      description: string;
-      denom_units: [
-        {
-          denom: string;
-          exponent: number;
-          aliases: [string];
-        },
-      ];
-      base: string;
-      display: string;
-      name: string;
-      symbol: string;
-      uri: string;
-      uri_hash: string;
-    },
-  ];
-  pagination: {
-    next_key: string;
-    total: string;
-  };
-};
-
-// TotalBurnedNeutronsAmountResponse is the response model for the feeburner's total-burned-neutrons.
-export type TotalBurnedNeutronsAmountResponse = {
-  total_burned_neutrons_amount: {
-    coin: Coin;
-  };
-};
+import { IBC_ATOM_DENOM, IBC_USDC_DENOM } from './constants';
 
 export class CosmosWrapper {
   constructor(public denom: string, public rest: string, public rpc: string) {}
-
-  async getHeight(): Promise<number> {
-    // TODO: use higher level client instead of `Tendermint37Client`
-    const tendermint = await Tendermint37Client.connect(this.rpc);
-
-    const block = await tendermint.block();
-    return +block.block.header.height;
-  }
 
   async queryContractWithWait<T>(
     contract: string,
@@ -205,8 +142,8 @@ export class CosmosWrapper {
 
   async queryBalances(addr: string): Promise<BalancesResponse> {
     // TODO: fixme don't connect every time
-    const tendermint = await Tendermint37Client.connect(this.rpc);
-    const queryClient = new QueryClient(tendermint);
+    const client = await connectComet(this.rpc);
+    const queryClient = new QueryClient(client);
     const rpcClient = createProtobufRpcClient(queryClient);
     const bankQueryService = new QueryClientImpl(rpcClient);
     const res = await bankQueryService.AllBalances({
@@ -216,8 +153,9 @@ export class CosmosWrapper {
   }
 
   async queryDenomBalance(addr: string, denom: string): Promise<number> {
-    const tendermint = await Tendermint37Client.connect(this.rpc);
-    const queryClient = new QueryClient(tendermint);
+    // TODO: fixme don't connect every time
+    const client = await connectComet(this.rpc);
+    const queryClient = new QueryClient(client);
     const rpcClient = createProtobufRpcClient(queryClient);
     const bankQueryService = new QueryClientImpl(rpcClient);
     const res = await bankQueryService.Balance({
@@ -226,6 +164,14 @@ export class CosmosWrapper {
     });
 
     return parseInt(res?.balance.amount ?? '0', 10);
+  }
+
+  async getHeight(): Promise<number> {
+    // TODO: fixme don't connect every time
+    const client = await connectComet(this.rpc);
+
+    const block = await client.block();
+    return +block.block.header.height;
   }
 
   async waitBlocks(blocks: number, timeout = 120000): Promise<void> {
