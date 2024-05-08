@@ -45,9 +45,42 @@ For exact code, see gen-proto.sh in root.
 ## Usage Example
 
 ```typescript
-TODO
+import {
+    cosmosWrapper,
+    walletWrapper,
+    NEUTRON_DENOM,
+} from '@neutron-org/neutronjsplus';
+import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+
+const neutronChain = new cosmosWrapper.CosmosWrapper(
+  NEUTRON_DENOM,
+  'restendpoint',
+  'rpcendpoint',
+);
+
+const directwallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+  prefix: addrPrefix,
+});
+
+const account = (await directwallet.getAccounts())[0];
+
+const directwalletValoper = await DirectSecp256k1HdWallet.fromMnemonic(
+  mnemonic,
+  {
+    prefix: addrPrefix + 'valoper',
+  },
+);
+
+const accountValoper = (await directwalletValoper.getAccounts())[0];
+
+const neutronAccount = await walletWrapper.createWalletWrapper(
+  neutronChain,
+  new Wallet('addrPrefix', directwallet, account, accountValoper),
+);
+
+const res = await neutronAccount.msgSend('neutronaddress', '50000');
 ```
 
 ## License
 
-`neutron-blockchain-helpers` is distributed under the Apache-2.0 license. See the `LICENSE` file in the repository for details.
+`neutronjsplus` is distributed under the Apache-2.0 license. See the `LICENSE` file in the repository for details.
