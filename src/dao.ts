@@ -1718,6 +1718,7 @@ export class DaoMember {
    * submitRemoveSchedule creates proposal to remove added schedule.
    */
   async submitUpdateMarketMap(
+    chainManagerAddress: string,
     title: string,
     description: string,
     newMarkets: NewMarkets,
@@ -1726,7 +1727,7 @@ export class DaoMember {
       title,
       description,
       [
-        {
+        chainManagerWrapper(chainManagerAddress, {
           custom: {
             submit_admin_proposal: {
               admin_proposal: {
@@ -1740,7 +1741,7 @@ export class DaoMember {
               },
             },
           },
-        },
+        }),
       ],
       '1000',
     );
