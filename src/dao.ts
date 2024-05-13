@@ -1387,6 +1387,7 @@ export class DaoMember {
   }
 
   async submitUpdateParamsGlobalfeeProposal(
+    chainManagerAddress: string,
     title: string,
     description: string,
     message: ParamsGlobalfeeInfo,
@@ -1399,7 +1400,7 @@ export class DaoMember {
     return await this.submitSingleChoiceProposal(
       title,
       description,
-      [message],
+      [chainManagerWrapper(chainManagerAddress, message)],
       amount,
       'single',
       fee,
