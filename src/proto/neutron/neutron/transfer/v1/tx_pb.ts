@@ -125,7 +125,7 @@ export class MsgTransferResponse extends Message<MsgTransferResponse> {
   sequenceId = protoInt64.zero;
 
   /**
-   * channel src channel on neutron side trasaction was submitted from
+   * channel src channel on neutron side transaction was submitted from
    *
    * @generated from field: string channel = 2;
    */
