@@ -29,6 +29,7 @@ export type ParamsInterchainqueriesInfo = {
 export type ParamsTokenfactoryInfo = {
   denom_creation_fee: any;
   denom_creation_gas_consume: number;
+  fee_collector_address: string;
 };
 
 export type ParamsFeeburnerInfo = {
@@ -164,26 +165,50 @@ export type MultipleChoiceVotes = {
   vote_weights: string[];
 };
 
+export type ChainManagerStrategy = {
+  address: string;
+  permissions: any[];
+};
+
 // 'none' is a choice that represents selecting none of the options; still counts toward quorum
 // and allows proposals with all bad options to be voted against.
 export type MultipleChoiceOptionType = 'none' | 'standard';
 
-export const paramChangeProposal = (info: ParamChangeProposalInfo): any => ({
-  custom: {
-    submit_admin_proposal: {
-      admin_proposal: {
-        param_change_proposal: {
-          title: info.title,
-          description: info.description,
-          param_changes: [
-            {
-              subspace: info.subspace,
-              key: info.key,
-              value: info.value,
-            },
-          ],
-        },
-      },
+export const paramChangeProposal = (
+  info: ParamChangeProposalInfo,
+  chainManagerAddress: string,
+): any => ({
+  wasm: {
+    execute: {
+      contract_addr: chainManagerAddress,
+      msg: Buffer.from(
+        JSON.stringify({
+          execute_messages: {
+            messages: [
+              {
+                custom: {
+                  submit_admin_proposal: {
+                    admin_proposal: {
+                      param_change_proposal: {
+                        title: info.title,
+                        description: info.description,
+                        param_changes: [
+                          {
+                            subspace: info.subspace,
+                            key: info.key,
+                            value: info.value,
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        }),
+      ).toString('base64'),
+      funds: [],
     },
   },
 });
@@ -294,7 +319,7 @@ export const updateTokenfacoryParamsProposal = (
             params: {
               denom_creation_fee: info.denom_creation_fee,
               denom_creation_gas_consume: info.denom_creation_gas_consume,
-              fee_collector_address: null,
+              fee_collector_address: info.fee_collector_address,
             },
           }),
         },
@@ -546,6 +571,25 @@ export const removeSchedule = (name: string): any => ({
   custom: {
     remove_schedule: {
       name,
+    },
+  },
+});
+
+export const chainManagerWrapper = (
+  chainManagerAddress: string,
+  proposal: any,
+): any => ({
+  wasm: {
+    execute: {
+      contract_addr: chainManagerAddress,
+      msg: Buffer.from(
+        JSON.stringify({
+          execute_messages: {
+            messages: [proposal],
+          },
+        }),
+      ).toString('base64'),
+      funds: [],
     },
   },
 });

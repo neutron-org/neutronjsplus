@@ -30,6 +30,7 @@ import {
   ParamsContractmanagerResponse,
   ParamsCronResponse,
   ParamsTokenfactoryResponse,
+  Strategy,
 } from './types';
 import { DEBUG_SUBMIT_TX, getContractBinary, getHeight } from './env';
 import { Message } from '@bufbuild/protobuf';
@@ -352,6 +353,17 @@ export class CosmosWrapper {
       admins: [string];
     }>(url);
     return resp.data.admins;
+  }
+
+  async getNeutronDAOCore() {
+    const chainManager = (await this.getChainAdmins())[0];
+    const strategies = await this.queryContract<[string, Strategy][]>(
+      chainManager,
+      {
+        strategies: {},
+      },
+    );
+    return strategies[0][0];
   }
 
   async queryPausedInfo(addr: string): Promise<PauseInfoResponse> {

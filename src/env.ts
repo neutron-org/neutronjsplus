@@ -51,7 +51,9 @@ export const setup = async (host1: string, host2: string) => {
   } else {
     execSync(`cd setup && make start-cosmopark`);
   }
-  showVersions();
+  // disabling printing versions to stabilise tests
+  // TODO: fix an issue with exclusive.lock file
+  // showVersions();
   await showContractsHashes();
   await waitForHTTP(host1);
   !process.env.NO_WAIT_CHANNEL1 && (await waitForChannel(host1));
