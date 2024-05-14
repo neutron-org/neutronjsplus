@@ -159,23 +159,16 @@ export type NewMarkets = {
     enabled: boolean;
     metadata_JSON: string;
   };
-  providers: {
-    providers: {
-      name: string;
-      off_chain_ticker: string;
-    }[];
-  };
-  paths: {
-    paths: {
-      operations: {
-        provider: string;
-        currency_pair: {
-          Base: string;
-          Quote: string;
-        };
-      }[];
-    }[];
-  };
+  provider_configs: {
+    name: string;
+    off_chain_ticker: string;
+    normalize_by_pair: {
+      Base: string;
+      Quote: string;
+    };
+    invert: boolean;
+    metadata_JSON: string;
+  }[];
 }[];
 
 export const DaoContractLabels = {
@@ -1715,7 +1708,40 @@ export class DaoMember {
   }
 
   /**
-   * submitRemoveSchedule creates proposal to remove added schedule.
+   * submitCreateMarketMap creates proposal to create market map.
+   */
+  async submitCreateMarketMap(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    newMarkets: NewMarkets,
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [
+        chainManagerWrapper(chainManagerAddress, {
+          custom: {
+            submit_admin_proposal: {
+              admin_proposal: {
+                proposal_execute_message: {
+                  message: JSON.stringify({
+                    '@type': '/slinky.marketmap.v1.MsgCreateMarkets',
+                    authority: ADMIN_MODULE_ADDRESS,
+                    create_markets: newMarkets,
+                  }),
+                },
+              },
+            },
+          },
+        }),
+      ],
+      '1000',
+    );
+  }
+
+  /**
+   * submitUpdateMarketMap creates proposal to update market map.
    */
   async submitUpdateMarketMap(
     chainManagerAddress: string,
@@ -1733,9 +1759,9 @@ export class DaoMember {
               admin_proposal: {
                 proposal_execute_message: {
                   message: JSON.stringify({
-                    '@type': '/slinky.marketmap.v1.MsgUpdateMarketMap',
-                    signer: ADMIN_MODULE_ADDRESS,
-                    create_markets: newMarkets,
+                    '@type': '/slinky.marketmap.v1.MsgUpdateMarkets',
+                    authority: ADMIN_MODULE_ADDRESS,
+                    update_markets: newMarkets,
                   }),
                 },
               },
