@@ -29,6 +29,7 @@ export type ParamsInterchainqueriesInfo = {
 export type ParamsTokenfactoryInfo = {
   denom_creation_fee: any;
   denom_creation_gas_consume: number;
+  fee_collector_address: string;
 };
 
 export type ParamsFeeburnerInfo = {
@@ -318,7 +319,7 @@ export const updateTokenfacoryParamsProposal = (
             params: {
               denom_creation_fee: info.denom_creation_fee,
               denom_creation_gas_consume: info.denom_creation_gas_consume,
-              fee_collector_address: null,
+              fee_collector_address: info.fee_collector_address,
             },
           }),
         },
