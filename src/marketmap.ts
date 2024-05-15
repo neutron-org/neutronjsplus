@@ -7,11 +7,11 @@ export type CurrencyPair = {
   quote: string;
 };
 
-export type GetLastUpdatedResponse = {
+export type LastUpdatedResponse = {
   last_updated: number;
 };
 
-export type GetMarketMapResponse = {
+export type MarketMapResponse = {
   // MarketMap defines the global set of market configurations for all providers
   // and markets.
   market_map: MarketMap;
@@ -48,10 +48,10 @@ export type MarketMap = {
 export type Market = {
   // Tickers is the full list of tickers and their associated configurations
   // to be stored on-chain.
-  tickers: Ticker;
+  ticker: Ticker;
   // Providers is a map from CurrencyPair to each of to provider-specific
   // configs associated with it.
-  providers: Map<string, ProviderConfig>;
+  provider_configs: Map<string, ProviderConfig>;
 };
 
 export type ProviderConfig = {
