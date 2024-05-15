@@ -38,7 +38,7 @@ export type QuotePrice = {
 
 export type Params = {
   version: number;
-  market_authorties: string[];
+  market_authorities: string[];
 };
 
 export type MarketMap = {
@@ -48,7 +48,7 @@ export type MarketMap = {
 export type Market = {
   // Tickers is the full list of tickers and their associated configurations
   // to be stored on-chain.
-  tickers: Map<string, Ticker>;
+  tickers: Ticker;
   // Providers is a map from CurrencyPair to each of to provider-specific
   // configs associated with it.
   providers: Map<string, ProviderConfig>;
