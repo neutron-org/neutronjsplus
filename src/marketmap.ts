@@ -38,26 +38,20 @@ export type QuotePrice = {
 
 export type Params = {
   version: number;
-  market_authority: string;
+  market_authorties: string[];
 };
 
 export type MarketMap = {
+  markets: Map<string,Market>;
+};
+
+export type Market = {
   // Tickers is the full list of tickers and their associated configurations
   // to be stored on-chain.
   tickers: Map<string, Ticker>;
-  // Paths is a map from CurrencyPair to all paths that resolve to that pair
-  paths: Map<string, Paths>;
   // Providers is a map from CurrencyPair to each of to provider-specific
   // configs associated with it.
-  providers: Map<string, Providers>;
-  // AggregationType is the type of aggregation that will be used to aggregate
-  // the prices of the tickers.
-  aggregation_type: number;
-};
-
-export type Providers = {
-  // Providers is the list of provider configurations for the given ticker.
-  providers: ProviderConfig[];
+  providers: Map<string, ProviderConfig>;
 };
 
 export type ProviderConfig = {
@@ -68,29 +62,17 @@ export type ProviderConfig = {
   // The off-chain ticker is unique to a given provider and is used to fetch the
   // price of the ticker from the provider.
   off_chain_ticker: string;
-};
-
-export type Paths = {
-  // Paths is the list of convertable markets that will be used to convert the
-  // prices of a set of tickers to a common ticker.
-  paths: Path[];
-};
-
-export type Path = {
-  // Operations is an ordered list of operations that will be taken. These must
-  // be topologically sorted to ensure that the conversion is possible i.e. DAG.
-  operations: Operation[];
-};
-
-export type Operation = {
-  // CurrencyPair is the on-chain currency pair for this ticker.
-  currency_pair: CurrencyPair;
-  // Invert is a boolean that indicates whether the price of the ticker should
-  // be inverted.
-  invert: boolean;
-  // Provider is the name of the provider that will be used to fetch the price
-  // of the ticker.
-  provider: string;
+  // NormalizeByPair is the currency pair for this ticker to be normalized by.
+  // For example, if the desired Ticker is BTC/USD, this market could be reached
+  // using: OffChainTicker = BTC/USDT NormalizeByPair = USDT/USD This field is
+  // optional and nullable.
+  normalize_by_pair: CurrencyPair,
+  // Invert is a boolean indicating if the BASE and QUOTE of the market should
+  // be inverted. i.e. BASE -> QUOTE, QUOTE -> BASE
+  invert: boolean,
+  // MetadataJSON is a string of JSON that encodes any extra configuration
+  // for the given provider config.
+  metadata_json: string,
 };
 
 export type Ticker = {
