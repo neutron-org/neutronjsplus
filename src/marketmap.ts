@@ -19,9 +19,6 @@ export type MarketMapResponse = {
   // This field can be used as an optimization for clients checking if there
   // is a new update to the map.
   last_updated: number;
-  // Version is the schema version for the MarketMap data structure and query
-  // response.
-  version: number;
   // ChainId is the chain identifier for the market map.
   chain_id: string;
 };
