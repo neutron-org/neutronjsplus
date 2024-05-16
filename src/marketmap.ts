@@ -23,6 +23,10 @@ export type MarketMapResponse = {
   chain_id: string;
 };
 
+export type MarketResponse = {
+  market: Market;
+};
+
 export type QuotePrice = {
   price: string;
   // // BlockTimestamp tracks the block height associated with this price update.
