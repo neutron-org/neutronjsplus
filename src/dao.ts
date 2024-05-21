@@ -1713,6 +1713,41 @@ export class DaoMember {
   }
 
   /**
+   * submitRecoverClient creates proposal to recover IBC client.
+   */
+  async submitRecoverIBCClient(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    subjectClientId: string,
+    substituteClientId: string,
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [
+        chainManagerWrapper(chainManagerAddress, {
+          custom: {
+            submit_admin_proposal: {
+              admin_proposal: {
+                proposal_execute_message: {
+                  message: JSON.stringify({
+                    '@type': '/ibc.core.client.v1.MsgRecoverClient',
+                    signer: ADMIN_MODULE_ADDRESS,
+                    subject_client_id: subjectClientId,
+                    substitute_client_id: substituteClientId,
+                  }),
+                },
+              },
+            },
+          },
+        }),
+      ],
+      '1000',
+    );
+  }
+
+  /**
    * submitCreateMarketMap creates proposal to create market map.
    */
   async submitCreateMarketMap(
