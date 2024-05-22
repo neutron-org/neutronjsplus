@@ -190,6 +190,8 @@ export const NeutronContract = {
 
   VESTING_LP_VAULT_CL: 'vesting_lp_vault_for_cl_pools.wasm',
   LOCKDROP_VAULT_CL: 'lockdrop_vault_for_cl_pools.wasm',
+  MARKETMAP: 'marketmap.wasm',
+  ORACLE: 'oracle.wasm',
 };
 
 export type MultiChoiceOption = {
