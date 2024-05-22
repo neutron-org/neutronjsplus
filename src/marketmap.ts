@@ -38,7 +38,7 @@ export type QuotePrice = {
 };
 
 export type Params = {
-  version: number;
+  admin: string;
   market_authorities: string[];
 };
 
