@@ -1,6 +1,7 @@
 import { google } from '@cosmos-client/core/cjs/proto';
 import { ADMIN_MODULE_ADDRESS } from './cosmos';
 import cosmosclient from '@cosmos-client/core';
+import { DynamicFeesParams } from './feemarket';
 
 export type ParamChangeProposalInfo = {
   title: string;
@@ -590,6 +591,24 @@ export const chainManagerWrapper = (
         }),
       ).toString('base64'),
       funds: [],
+    },
+  },
+});
+
+export const updateDynamicFeesParamsProposal = (
+  params: DynamicFeesParams,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.dynamicfees.v1.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params,
+          }),
+        },
+      },
     },
   },
 });
