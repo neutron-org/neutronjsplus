@@ -45,6 +45,11 @@ import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 import IHeight = ibc.core.client.v1.IHeight;
 import { GetPriceResponse } from './oracle';
 import { GetAllCurrencyPairsResponse, GetPricesResponse } from './oracle';
+import {
+  GasPriceResponse,
+  GasPricesResponse,
+  DynamicFeesRaparmsResponse,
+} from './feemarket';
 
 export const NEUTRON_DENOM = process.env.NEUTRON_DENOM || 'untrn';
 export const IBC_ATOM_DENOM = process.env.IBC_ATOM_DENOM || 'uibcatom';
@@ -480,6 +485,30 @@ export class CosmosWrapper {
     );
 
     return req.data.params;
+  }
+
+  async getGasPrice(denom: string): Promise<GasPriceResponse> {
+    const res = await axios.get<GasPriceResponse>(
+      `${this.sdk.url}/feemarket/v1/gas_price/${denom}`,
+    );
+
+    return res.data;
+  }
+
+  async getGasPrices(): Promise<GasPricesResponse> {
+    const res = await axios.get<GasPricesResponse>(
+      `${this.sdk.url}/feemarket/v1/gas_prices`,
+    );
+
+    return res.data;
+  }
+
+  async getDynamicFeesRaparms(): Promise<DynamicFeesRaparmsResponse> {
+    const res = await axios.get<DynamicFeesRaparmsResponse>(
+      `${this.sdk.url}/neutron/dynamicfees/v1/params`,
+    );
+
+    return res.data;
   }
 
   async queryContractAdmin(address: string): Promise<string> {
