@@ -1024,6 +1024,7 @@ export class DaoMember {
             proposal_execute_message: {
               message: JSON.stringify({
                 '@type': '/feemarket.feemarket.v1.MsgUpdateParams',
+                authority: ADMIN_MODULE_ADDRESS,
                 params,
               }),
             },
@@ -1056,6 +1057,7 @@ export class DaoMember {
             proposal_execute_message: {
               message: JSON.stringify({
                 '@type': '/neutron.dynamicfees.v1.MsgUpdateParams',
+                authority: ADMIN_MODULE_ADDRESS,
                 params,
               }),
             },
