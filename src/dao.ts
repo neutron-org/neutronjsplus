@@ -1023,7 +1023,7 @@ export class DaoMember {
           admin_proposal: {
             proposal_execute_message: {
               message: JSON.stringify({
-                '@type': '/feemarket.feemarket.v1.MsgUpdateParams',
+                '@type': '/feemarket.feemarket.v1.MsgParams',
                 authority: ADMIN_MODULE_ADDRESS,
                 params,
               }),
