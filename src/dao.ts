@@ -1023,7 +1023,7 @@ export class DaoMember {
           admin_proposal: {
             proposal_execute_message: {
               message: JSON.stringify({
-                '@type': '/feemarket.feemarket.v1.MsgParams',
+                '@type': '/feemarket.feemarket.v1.MsgUpdateParams',
                 params,
               }),
             },
@@ -1055,7 +1055,7 @@ export class DaoMember {
           admin_proposal: {
             proposal_execute_message: {
               message: JSON.stringify({
-                '@type': '/neutron.dynamicfees.v1.MsgSend',
+                '@type': '/neutron.dynamicfees.v1.MsgUpdateParams',
                 params,
               }),
             },
