@@ -505,7 +505,7 @@ export class CosmosWrapper {
 
   async getFeemarketParams(): Promise<FeeMarketParamsResponse> {
     const res = await axios.get<FeeMarketParamsResponse>(
-      `${this.sdk.url}/feemarket/v1/gas_prices`,
+      `${this.sdk.url}/feemarket/v1/params`,
     );
 
     return res.data;
