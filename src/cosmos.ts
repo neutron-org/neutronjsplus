@@ -22,7 +22,6 @@ import {
   IcaHostParamsResponse,
   Wallet,
   CodeId,
-  GlobalfeeParamsResponse,
   InterchaintxsParamsResponse,
   ParamsFeeburnerResponse,
   ParamsInterchainqueriesResponse,
@@ -478,14 +477,6 @@ export class CosmosWrapper {
       }
       throw e;
     }
-  }
-
-  async queryGlobalfeeParams(): Promise<GlobalfeeParamsResponse> {
-    const req = await axios.get(
-      `${this.sdk.url}/gaia/globalfee/v1beta1/params`,
-    );
-
-    return req.data.params;
   }
 
   async getGasPrice(denom: string): Promise<GasPriceResponse> {
