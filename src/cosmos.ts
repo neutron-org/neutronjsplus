@@ -49,6 +49,7 @@ import {
   GasPriceResponse,
   GasPricesResponse,
   DynamicFeesRaparmsResponse,
+  FeeMarketParamsResponse as FeeMarketParamsResponse,
 } from './feemarket';
 
 export const NEUTRON_DENOM = process.env.NEUTRON_DENOM || 'untrn';
@@ -506,6 +507,14 @@ export class CosmosWrapper {
   async getDynamicFeesRaparms(): Promise<DynamicFeesRaparmsResponse> {
     const res = await axios.get<DynamicFeesRaparmsResponse>(
       `${this.sdk.url}/neutron/dynamicfees/v1/params`,
+    );
+
+    return res.data;
+  }
+
+  async getFeemarketParams(): Promise<FeeMarketParamsResponse> {
+    const res = await axios.get<FeeMarketParamsResponse>(
+      `${this.sdk.url}/feemarket/v1/gas_prices`,
     );
 
     return res.data;
