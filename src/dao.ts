@@ -43,6 +43,7 @@ import {
 } from './proposal';
 import Long from 'long';
 import { ClientState } from './proto/neutron_thirdparty/ibc/lightclients/tendermint/v1/tendermint_pb';
+import { DynamicFeesParams, FeeMarketParams } from './feemarket';
 
 export type SubdaoProposalConfig = {
   threshold: any;
@@ -992,6 +993,72 @@ export class DaoMember {
                 from_address: ADMIN_MODULE_ADDRESS,
                 to_address: ADMIN_MODULE_ADDRESS,
                 amount: [],
+              }),
+            },
+          },
+        },
+      },
+    });
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      deposit,
+    );
+  }
+
+  /**
+   * submitFeeMarketChangeParamsProposal creates proposal.
+   */
+  async submitFeeMarketChangeParamsProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    deposit: string,
+    params: FeeMarketParams,
+  ): Promise<number> {
+    const message = chainManagerWrapper(chainManagerAddress, {
+      custom: {
+        submit_admin_proposal: {
+          admin_proposal: {
+            proposal_execute_message: {
+              message: JSON.stringify({
+                '@type': '/feemarket.feemarket.v1.MsgParams',
+                authority: ADMIN_MODULE_ADDRESS,
+                params,
+              }),
+            },
+          },
+        },
+      },
+    });
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      deposit,
+    );
+  }
+
+  /**
+   * submitDynamicfeesChangeParamsProposal creates proposal.
+   */
+  async submitDynamicfeesChangeParamsProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    deposit: string,
+    params: DynamicFeesParams,
+  ): Promise<number> {
+    const message = chainManagerWrapper(chainManagerAddress, {
+      custom: {
+        submit_admin_proposal: {
+          admin_proposal: {
+            proposal_execute_message: {
+              message: JSON.stringify({
+                '@type': '/neutron.dynamicfees.v1.MsgUpdateParams',
+                authority: ADMIN_MODULE_ADDRESS,
+                params,
               }),
             },
           },
