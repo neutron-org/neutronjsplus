@@ -318,6 +318,12 @@ export type InterchaintxsParamsResponse = {
   };
 };
 
+export type GlobalfeeParamsResponse = {
+  minimum_gas_prices: cosmosclient.proto.cosmos.base.v1beta1.ICoin[];
+  bypass_min_fee_msg_types: string[];
+  max_total_bypass_min_fee_msg_gas_usage: string;
+};
+
 export type ContractAdminResponse = {
   contract_info: {
     admin: string;
