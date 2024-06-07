@@ -163,12 +163,12 @@ export type NewMarkets = {
   provider_configs: {
     name: string;
     off_chain_ticker: string;
-    normalize_by_pair: {
+    normalize_by_pair?: {
       Base: string;
       Quote: string;
     };
-    invert: boolean;
-    metadata_JSON: string;
+    invert?: boolean;
+    metadata_JSON?: string;
   }[];
 }[];
 
