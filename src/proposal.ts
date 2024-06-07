@@ -37,6 +37,11 @@ export type ParamsFeeburnerInfo = {
   treasury_address: string;
 };
 
+export type ParamsTransferInfo = {
+  send_enabled: boolean;
+  receive_enabled: boolean;
+};
+
 export type ParamsFeerefunderInfo = {
   min_fee: {
     recv_fee: any;
@@ -341,6 +346,27 @@ export const updateFeeburnerParamsProposal = (
             authority: ADMIN_MODULE_ADDRESS,
             params: {
               treasury_address: info.treasury_address,
+            },
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateTransferParamsProposal = (
+  info: ParamsTransferInfo,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/ibc.applications.transfer.v1.MsgUpdateParams',
+            signer: ADMIN_MODULE_ADDRESS,
+            params: {
+              send_enabled: info.send_enabled,
+              receive_enabled: info.receive_enabled
             },
           }),
         },

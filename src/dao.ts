@@ -32,7 +32,7 @@ import {
   ParamsGlobalfeeInfo,
   ParamsInterchainqueriesInfo,
   ParamsInterchaintxsInfo,
-  ParamsTokenfactoryInfo,
+  ParamsTokenfactoryInfo, ParamsTransferInfo,
   pinCodesCustomAuthorityProposal,
   pinCodesProposal,
   removeSchedule,
@@ -1421,6 +1421,40 @@ export class DaoMember {
     title: string,
     description: string,
     message: ParamsInterchaintxsInfo,
+    amount: string,
+  ): Promise<number> {
+    const messageWrapped = {
+      wasm: {
+        execute: {
+          contract_addr: chainManagerAddress,
+          msg: Buffer.from(
+            JSON.stringify({
+              execute_messages: {
+                messages: [message],
+              },
+            }),
+          ).toString('base64'),
+          funds: [],
+        },
+      },
+    };
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [messageWrapped],
+      amount,
+    );
+  }
+
+  /**
+   * submitUpdateParamsTransferProposal creates proposal which changes params of transfer module.
+   */
+
+  async submitUpdateParamsTransferProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    message: ParamsTransferInfo,
     amount: string,
   ): Promise<number> {
     const messageWrapped = {

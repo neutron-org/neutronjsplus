@@ -30,7 +30,7 @@ import {
   ParamsContractmanagerResponse,
   ParamsCronResponse,
   ParamsTokenfactoryResponse,
-  Strategy,
+  Strategy, TransferParamsResponse,
 } from './types';
 import { DEBUG_SUBMIT_TX, getContractBinary, getHeight } from './env';
 import { Message } from '@bufbuild/protobuf';
@@ -210,6 +210,15 @@ export class CosmosWrapper {
     );
 
     return req.data;
+  }
+
+  async queryTransferParams(): Promise<TransferParamsResponse> {
+    const req = await axios.get(
+      `${this.sdk.url}/ibc/apps/transfer/v1/params`,
+    );
+
+    return req.data;
+
   }
 
   async queryFeeburnerParams(): Promise<ParamsFeeburnerResponse> {
