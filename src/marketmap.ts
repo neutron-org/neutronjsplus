@@ -43,7 +43,7 @@ export type Params = {
 };
 
 export type MarketMap = {
-  markets: Map<string,Market>;
+  markets: Map<string, Market>;
 };
 
 export type Market = {
@@ -67,13 +67,13 @@ export type ProviderConfig = {
   // For example, if the desired Ticker is BTC/USD, this market could be reached
   // using: OffChainTicker = BTC/USDT NormalizeByPair = USDT/USD This field is
   // optional and nullable.
-  normalize_by_pair: CurrencyPair,
+  normalize_by_pair: CurrencyPair;
   // Invert is a boolean indicating if the BASE and QUOTE of the market should
   // be inverted. i.e. BASE -> QUOTE, QUOTE -> BASE
-  invert: boolean,
+  invert: boolean;
   // MetadataJSON is a string of JSON that encodes any extra configuration
   // for the given provider config.
-  metadata_json: string,
+  metadata_json: string;
 };
 
 export type Ticker = {
