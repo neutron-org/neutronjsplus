@@ -1,5 +1,3 @@
-import { DecCoin } from '@neutron-org/cosmjs-types/cosmos/base/v1beta1/coin';
-
 export type GasPriceResponse = {
   price: DecCoin;
 };
@@ -70,4 +68,9 @@ export type DynamicFeesParamsResponse = {
 
 export type DynamicFeesParams = {
   ntrn_prices: Array<DecCoin>;
+};
+
+export type DecCoin = {
+  denom: string;
+  amount: string;
 };
