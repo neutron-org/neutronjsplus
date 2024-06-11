@@ -20,6 +20,7 @@ import {
   ParamsCronResponse,
   ParamsTokenfactoryResponse,
   Strategy,
+  TransferParamsResponse,
   DenomTraceResponse,
   TotalBurnedNeutronsAmountResponse,
   TotalSupplyByDenomResponse,
@@ -39,6 +40,12 @@ import { GetAllCurrencyPairsResponse, GetPricesResponse } from './oracle';
 import { Coin } from '@cosmjs/proto-signing';
 import { IndexedTx } from '@cosmjs/stargate';
 import { IBC_ATOM_DENOM, IBC_USDC_DENOM } from './constants';
+import {
+  DynamicFeesParamsResponse,
+  FeeMarketParamsResponse,
+  GasPriceResponse,
+  GasPricesResponse,
+} from './feemarket';
 
 export class CosmosWrapper {
   constructor(public denom: string, public rest: string, public rpc: string) {}
@@ -102,6 +109,12 @@ export class CosmosWrapper {
     const req = await axios.get(
       `${this.rest}/neutron/interchainqueries/params`,
     );
+
+    return req.data;
+  }
+
+  async queryTransferParams(): Promise<TransferParamsResponse> {
+    const req = await axios.get(`${this.rest}/ibc/apps/transfer/v1/params`);
 
     return req.data;
   }
@@ -426,6 +439,38 @@ export class CosmosWrapper {
     const req = await axios.get(`${this.rest}/gaia/globalfee/v1beta1/params`);
 
     return req.data.params;
+  }
+
+  async getGasPrice(denom: string): Promise<GasPriceResponse> {
+    const res = await axios.get<GasPriceResponse>(
+      `${this.rest}/feemarket/v1/gas_price/${denom}`,
+    );
+
+    return res.data;
+  }
+
+  async getGasPrices(): Promise<GasPricesResponse> {
+    const res = await axios.get<GasPricesResponse>(
+      `${this.rest}/feemarket/v1/gas_prices`,
+    );
+
+    return res.data;
+  }
+
+  async getDynamicFeesRaparms(): Promise<DynamicFeesParamsResponse> {
+    const res = await axios.get<DynamicFeesParamsResponse>(
+      `${this.rest}/neutron/dynamicfees/v1/params`,
+    );
+
+    return res.data;
+  }
+
+  async getFeemarketParams(): Promise<FeeMarketParamsResponse> {
+    const res = await axios.get<FeeMarketParamsResponse>(
+      `${this.rest}/feemarket/v1/params`,
+    );
+
+    return res.data;
   }
 
   async queryContractAdmin(address: string): Promise<string> {

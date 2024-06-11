@@ -307,6 +307,13 @@ export type IcaHostParamsResponse = {
   };
 };
 
+export type TransferParamsResponse = {
+  params: {
+    send_enabled: boolean;
+    receive_enabled: boolean;
+  };
+};
+
 export type InterchainqueriesParamsResponse = {
   params: {
     query_submit_timeout: number;

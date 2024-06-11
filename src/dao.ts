@@ -28,6 +28,7 @@ import {
   ParamsInterchainqueriesInfo,
   ParamsInterchaintxsInfo,
   ParamsTokenfactoryInfo,
+  ParamsTransferInfo,
   pinCodesCustomAuthorityProposal,
   pinCodesProposal,
   removeSchedule,
@@ -40,6 +41,7 @@ import { WalletWrapper } from './walletWrapper';
 import { IndexedTx } from '@cosmjs/cosmwasm-stargate';
 import { ClientState } from '@neutron-org/cosmjs-types/ibc/lightclients/tendermint/v1/tendermint';
 import { ADMIN_MODULE_ADDRESS } from './constants';
+import { DynamicFeesParams, FeeMarketParams } from './feemarket';
 
 export type SubdaoProposalConfig = {
   threshold: any;
@@ -159,12 +161,12 @@ export type NewMarkets = {
   provider_configs: {
     name: string;
     off_chain_ticker: string;
-    normalize_by_pair: {
+    normalize_by_pair?: {
       Base: string;
       Quote: string;
     };
-    invert: boolean;
-    metadata_JSON: string;
+    invert?: boolean;
+    metadata_JSON?: string;
   }[];
 }[];
 
@@ -1011,6 +1013,72 @@ export class DaoMember {
     );
   }
 
+  /**
+   * submitFeeMarketChangeParamsProposal creates proposal.
+   */
+  async submitFeeMarketChangeParamsProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    deposit: string,
+    params: FeeMarketParams,
+  ): Promise<number> {
+    const message = chainManagerWrapper(chainManagerAddress, {
+      custom: {
+        submit_admin_proposal: {
+          admin_proposal: {
+            proposal_execute_message: {
+              message: JSON.stringify({
+                '@type': '/feemarket.feemarket.v1.MsgParams',
+                authority: ADMIN_MODULE_ADDRESS,
+                params,
+              }),
+            },
+          },
+        },
+      },
+    });
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      deposit,
+    );
+  }
+
+  /**
+   * submitDynamicfeesChangeParamsProposal creates proposal.
+   */
+  async submitDynamicfeesChangeParamsProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    deposit: string,
+    params: DynamicFeesParams,
+  ): Promise<number> {
+    const message = chainManagerWrapper(chainManagerAddress, {
+      custom: {
+        submit_admin_proposal: {
+          admin_proposal: {
+            proposal_execute_message: {
+              message: JSON.stringify({
+                '@type': '/neutron.dynamicfees.v1.MsgUpdateParams',
+                authority: ADMIN_MODULE_ADDRESS,
+                params,
+              }),
+            },
+          },
+        },
+      },
+    });
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
+      deposit,
+    );
+  }
+
   async supportAndExecuteProposal(
     proposalId: number,
     customModule = 'single',
@@ -1359,6 +1427,40 @@ export class DaoMember {
     title: string,
     description: string,
     message: ParamsInterchaintxsInfo,
+    amount: string,
+  ): Promise<number> {
+    const messageWrapped = {
+      wasm: {
+        execute: {
+          contract_addr: chainManagerAddress,
+          msg: Buffer.from(
+            JSON.stringify({
+              execute_messages: {
+                messages: [message],
+              },
+            }),
+          ).toString('base64'),
+          funds: [],
+        },
+      },
+    };
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [messageWrapped],
+      amount,
+    );
+  }
+
+  /**
+   * submitUpdateParamsTransferProposal creates proposal which changes params of transfer module.
+   */
+
+  async submitUpdateParamsTransferProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    message: ParamsTransferInfo,
     amount: string,
   ): Promise<number> {
     const messageWrapped = {

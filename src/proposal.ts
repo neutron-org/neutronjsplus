@@ -1,5 +1,6 @@
 import { Coin } from '@cosmjs/proto-signing';
 import { ADMIN_MODULE_ADDRESS } from './constants';
+import { DynamicFeesParams } from './feemarket';
 
 export type ParamChangeProposalInfo = {
   title: string;
@@ -33,6 +34,11 @@ export type ParamsTokenfactoryInfo = {
 
 export type ParamsFeeburnerInfo = {
   treasury_address: string;
+};
+
+export type ParamsTransferInfo = {
+  send_enabled: boolean;
+  receive_enabled: boolean;
 };
 
 export type ParamsFeerefunderInfo = {
@@ -350,6 +356,27 @@ export const updateFeeburnerParamsProposal = (
   },
 });
 
+export const updateTransferParamsProposal = (
+  info: ParamsTransferInfo,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/ibc.applications.transfer.v1.MsgUpdateParams',
+            signer: ADMIN_MODULE_ADDRESS,
+            params: {
+              send_enabled: info.send_enabled,
+              receive_enabled: info.receive_enabled,
+            },
+          }),
+        },
+      },
+    },
+  },
+});
+
 export const updateGlobalFeeParamsProposal = (
   info: ParamsGlobalfeeInfo,
 ): any => ({
@@ -592,6 +619,24 @@ export const chainManagerWrapper = (
         }),
       ).toString('base64'),
       funds: [],
+    },
+  },
+});
+
+export const updateDynamicFeesParamsProposal = (
+  params: DynamicFeesParams,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.dynamicfees.v1.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params,
+          }),
+        },
+      },
     },
   },
 });
