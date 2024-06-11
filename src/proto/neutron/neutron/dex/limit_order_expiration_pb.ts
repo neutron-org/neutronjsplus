@@ -11,7 +11,7 @@ import { Message, proto3, Timestamp } from "@bufbuild/protobuf";
  */
 export class LimitOrderExpiration extends Message<LimitOrderExpiration> {
   /**
-   * see limitOrderTranche.proto for details on goodTilDate
+   * see limitOrderTranche.proto for details on expiration_time
    *
    * @generated from field: google.protobuf.Timestamp expiration_time = 1;
    */

@@ -30,7 +30,7 @@ import {
   ParamsContractmanagerResponse,
   ParamsCronResponse,
   ParamsTokenfactoryResponse,
-  Strategy,
+  Strategy, TransferParamsResponse,
 } from './types';
 import { DEBUG_SUBMIT_TX, getContractBinary, getHeight } from './env';
 import { Message } from '@bufbuild/protobuf';
@@ -43,6 +43,14 @@ import { MsgSend } from './proto/cosmos_sdk/cosmos/bank/v1beta1/tx_pb';
 import { MsgRemoveInterchainQueryRequest } from './proto/neutron/neutron/interchainqueries/tx_pb';
 import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
 import IHeight = ibc.core.client.v1.IHeight;
+import { GetPriceResponse } from './oracle';
+import { GetAllCurrencyPairsResponse, GetPricesResponse } from './oracle';
+import {
+  GasPriceResponse,
+  GasPricesResponse,
+  DynamicFeesRaparmsResponse,
+  FeeMarketParamsResponse as FeeMarketParamsResponse,
+} from './feemarket';
 
 export const NEUTRON_DENOM = process.env.NEUTRON_DENOM || 'untrn';
 export const IBC_ATOM_DENOM = process.env.IBC_ATOM_DENOM || 'uibcatom';
@@ -202,6 +210,15 @@ export class CosmosWrapper {
     );
 
     return req.data;
+  }
+
+  async queryTransferParams(): Promise<TransferParamsResponse> {
+    const req = await axios.get(
+      `${this.sdk.url}/ibc/apps/transfer/v1/params`,
+    );
+
+    return req.data;
+
   }
 
   async queryFeeburnerParams(): Promise<ParamsFeeburnerResponse> {
@@ -480,9 +497,82 @@ export class CosmosWrapper {
     return req.data.params;
   }
 
+  async getGasPrice(denom: string): Promise<GasPriceResponse> {
+    const res = await axios.get<GasPriceResponse>(
+      `${this.sdk.url}/feemarket/v1/gas_price/${denom}`,
+    );
+
+    return res.data;
+  }
+
+  async getGasPrices(): Promise<GasPricesResponse> {
+    const res = await axios.get<GasPricesResponse>(
+      `${this.sdk.url}/feemarket/v1/gas_prices`,
+    );
+
+    return res.data;
+  }
+
+  async getDynamicFeesRaparms(): Promise<DynamicFeesRaparmsResponse> {
+    const res = await axios.get<DynamicFeesRaparmsResponse>(
+      `${this.sdk.url}/neutron/dynamicfees/v1/params`,
+    );
+
+    return res.data;
+  }
+
+  async getFeemarketParams(): Promise<FeeMarketParamsResponse> {
+    const res = await axios.get<FeeMarketParamsResponse>(
+      `${this.sdk.url}/feemarket/v1/params`,
+    );
+
+    return res.data;
+  }
+
   async queryContractAdmin(address: string): Promise<string> {
     const resp = await this.getContractInfo(address);
     return resp.contract_info.admin;
+  }
+
+  async queryOraclePrice(
+    base: string,
+    quote: string,
+  ): Promise<GetPriceResponse> {
+    try {
+      const req = await axios.get<any>(
+        `${this.sdk.url}/slinky/oracle/v1/get_price`,
+        {
+          params: {
+            'currency_pair.Base': base,
+            'currency_pair.Quote': quote,
+          },
+        },
+      );
+      return req.data;
+    } catch (e) {
+      if (e.response?.data?.message !== undefined) {
+        throw new Error(e.response?.data?.message);
+      }
+      throw e;
+    }
+  }
+
+  async queryOraclePrices(
+    currencyPairIds: string[],
+  ): Promise<GetPricesResponse> {
+    const req = await axios.get(`${this.sdk.url}/slinky/oracle/v1/get_prices`, {
+      params: { currency_pair_ids: currencyPairIds.join(',') },
+    });
+
+    return req.data;
+  }
+
+  async queryOracleAllCurrencyPairs(): Promise<GetAllCurrencyPairsResponse> {
+    const req = await axios.get(
+      `${this.sdk.url}/slinky/oracle/v1/get_all_tickers`,
+    );
+
+    return req.data;
   }
 }
 
@@ -945,25 +1035,14 @@ export class WalletWrapper {
   }
 }
 
-type TxResponseType = Awaited<ReturnType<typeof cosmosclient.rest.tx.getTx>>;
-
 export const getEventAttributesFromTx = (
-  data: TxResponseType['data'],
+  data: any,
   event: string,
   attributes: string[],
 ): Array<
   Record<(typeof attributes)[number], string> | Record<string, never>
 > => {
-  const events =
-    (
-      JSON.parse(data?.tx_response.raw_log) as [
-        {
-          events: [
-            { type: string; attributes: [{ key: string; value: string }] },
-          ];
-        },
-      ]
-    )[0].events || [];
+  const events = data?.tx_response.events;
   const resp = [];
   for (const e of events) {
     if (event === e.type) {
@@ -1031,15 +1110,22 @@ export const mnemonicToWallet = async (
   return new Wallet(address, account, pubKey, privKey, addrPrefix);
 };
 
-export const getSequenceId = (rawLog: string | undefined): number => {
+export const getSequenceId = (
+  rawLog: BroadcastTx200ResponseTxResponse | undefined,
+): number => {
   if (!rawLog) {
     throw 'getSequenceId: empty rawLog';
   }
-  const events = JSON.parse(rawLog)[0]['events'];
-  const sequence = events
-    .find((e) => e['type'] === 'send_packet')
-    ['attributes'].find((a) => a['key'] === 'packet_sequence').value;
-  return +sequence;
+  for (const event of rawLog.events) {
+    if (event.type === 'send_packet') {
+      const sequenceAttr = event.attributes.find(
+        (attr) => attr.key === 'packet_sequence',
+      );
+      if (sequenceAttr) {
+        return parseInt(sequenceAttr.value);
+      }
+    }
+  }
 };
 
 export const getIBCDenom = (portName, channelName, denom: string): string => {

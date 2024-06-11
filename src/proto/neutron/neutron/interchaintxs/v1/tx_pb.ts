@@ -73,6 +73,16 @@ export class MsgRegisterInterchainAccount extends Message<MsgRegisterInterchainA
  * @generated from message neutron.interchaintxs.v1.MsgRegisterInterchainAccountResponse
  */
 export class MsgRegisterInterchainAccountResponse extends Message<MsgRegisterInterchainAccountResponse> {
+  /**
+   * @generated from field: string channel_id = 1;
+   */
+  channelId = "";
+
+  /**
+   * @generated from field: string port_id = 2;
+   */
+  portId = "";
+
   constructor(data?: PartialMessage<MsgRegisterInterchainAccountResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -81,6 +91,8 @@ export class MsgRegisterInterchainAccountResponse extends Message<MsgRegisterInt
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "neutron.interchaintxs.v1.MsgRegisterInterchainAccountResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "channel_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "port_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgRegisterInterchainAccountResponse {

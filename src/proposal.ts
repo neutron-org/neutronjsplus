@@ -1,5 +1,7 @@
 import { google } from '@cosmos-client/core/cjs/proto';
 import { ADMIN_MODULE_ADDRESS } from './cosmos';
+import cosmosclient from '@cosmos-client/core';
+import { DynamicFeesParams } from './feemarket';
 
 export type ParamChangeProposalInfo = {
   title: string;
@@ -28,10 +30,16 @@ export type ParamsInterchainqueriesInfo = {
 export type ParamsTokenfactoryInfo = {
   denom_creation_fee: any;
   denom_creation_gas_consume: number;
+  fee_collector_address: string;
 };
 
 export type ParamsFeeburnerInfo = {
   treasury_address: string;
+};
+
+export type ParamsTransferInfo = {
+  send_enabled: boolean;
+  receive_enabled: boolean;
 };
 
 export type ParamsFeerefunderInfo = {
@@ -40,6 +48,12 @@ export type ParamsFeerefunderInfo = {
     ack_fee: any;
     timeout_fee: any;
   };
+};
+
+export type ParamsGlobalfeeInfo = {
+  minimum_gas_prices: cosmosclient.proto.cosmos.base.v1beta1.ICoin[];
+  bypass_min_fee_msg_types: string[];
+  max_total_bypass_min_fee_msg_gas_usage: string;
 };
 
 export type ParamsCronInfo = {
@@ -76,6 +90,11 @@ export type UpgradeInfo = {
   height: number;
   info: string;
   upgraded_client_state: google.protobuf.Any;
+};
+
+export type CurrencyPairInfo = {
+  Base: string;
+  Quote: string;
 };
 
 export type SendProposalInfo = {
@@ -306,7 +325,7 @@ export const updateTokenfacoryParamsProposal = (
             params: {
               denom_creation_fee: info.denom_creation_fee,
               denom_creation_gas_consume: info.denom_creation_gas_consume,
-              fee_collector_address: null,
+              fee_collector_address: info.fee_collector_address,
             },
           }),
         },
@@ -327,6 +346,50 @@ export const updateFeeburnerParamsProposal = (
             authority: ADMIN_MODULE_ADDRESS,
             params: {
               treasury_address: info.treasury_address,
+            },
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateTransferParamsProposal = (
+  info: ParamsTransferInfo,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/ibc.applications.transfer.v1.MsgUpdateParams',
+            signer: ADMIN_MODULE_ADDRESS,
+            params: {
+              send_enabled: info.send_enabled,
+              receive_enabled: info.receive_enabled
+            },
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateGlobalFeeParamsProposal = (
+  info: ParamsGlobalfeeInfo,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/gaia.globalfee.v1beta1.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params: {
+              minimum_gas_prices: info.minimum_gas_prices,
+              bypass_min_fee_msg_types: info.bypass_min_fee_msg_types,
+              max_total_bypass_min_fee_msg_gas_usage:
+                info.max_total_bypass_min_fee_msg_gas_usage,
             },
           }),
         },
@@ -461,6 +524,24 @@ export const upgradeProposal = (info: UpgradeInfo): any => ({
   },
 });
 
+export const addCurrencyPairsProposal = (
+  currencyPairs: CurrencyPairInfo[],
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/slinky.oracle.v1.MsgAddCurrencyPairs',
+            authority: ADMIN_MODULE_ADDRESS,
+            currency_pairs: currencyPairs,
+          }),
+        },
+      },
+    },
+  },
+});
+
 export const addSubdaoProposal = (
   mainDaoCoreAddress: string,
   subdaoCoreAddress: string,
@@ -536,6 +617,24 @@ export const chainManagerWrapper = (
         }),
       ).toString('base64'),
       funds: [],
+    },
+  },
+});
+
+export const updateDynamicFeesParamsProposal = (
+  params: DynamicFeesParams,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.dynamicfees.v1.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params,
+          }),
+        },
+      },
     },
   },
 });
