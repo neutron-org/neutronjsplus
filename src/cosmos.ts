@@ -29,6 +29,7 @@ import {
   ParamsFeerefunderResponse,
   ParamsContractmanagerResponse,
   ParamsCronResponse,
+  ParamsDexResponse,
   ParamsTokenfactoryResponse,
   Strategy,
   TransferParamsResponse,
