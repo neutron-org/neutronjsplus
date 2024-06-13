@@ -61,6 +61,13 @@ export type ParamsCronInfo = {
   limit: number;
 };
 
+export type ParamsDexInfo = {
+  fee_tiers: number[];
+  paused: bool;
+  max_jits_per_block: number;
+  good_til_purge_allowance: number;
+};
+
 export type ParamsContractmanagerInfo = {
   sudo_call_gas_limit: string;
 };
@@ -429,6 +436,27 @@ export const updateCronParamsProposal = (info: ParamsCronInfo): any => ({
             params: {
               security_address: info.security_address,
               limit: info.limit,
+            },
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateDexParamsProposal = (info: ParamsDexInfo): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.dex.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params: {
+              fee_tiers: info.fee_tiers,
+              paused: info.paused,
+              max_jits_per_block: info.max_jits_per_block,
+              good_til_purge_allowance: info.good_til_purge_allowance,
             },
           }),
         },
