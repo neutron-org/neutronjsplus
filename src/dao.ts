@@ -27,6 +27,7 @@ import {
   ParamChangeProposalInfo,
   ParamsContractmanagerInfo,
   ParamsCronInfo,
+  ParamsDexInfo,
   ParamsFeeburnerInfo,
   ParamsFeerefunderInfo,
   ParamsGlobalfeeInfo,
@@ -1612,6 +1613,25 @@ export class DaoMember {
     title: string,
     description: string,
     message: ParamsCronInfo,
+    amount: string,
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [chainManagerWrapper(chainManagerAddress, message)],
+      amount,
+    );
+  }
+
+  /**
+   * submitUpdateParamsDexProposal creates proposal which changes soe params of dex module.
+   */
+
+  async submitUpdateParamsDexProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    message: ParamsDexInfo,
     amount: string,
   ): Promise<number> {
     return await this.submitSingleChoiceProposal(
