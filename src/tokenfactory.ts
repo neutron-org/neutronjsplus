@@ -27,7 +27,11 @@ export const msgMintDenom = async (
   cmNeutron: WalletWrapper,
   creator: string,
   amount: Coin,
-  mintToAddress: string,
+  mintToAddress = '',
+  fee = {
+    gas: '500000',
+    amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
+  },
 ): Promise<IndexedTx> => {
   const value: MsgMint = {
     sender: creator,
@@ -38,30 +42,26 @@ export const msgMintDenom = async (
     typeUrl: MsgMint.typeUrl,
     value,
   };
-  const fee = {
-    gas: '200000',
-    amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
-  };
 
   return await cmNeutron.execTx(fee, [msg]);
 };
 
 export const msgCreateDenom = async (
   cmNeutron: WalletWrapper,
-  creator: string,
+  sender: string,
   subdenom: string,
+  fee = {
+    gas: '500000',
+    amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
+  },
 ): Promise<IndexedTx> => {
   const value: MsgCreateDenom = {
-    sender: creator,
+    sender,
     subdenom,
   };
   const msg = {
     typeUrl: MsgCreateDenom.typeUrl,
     value,
-  };
-  const fee = {
-    gas: '200000',
-    amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
   };
 
   return await cmNeutron.execTx(fee, [msg]);
@@ -69,13 +69,17 @@ export const msgCreateDenom = async (
 
 export const msgBurn = async (
   cmNeutron: WalletWrapper,
-  creator: string,
+  sender: string,
   denom: string,
   amountToBurn: string,
-  burnFromAddress: string,
+  burnFromAddress = '',
+  fee = {
+    gas: '200000',
+    amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
+  },
 ): Promise<IndexedTx> => {
   const value: MsgBurn = {
-    sender: creator,
+    sender,
     amount: {
       denom: denom,
       amount: amountToBurn,
@@ -85,10 +89,6 @@ export const msgBurn = async (
   const msg = {
     typeUrl: MsgBurn.typeUrl,
     value,
-  };
-  const fee = {
-    gas: '200000',
-    amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
   };
 
   return await cmNeutron.execTx(fee, [msg]);
