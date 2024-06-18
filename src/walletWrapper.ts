@@ -171,7 +171,7 @@ export class WalletWrapper {
     value: string,
     fee = {
       gas: '200000',
-      amount: [{ denom: this.chain.denom, amount: '1000' }],
+      amount: [{ denom: this.chain.denom, amount: '1250' }],
     },
   ): Promise<IndexedTx> {
     const proposal: ParameterChangeProposal = {
@@ -242,7 +242,7 @@ export class WalletWrapper {
     return await this.execTx(
       {
         gas: '200000',
-        amount: [{ denom: this.chain.denom, amount: '1000' }],
+        amount: [{ denom: this.chain.denom, amount: '1250' }],
       },
       [msg],
     );

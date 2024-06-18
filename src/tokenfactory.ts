@@ -30,7 +30,7 @@ export const msgMintDenom = async (
   mintToAddress = '',
   fee = {
     gas: '500000',
-    amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
+    amount: [{ denom: cmNeutron.chain.denom, amount: '1250' }],
   },
 ): Promise<IndexedTx> => {
   const value: MsgMint = {
@@ -52,7 +52,7 @@ export const msgCreateDenom = async (
   subdenom: string,
   fee = {
     gas: '500000',
-    amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
+    amount: [{ denom: cmNeutron.chain.denom, amount: '1250' }],
   },
 ): Promise<IndexedTx> => {
   const value: MsgCreateDenom = {
@@ -74,8 +74,8 @@ export const msgBurn = async (
   amountToBurn: string,
   burnFromAddress = '',
   fee = {
-    gas: '200000',
-    amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
+    gas: '500000',
+    amount: [{ denom: cmNeutron.chain.denom, amount: '1250' }],
   },
 ): Promise<IndexedTx> => {
   const value: MsgBurn = {
@@ -112,7 +112,7 @@ export const msgChangeAdmin = async (
   };
   const fee = {
     gas: '200000',
-    amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
+    amount: [{ denom: cmNeutron.chain.denom, amount: '1250' }],
   };
 
   return await cmNeutron.execTx(fee, [msg]);
