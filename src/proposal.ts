@@ -27,7 +27,7 @@ export type ParamsInterchainqueriesInfo = {
   tx_query_removal_limit: number;
 };
 
-export type WhitelistedDenom = {
+export type WhitelistedHook = {
   code_id: number;
   denom_creator: string;
 };
@@ -35,7 +35,7 @@ export type ParamsTokenfactoryInfo = {
   denom_creation_fee: any;
   denom_creation_gas_consume: number;
   fee_collector_address: string;
-  whitelisted_denoms: WhitelistedDenom[];
+  whitelisted_hooks: WhitelistedHook[];
 };
 
 export type ParamsFeeburnerInfo = {
@@ -331,7 +331,7 @@ export const updateTokenfactoryParamsProposal = (
               denom_creation_fee: info.denom_creation_fee,
               denom_creation_gas_consume: info.denom_creation_gas_consume,
               fee_collector_address: info.fee_collector_address,
-              whitelisted_denoms: info.whitelisted_denoms,
+              whitelisted_hooks: info.whitelisted_hooks,
             },
           }),
         },
