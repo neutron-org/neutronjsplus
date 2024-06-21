@@ -35,7 +35,7 @@ export type ParamsTokenfactoryInfo = {
   denom_creation_fee: any;
   denom_creation_gas_consume: number;
   fee_collector_address: string;
-  whitelisted_hooks: WhitelistedHook[];
+  whitelisted_hooks: any;
 };
 
 export type ParamsFeeburnerInfo = {
