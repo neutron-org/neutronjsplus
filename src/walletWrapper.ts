@@ -32,6 +32,9 @@ export class WalletWrapper {
     return await this.chain.queryDenomBalance(this.wallet.address, denom);
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async execTx(
     fee: StdFee | 'auto' | number,
     msgs: EncodeObject[],
@@ -70,7 +73,11 @@ export class WalletWrapper {
     throw error;
   }
 
-  // storeWasm stores the wasm code by the passed path on the blockchain.
+  /**
+   * storeWasm stores the wasm code by the passed path on the blockchain.
+   * @deprecated since version 0.5.0
+   * Please use SigningCosmWasmClient instead
+   */
   async storeWasm(fileName: string): Promise<CodeId> {
     const sender = this.wallet.address;
     const wasmCode = await this.getContractBinary(fileName);
@@ -81,6 +88,10 @@ export class WalletWrapper {
     return res.codeId;
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   * Please use SigningCosmWasmClient instead
+   */
   async instantiateContract(
     codeId: number,
     msg: any,
@@ -101,6 +112,10 @@ export class WalletWrapper {
     return res.contractAddress;
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   * Please use SigningCosmWasmClient instead
+   */
   async migrateContract(
     contract: string,
     codeId: number,
@@ -113,6 +128,10 @@ export class WalletWrapper {
     });
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   * Please use SigningCosmWasmClient instead
+   */
   async executeContract(
     contract: string,
     msg: any,
@@ -136,6 +155,7 @@ export class WalletWrapper {
 
   /**
    * msgSend processes a transfer, waits two blocks and returns the tx hash.
+   * @deprecated since version 0.5.0
    */
   async msgSend(
     to: string,
@@ -165,6 +185,8 @@ export class WalletWrapper {
     return res;
   }
 
+  // TODO: move out from walletWrapper?
+  // Q: Do we need it in neutronjsplus?
   async msgSendDirectProposal(
     subspace: string,
     key: string,
@@ -202,7 +224,9 @@ export class WalletWrapper {
     return await this.execTx(fee, [msg]);
   }
 
-  /* simulateFeeBurning simulates fee burning via send tx.
+  /**
+   * simulateFeeBurning simulates fee burning via send tx.
+   * @deprecated since version 0.5.0
    */
   async simulateFeeBurning(amount: number): Promise<IndexedTx> {
     const fee = {
@@ -224,6 +248,7 @@ export class WalletWrapper {
 
   /**
    * msgRemoveInterchainQuery sends transaction to remove interchain query, waits two blocks and returns the tx hash.
+   * @deprecated since version 0.5.0
    */
   async msgRemoveInterchainQuery(
     queryId: bigint,
@@ -250,6 +275,7 @@ export class WalletWrapper {
 
   /**
    * msgIBCTransfer processes an IBC transfer, waits two blocks and returns the tx hash.
+   * @deprecated since version 0.5.0
    */
   async msgIBCTransfer(
     sourcePort: string,
@@ -286,6 +312,9 @@ export class WalletWrapper {
     return await this.execTx(fee, [msg]);
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async getContractBinary(fileName: string): Promise<Buffer> {
     return fsPromise.readFile(path.resolve(this.contractsPath, fileName));
   }

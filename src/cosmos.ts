@@ -165,6 +165,9 @@ export class CosmosWrapper {
     return res.balances;
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryDenomBalance(addr: string, denom: string): Promise<number> {
     // TODO: fixme don't connect every time
     const client = await connectComet(this.rpc);
@@ -179,6 +182,9 @@ export class CosmosWrapper {
     return parseInt(res?.balance.amount ?? '0', 10);
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async getHeight(): Promise<number> {
     // TODO: fixme don't connect every time
     const client = await connectComet(this.rpc);
@@ -187,6 +193,9 @@ export class CosmosWrapper {
     return +block.block.header.height;
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async waitBlocks(blocks: number, timeout = 120000): Promise<void> {
     const start = Date.now();
     const client = await StargateClient.connect(this.rpc);
@@ -208,6 +217,9 @@ export class CosmosWrapper {
     }
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryDenomTrace(ibcDenom: string): Promise<DenomTraceResponse> {
     const data = axios.get<{ denom_trace: DenomTraceResponse }>(
       `${this.rest}/ibc/apps/transfer/v1/denom_traces/${ibcDenom}`,
@@ -215,6 +227,9 @@ export class CosmosWrapper {
     return data.then((res) => res.data.denom_trace);
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryAckFailures(
     addr: string,
     pagination?: PageRequest,
@@ -233,6 +248,9 @@ export class CosmosWrapper {
     }
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async listIBCChannels(): Promise<ChannelsList> {
     const res = await axios.get<ChannelsList>(
       `${this.rest}/ibc/core/channel/v1/channels`,
@@ -240,6 +258,9 @@ export class CosmosWrapper {
     return res.data;
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async getIBCClientStatus(clientId: string): Promise<IBCClientStatus> {
     const res = await axios.get<IBCClientStatus>(
       `${this.rest}/ibc/core/client/v1/client_status/${clientId}`,
@@ -247,6 +268,9 @@ export class CosmosWrapper {
     return res.data;
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryTotalBurnedNeutronsAmount(): Promise<TotalBurnedNeutronsAmountResponse> {
     try {
       const req = await axios.get<TotalBurnedNeutronsAmountResponse>(
@@ -261,6 +285,9 @@ export class CosmosWrapper {
     }
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryTotalSupplyByDenom(
     denom: string,
   ): Promise<TotalSupplyByDenomResponse> {
@@ -277,6 +304,9 @@ export class CosmosWrapper {
     }
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryDenomsMetadata(
     pagination?: PageRequest,
   ): Promise<DenomMetadataResponse> {
@@ -294,6 +324,9 @@ export class CosmosWrapper {
     }
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async getChainAdmins() {
     const url = `${this.rest}/cosmos/adminmodule/adminmodule/admins`;
     const resp = await axios.get<{
@@ -302,6 +335,10 @@ export class CosmosWrapper {
     return resp.data.admins;
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
+  // TODO: do not belong here - move out to the dao.ts or something
   async getNeutronDAOCore() {
     const chainManager = (await this.getChainAdmins())[0];
     const strategies = await this.queryContract<[string, Strategy][]>(
@@ -313,12 +350,20 @@ export class CosmosWrapper {
     return strategies[0][0];
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
+  // TODO: do not belong here - move out to the dao.ts or something
   async queryPausedInfo(addr: string): Promise<PauseInfoResponse> {
     return await this.queryContract<PauseInfoResponse>(addr, {
       pause_info: {},
     });
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
+  // TODO: do not belong here - move to test helpers
   async getWithAttempts<T>(
     getFunc: () => Promise<T>,
     readyFunc: (t: T) => Promise<boolean>,
@@ -346,6 +391,9 @@ export class CosmosWrapper {
         );
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async getCodeDataHash(codeId: number): Promise<string> {
     try {
       const res = await axios.get(
@@ -360,6 +408,9 @@ export class CosmosWrapper {
     }
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async querySchedules(pagination?: PageRequest): Promise<ScheduleResponse> {
     try {
       const req = await axios.get<ScheduleResponse>(
@@ -375,6 +426,9 @@ export class CosmosWrapper {
     }
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryCurrentUpgradePlan(): Promise<CurrentPlanResponse> {
     try {
       const req = await axios.get<CurrentPlanResponse>(
@@ -390,6 +444,9 @@ export class CosmosWrapper {
     }
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryPinnedCodes(): Promise<PinnedCodesResponse> {
     try {
       const req = await axios.get<PinnedCodesResponse>(
@@ -405,6 +462,9 @@ export class CosmosWrapper {
     }
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryHostEnabled(): Promise<boolean> {
     try {
       const req = await axios.get<IcaHostParamsResponse>(
@@ -420,6 +480,9 @@ export class CosmosWrapper {
     }
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryMaxTxsAllowed(): Promise<string> {
     try {
       const req = await axios.get<InterchaintxsParamsResponse>(
@@ -435,12 +498,18 @@ export class CosmosWrapper {
     }
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryGlobalfeeParams(): Promise<GlobalfeeParamsResponse> {
     const req = await axios.get(`${this.rest}/gaia/globalfee/v1beta1/params`);
 
     return req.data.params;
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async getGasPrice(denom: string): Promise<GasPriceResponse> {
     const res = await axios.get<GasPriceResponse>(
       `${this.rest}/feemarket/v1/gas_price/${denom}`,
@@ -449,6 +518,9 @@ export class CosmosWrapper {
     return res.data;
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async getGasPrices(): Promise<GasPricesResponse> {
     const res = await axios.get<GasPricesResponse>(
       `${this.rest}/feemarket/v1/gas_prices`,
@@ -457,6 +529,9 @@ export class CosmosWrapper {
     return res.data;
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async getDynamicFeesRaparms(): Promise<DynamicFeesParamsResponse> {
     const res = await axios.get<DynamicFeesParamsResponse>(
       `${this.rest}/neutron/dynamicfees/v1/params`,
@@ -465,6 +540,9 @@ export class CosmosWrapper {
     return res.data;
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async getFeemarketParams(): Promise<FeeMarketParamsResponse> {
     const res = await axios.get<FeeMarketParamsResponse>(
       `${this.rest}/feemarket/v1/params`,
@@ -473,11 +551,17 @@ export class CosmosWrapper {
     return res.data;
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryContractAdmin(address: string): Promise<string> {
     const resp = await this.getContractInfo(address);
     return resp.contract_info.admin;
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryOraclePrice(
     base: string,
     quote: string,
@@ -501,6 +585,9 @@ export class CosmosWrapper {
     }
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryOraclePrices(
     currencyPairIds: string[],
   ): Promise<GetPricesResponse> {
@@ -511,6 +598,9 @@ export class CosmosWrapper {
     return req.data;
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   */
   async queryOracleAllCurrencyPairs(): Promise<GetAllCurrencyPairsResponse> {
     const req = await axios.get(
       `${this.rest}/slinky/oracle/v1/get_all_tickers`,
@@ -520,6 +610,10 @@ export class CosmosWrapper {
   }
 }
 
+// TODO: move out to some helpers
+/**
+ * @deprecated since version 0.5.0
+ */
 export const getEventAttributesFromTx = (
   data: any,
   event: string,
@@ -562,6 +656,10 @@ export const getSequenceId = (tx: IndexedTx | undefined): number => {
   }
 };
 
+// TODO: move out to IBC helpers
+/**
+ * @deprecated since version 0.5.0
+ */
 export const getIBCDenom = (portName, channelName, denom: string): string => {
   const uatomIBCHash = crypto
     .createHash('sha256')
@@ -571,6 +669,10 @@ export const getIBCDenom = (portName, channelName, denom: string): string => {
   return `ibc/${uatomIBCHash}`;
 };
 
+// TODO: move to dao helpers
+/**
+ * @deprecated since version 0.5.0
+ */
 export const createBankSendMessage = (
   addr: string,
   amount: number,
@@ -589,6 +691,10 @@ export const createBankSendMessage = (
   },
 });
 
+// TODO: move to helpers
+/**
+ * @deprecated since version 0.5.0
+ */
 export const getEventAttribute = (
   events: readonly CosmosEvent[],
   eventType: string,
@@ -609,10 +715,18 @@ export const getEventAttribute = (
   return attrValue;
 };
 
+// TODO: move out to IBC helpers
+/**
+ * @deprecated since version 0.5.0
+ */
 export const filterIBCDenoms = (list: Coin[]) =>
   list.filter(
     (coin) =>
       coin.denom && ![IBC_ATOM_DENOM, IBC_USDC_DENOM].includes(coin.denom),
   );
 
+// TODO: move to dao helpers
+/**
+ * @deprecated since version 0.5.0
+ */
 export const wrapMsg = (x) => Buffer.from(JSON.stringify(x)).toString('base64');

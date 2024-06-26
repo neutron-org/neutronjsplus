@@ -1,5 +1,9 @@
 import { CosmosWrapper } from './cosmos';
 
+// TODO: move to interchain tx tests
+/**
+ * @deprecated since version 0.5.0
+ */
 export const getIca = (
   cm: CosmosWrapper,
   contractAddress: string,

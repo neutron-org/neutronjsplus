@@ -106,7 +106,9 @@ export type SendProposalInfo = {
 };
 
 export type MultiChoiceProposal = {
+  // Title  of the proposal
   readonly title: string;
+  // Description of the proposal
   readonly description: string;
   // The address that created this proposal.
   readonly proposer: string;
