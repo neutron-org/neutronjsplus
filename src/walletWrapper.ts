@@ -24,10 +24,18 @@ export class WalletWrapper {
     public debug = false,
   ) {}
 
+  /**
+   * @deprecated since version 0.5.0
+   * use StargateClient.getAllBalances("address") instead
+   */
   async queryBalances(): Promise<Coin[]> {
     return await this.chain.queryBalances(this.wallet.address);
   }
 
+  /**
+   * @deprecated since version 0.5.0
+   * use StargateClient.getBalance("address", "denom") instead
+   */
   async queryDenomBalance(denom: string): Promise<number> {
     return await this.chain.queryDenomBalance(this.wallet.address, denom);
   }
@@ -156,6 +164,7 @@ export class WalletWrapper {
   /**
    * msgSend processes a transfer, waits two blocks and returns the tx hash.
    * @deprecated since version 0.5.0
+   * Use SigningStargateClient.sendTokens instead
    */
   async msgSend(
     to: string,
@@ -185,8 +194,13 @@ export class WalletWrapper {
     return res;
   }
 
-  // TODO: move out from walletWrapper?
-  // Q: Do we need it in neutronjsplus?
+  // TODO: move to dao
+  // TODO: is it legacy proposal submission method?
+  /**
+   * msgSend processes a transfer, waits two blocks and returns the tx hash.
+   * @deprecated since version 0.5.0
+   * Use dao.submitParameterChangeProposal instead
+   */
   async msgSendDirectProposal(
     subspace: string,
     key: string,
