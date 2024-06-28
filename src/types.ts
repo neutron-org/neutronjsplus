@@ -124,6 +124,9 @@ export type PauseInfoResponse = {
 // Strategy defines a permission strategy in the chain manager.
 export type Strategy = any;
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export const NeutronContract = {
   IBC_TRANSFER: 'ibc_transfer.wasm',
   MSG_RECEIVER: 'msg_receiver.wasm',
