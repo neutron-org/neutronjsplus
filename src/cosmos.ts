@@ -155,7 +155,6 @@ export class CosmosWrapper {
 
   /**
    * @deprecated since version 0.5.0
-   * use StargateClient.getAllBalances("address") instead
    */
   async queryBalances(addr: string): Promise<Coin[]> {
     // TODO: fixme don't connect every time
