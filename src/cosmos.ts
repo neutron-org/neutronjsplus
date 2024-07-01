@@ -694,10 +694,6 @@ export const createBankSendMessage = (
   },
 });
 
-// TODO: move to helpers
-/**
- * @deprecated since version 0.5.0
- */
 export const getEventAttribute = (
   events: readonly CosmosEvent[],
   eventType: string,
@@ -727,9 +723,3 @@ export const filterIBCDenoms = (list: Coin[]) =>
     (coin) =>
       coin.denom && ![IBC_ATOM_DENOM, IBC_USDC_DENOM].includes(coin.denom),
   );
-
-// TODO: move to dao helpers
-/**
- * @deprecated since version 0.5.0
- */
-export const wrapMsg = (x) => Buffer.from(JSON.stringify(x)).toString('base64');
