@@ -37,9 +37,11 @@ import {
   SigningCosmWasmClient,
 } from '@cosmjs/cosmwasm-stargate';
 import { ClientState } from '@neutron-org/cosmjs-types/ibc/lightclients/tendermint/v1/tendermint';
+import { QueryClientImpl as AdminQueryClient } from '@neutron-org/cosmjs-types/cosmos/adminmodule/adminmodule/query';
 import { ADMIN_MODULE_ADDRESS } from './constants';
 import { DynamicFeesParams, FeeMarketParams } from './feemarket';
 import { getWithAttempts } from './wait';
+import { ProtobufRpcClient } from '@cosmjs/stargate';
 
 export type SubdaoProposalConfig = {
   threshold: any;
@@ -499,10 +501,10 @@ export class Dao {
 
 export class DaoMember {
   constructor(
+    public dao: Dao,
     private client: SigningCosmWasmClient,
-    private user: string,
+    public user: string,
     private denom: string,
-    private dao: Dao,
   ) {}
 
   /**
@@ -1916,6 +1918,19 @@ export class DaoMember {
     return await this.dao.queryVotingPower(this.user, height);
   }
 }
+
+export const getNeutronDAOCore = async (
+  client: CosmWasmClient,
+  rpcClient: ProtobufRpcClient,
+) => {
+  const queryClient = new AdminQueryClient(rpcClient);
+  const admins = await queryClient.Admins();
+  const chainManager = admins.admins[0];
+  const strategies = await client.queryContractSmart(chainManager, {
+    strategies: {},
+  });
+  return strategies[0][0];
+};
 
 export const DaoContractLabels = {
   DAO_CORE: 'neutron.core',
