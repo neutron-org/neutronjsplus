@@ -47,6 +47,9 @@ import {
   GasPricesResponse,
 } from './feemarket';
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export class CosmosWrapper {
   constructor(public denom: string, public rest: string, public rpc: string) {}
 
@@ -672,10 +675,6 @@ export const getIBCDenom = (portName, channelName, denom: string): string => {
   return `ibc/${uatomIBCHash}`;
 };
 
-// TODO: move to dao helpers
-/**
- * @deprecated since version 0.5.0
- */
 export const createBankSendMessage = (
   addr: string,
   amount: number,

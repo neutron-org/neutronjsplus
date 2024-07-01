@@ -14,6 +14,9 @@ import { CosmosWrapper } from './cosmos';
 import { ParameterChangeProposal } from '@neutron-org/cosmjs-types/cosmos/params/v1beta1/params';
 import { NEUTRON_DENOM } from './constants';
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export class WalletWrapper {
   constructor(
     public chain: CosmosWrapper,
