@@ -1,5 +1,3 @@
-import { DecCoin } from './proto/neutron/cosmos/base/v1beta1/coin_pb';
-
 export type GasPriceResponse = {
   price: DecCoin;
 };
@@ -64,10 +62,15 @@ export type FeeMarketParams = {
   distribute_fees: boolean;
 };
 
-export type DynamicFeesRaparmsResponse = {
+export type DynamicFeesParamsResponse = {
   params: DynamicFeesParams;
 };
 
 export type DynamicFeesParams = {
   ntrn_prices: Array<DecCoin>;
+};
+
+export type DecCoin = {
+  denom: string;
+  amount: string;
 };

@@ -1,6 +1,5 @@
-import { google } from '@cosmos-client/core/cjs/proto';
-import { ADMIN_MODULE_ADDRESS } from './cosmos';
-import cosmosclient from '@cosmos-client/core';
+import { Coin } from '@cosmjs/proto-signing';
+import { ADMIN_MODULE_ADDRESS } from './constants';
 import { DynamicFeesParams } from './feemarket';
 
 export type ParamChangeProposalInfo = {
@@ -51,7 +50,7 @@ export type ParamsFeerefunderInfo = {
 };
 
 export type ParamsGlobalfeeInfo = {
-  minimum_gas_prices: cosmosclient.proto.cosmos.base.v1beta1.ICoin[];
+  minimum_gas_prices: Coin[];
   bypass_min_fee_msg_types: string[];
   max_total_bypass_min_fee_msg_gas_usage: string;
 };
@@ -89,7 +88,10 @@ export type UpgradeInfo = {
   name: string;
   height: number;
   info: string;
-  upgraded_client_state: google.protobuf.Any;
+  upgraded_client_state: {
+    type_url: string;
+    value: string;
+  };
 };
 
 export type CurrencyPairInfo = {
@@ -104,7 +106,9 @@ export type SendProposalInfo = {
 };
 
 export type MultiChoiceProposal = {
+  // Title  of the proposal
   readonly title: string;
+  // Description of the proposal
   readonly description: string;
   // The address that created this proposal.
   readonly proposer: string;
@@ -366,7 +370,7 @@ export const updateTransferParamsProposal = (
             signer: ADMIN_MODULE_ADDRESS,
             params: {
               send_enabled: info.send_enabled,
-              receive_enabled: info.receive_enabled
+              receive_enabled: info.receive_enabled,
             },
           }),
         },

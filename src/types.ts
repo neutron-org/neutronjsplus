@@ -1,5 +1,3 @@
-import cosmosclient from '@cosmos-client/core';
-import bech32 from 'bech32';
 import {
   ParamsContractmanagerInfo,
   ParamsCronInfo,
@@ -8,6 +6,11 @@ import {
   ParamsInterchainqueriesInfo,
   ParamsTokenfactoryInfo,
 } from './proposal';
+import {
+  AccountData,
+  Coin,
+  DirectSecp256k1HdWallet,
+} from '@cosmjs/proto-signing';
 
 export type AcknowledgementResult =
   | { success: string[] }
@@ -111,7 +114,6 @@ type Schedule = {
   msgs: any[];
 };
 
-// BalancesResponse is the response model for the bank balances query.
 export type PauseInfoResponse = {
   paused: {
     until_height: number;
@@ -122,6 +124,9 @@ export type PauseInfoResponse = {
 // Strategy defines a permission strategy in the chain manager.
 export type Strategy = any;
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export const NeutronContract = {
   IBC_TRANSFER: 'ibc_transfer.wasm',
   MSG_RECEIVER: 'msg_receiver.wasm',
@@ -184,7 +189,7 @@ export const NeutronContract = {
   TGE_LOCKDROP_CURRENT:
     '../contracts_tge_migration/current_neutron_lockdrop.wasm',
   // pre-migration mainnet version of the vesting lp contract
-  VESING_LP_CURRENT: '../contracts_tge_migration/current_vesting_lp.wasm',
+  VESTING_LP_CURRENT: '../contracts_tge_migration/current_vesting_lp.wasm',
   // pre-migration mainnet version of the reserve contract
   RESERVE_CURRENT: '../contracts_tge_migration/current_neutron_reserve.wasm',
 
@@ -326,7 +331,7 @@ export type InterchaintxsParamsResponse = {
 };
 
 export type GlobalfeeParamsResponse = {
-  minimum_gas_prices: cosmosclient.proto.cosmos.base.v1beta1.ICoin[];
+  minimum_gas_prices: Coin[];
   bypass_min_fee_msg_types: string[];
   max_total_bypass_min_fee_msg_gas_usage: string;
 };
@@ -361,34 +366,81 @@ export type ParamsInterchainqueriesResponse = {
 };
 
 export class Wallet {
-  address: cosmosclient.AccAddress | cosmosclient.ValAddress;
-  account: cosmosclient.proto.cosmos.auth.v1beta1.BaseAccount | null;
-  pubKey: cosmosclient.PubKey;
-  privKey: cosmosclient.PrivKey;
   addrPrefix: string;
+  directwallet: DirectSecp256k1HdWallet;
+  account: AccountData;
+  address: string;
+  valAddress: string;
   constructor(
-    address: cosmosclient.AccAddress | cosmosclient.ValAddress,
-    account: cosmosclient.proto.cosmos.auth.v1beta1.BaseAccount | null,
-    pubKey: cosmosclient.PubKey,
-    privKey: cosmosclient.PrivKey,
     addrPrefix: string,
+    directwallet: DirectSecp256k1HdWallet,
+    account: AccountData,
+    valAccount: AccountData,
   ) {
-    this.address = address;
-    this.account = account;
-    this.pubKey = pubKey;
-    this.privKey = privKey;
     this.addrPrefix = addrPrefix;
-    this.address.toString = () => {
-      if (this.address instanceof cosmosclient.AccAddress) {
-        const words = bech32.toWords(Buffer.from(this.address.value()));
-        return bech32.encode(addrPrefix, words);
-      } else if (this.address instanceof cosmosclient.ValAddress) {
-        const words = bech32.toWords(Buffer.from(this.address.value()));
-        return bech32.encode(addrPrefix + 'valoper', words);
-      }
-      throw new Error('unexpected addr type');
-    };
+    this.directwallet = directwallet;
+    this.account = account;
+    this.address = this.account.address;
+    this.valAddress = valAccount.address;
   }
 }
 
 export type CodeId = number;
+
+// DenomTraceResponse is the response model for the ibc transfer denom trace query.
+// TODO: use rpc authogeneration
+/**
+ * @deprecated since version 0.5.0
+ */
+export type DenomTraceResponse = {
+  path?: string;
+  base_denom?: string;
+};
+
+// TODO: use rpc authogeneration
+/**
+ * @deprecated since version 0.5.0
+ */
+export type TotalSupplyByDenomResponse = {
+  amount: Coin;
+};
+
+// TODO: use rpc authogeneration
+/**
+ * @deprecated since version 0.5.0
+ */
+export type DenomMetadataResponse = {
+  metadatas: [
+    {
+      description: string;
+      denom_units: [
+        {
+          denom: string;
+          exponent: number;
+          aliases: [string];
+        },
+      ];
+      base: string;
+      display: string;
+      name: string;
+      symbol: string;
+      uri: string;
+      uri_hash: string;
+    },
+  ];
+  pagination: {
+    next_key: string;
+    total: string;
+  };
+};
+
+// TODO: use rpc authogeneration
+/**
+ * @deprecated since version 0.5.0
+ */
+// TotalBurnedNeutronsAmountResponse is the response model for the feeburner's total-burned-neutrons.
+export type TotalBurnedNeutronsAmountResponse = {
+  total_burned_neutrons_amount: {
+    coin: Coin;
+  };
+};

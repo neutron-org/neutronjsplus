@@ -31,43 +31,58 @@ yarn add @neutron-org/neutronjsplus
 | < 2.0.0 | < 0.1.0       |
 | 2.0.0   | 0.1.0         |
 
-## Building protofiles
-
-If need updated protofiles, they can be generated using yarn:
-
-```bash
-yarn proto
-```
-
-What this does is it clones all needed repos with protofiles we use and runs `buf` with ts plugin.
-For exact code, see gen-proto.sh in root.
-
 ## Usage Example
 
 ```typescript
-import { 
+import {
     cosmosWrapper,
+    walletWrapper,
     NEUTRON_DENOM,
-    TestStateLocalCosmosTestNet,
+    neutronTypes,
 } from '@neutron-org/neutronjsplus';
+import { Registry, DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 
-const config = require('./config.json');
-
-const testState = new TestStateLocalCosmosTestNet(config);
- await testState.init();
 const neutronChain = new cosmosWrapper.CosmosWrapper(
-    testState.sdk1,
-    testState.blockWaiter1,
-    NEUTRON_DENOM,
+  NEUTRON_DENOM,
+  'restendpoint',
+  'rpcendpoint',
 );
-neutronAccount = new cosmosWrapper.WalletWrapper(
-    neutronChain,
-    testState.wallets.qaNeutron.genQaWal1,
+const addrPrefix = 'neutron';
+
+const directwallet = await DirectSecp256k1HdWallet.fromMnemonic('mnemonic', {
+  prefix: addrPrefix,
+});
+
+const account = (await directwallet.getAccounts())[0];
+
+const directwalletValoper = await DirectSecp256k1HdWallet.fromMnemonic(
+  'mnemonic',
+  {
+    prefix: addrPrefix + 'valoper',
+  },
 );
-const res = await neutronAccount.msgSend('<blockchain account address>', '1000000');
-console.log(res);
+
+const accountValoper = (await directwalletValoper.getAccounts())[0];
+
+const registry = new Registry(neutronTypes);
+
+const wasmClient = await SigningCosmWasmClient.connectWithSigner(
+  neutronChain.rpc,
+  directwallet,
+  { registry },
+);
+
+const neutronAccount = new WalletWrapper(
+  neutronChain,
+  new Wallet(addrPrefix, directwallet, account, accountValoper),
+  wasmClient,
+  registry,
+  './contracts',
+);
+
+const res = await neutronAccount.msgSend('neutronaddress', '50000');
 ```
 
 ## License
 
-`neutron-blockchain-helpers` is distributed under the Apache-2.0 license. See the `LICENSE` file in the repository for details.
+`neutronjsplus` is distributed under the Apache-2.0 license. See the `LICENSE` file in the repository for details.

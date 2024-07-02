@@ -1,9 +1,11 @@
 import axios, { AxiosResponse } from 'axios';
-import { CosmosWrapper, WalletWrapper } from './cosmos';
-import { getWithAttempts } from './wait';
-import cosmosclient from '@cosmos-client/core';
+import { CosmosWrapper } from './cosmos';
+import { WalletWrapper } from './walletWrapper';
 
+// TODO: move to helpers for neutron_interchain_queries contract
 /**
+ * @deprecated since version 0.5.0
+ *
  * getRegisteredQuery queries the contract for a registered query details registered by the given
  * queryId.
  */
@@ -39,7 +41,10 @@ export const getRegisteredQuery = (
     },
   });
 
+// TODO: move to helpers for neutron_interchain_queries contract
 /**
+ * @deprecated since version 0.5.0
+ *
  * waitForICQResultWithRemoteHeight waits until ICQ gets updated to
  * reflect data corresponding to remote height `>= targetHeight`
  */
@@ -50,8 +55,7 @@ export const waitForICQResultWithRemoteHeight = (
   targetHeight: number,
   numAttempts = 20,
 ) =>
-  getWithAttempts(
-    cm.blockWaiter,
+  cm.getWithAttempts(
     () => getRegisteredQuery(cm, contractAddress, queryId),
     async (query) =>
       query.registered_query.last_submitted_result_remote_height
@@ -59,7 +63,9 @@ export const waitForICQResultWithRemoteHeight = (
     numAttempts,
   );
 
+// TODO: move to helpers for neutron_interchain_queries contract
 /**
+ * @deprecated since version 0.5.0
  * queryTransfersNumber queries the contract for recorded transfers number.
  */
 export const queryTransfersNumber = (
@@ -72,7 +78,10 @@ export const queryTransfersNumber = (
     get_transfers_number: {},
   });
 
+// TODO: move to helpers for neutron_interchain_queries contract
 /**
+ *
+ * @deprecated since version 0.5.0
  * waitForTransfersAmount waits until contract has `expectedTransfersAmount`
  * number of incoming transfers stored.
  */
@@ -82,14 +91,14 @@ export const waitForTransfersAmount = (
   expectedTransfersAmount: number,
   numAttempts = 50,
 ) =>
-  getWithAttempts(
-    cm.blockWaiter,
+  cm.getWithAttempts(
     async () =>
       (await queryTransfersNumber(cm, contractAddress)).transfers_number,
     async (amount) => amount == expectedTransfersAmount,
     numAttempts,
   );
 
+// TODO: description
 type UnsuccessfulSubmitIcqTx = {
   // QueryID is the query_id transactions was submitted for
   query_id: number;
@@ -105,11 +114,13 @@ type UnsuccessfulSubmitIcqTx = {
   message: string;
 };
 
+// TODO: description
 export type ResubmitQuery = {
   query_id: number;
   hash: string;
 };
 
+// TODO: description
 export const getUnsuccessfulTxs = async (
   icqWebHost: string,
 ): Promise<Array<UnsuccessfulSubmitIcqTx>> => {
@@ -118,6 +129,7 @@ export const getUnsuccessfulTxs = async (
   return req.data;
 };
 
+// TODO: description
 export const postResubmitTxs = async (
   icqWebHost: string,
   txs: Array<ResubmitQuery>,
@@ -127,7 +139,10 @@ export const postResubmitTxs = async (
   return await axios.post(url, data);
 };
 
+// TODO: move to helpers for neutron_interchain_queries contract
 /**
+ * @deprecated since version 0.5.0
+ *
  * registerTransfersQuery sends a register_transfers_query execute msg to the contractAddress with
  * the given parameters and checks the tx result to be successful.
  */
@@ -138,27 +153,23 @@ export const registerTransfersQuery = async (
   updatePeriod: number,
   recipient: string,
 ) => {
-  const res = await cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      register_transfers_query: {
-        connection_id: connectionId,
-        update_period: updatePeriod,
-        recipient: recipient,
-      },
-    }),
-  );
+  const res = await cm.executeContract(contractAddress, {
+    register_transfers_query: {
+      connection_id: connectionId,
+      update_period: updatePeriod,
+      recipient: recipient,
+    },
+  });
 
-  const tx = await cosmosclient.rest.tx.getTx(
-    cm.chain.sdk as cosmosclient.CosmosSDK,
-    res.txhash as string,
-  );
-  if (tx?.data.tx_response?.code != 0) {
-    throw new Error('tx?.data.tx_response?.code != 0');
+  if (res.code != 0) {
+    throw new Error('res.code != 0');
   }
 };
 
+// TODO: move to helpers for neutron_interchain_queries contract
 /**
+ * @deprecated since version 0.5.0
+ *
  * queryRecipientTxs queries the contract for recorded transfers to the given recipient address.
  */
 export const queryRecipientTxs = (

@@ -1,6 +1,7 @@
 import MerkleTree from 'merkletreejs';
 import crypto from 'crypto';
-import { CosmosWrapper, WalletWrapper, getEventAttribute } from './cosmos';
+import { CosmosWrapper, getEventAttribute } from './cosmos';
+import { WalletWrapper } from './walletWrapper';
 import {
   NativeToken,
   Token,
@@ -17,7 +18,7 @@ import {
   VestingLpVaultConfig,
 } from './dao';
 import { msgMintDenom, msgCreateDenom } from './tokenfactory';
-import { BroadcastTx200ResponseTxResponse } from '@cosmos-client/core/cjs/openapi/api';
+import { IndexedTx } from '@cosmjs/cosmwasm-stargate';
 
 // subdenom of rewards asset distributed by the generator contract.
 const ASTRO_SUBDENOM = 'uastro';
@@ -32,6 +33,10 @@ const sha256 = (x: string): Buffer => {
   return hash.digest();
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export class Airdrop {
   private tree: MerkleTree;
 
@@ -54,6 +59,10 @@ export class Airdrop {
   }
 }
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const getTimestamp = (secondsFromNow: number): number =>
   (Date.now() / 1000 + secondsFromNow) | 0;
 
@@ -82,6 +91,11 @@ export const getTimestamp = (secondsFromNow: number): number =>
  * await tge.deployLockdrop();
  * await tge.deployLockdropVault();
  *
+ */
+
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
  */
 export class Tge {
   chain: CosmosWrapper;
@@ -176,8 +190,8 @@ export class Tge {
     this.times.auctionInit = 0;
     this.times.auctionDepositWindow = 60;
     this.times.auctionWithdrawalWindow = 60;
-    this.times.lockdropDepositDuration = 60;
-    this.times.lockdropWithdrawalDuration = 60;
+    this.times.lockdropDepositDuration = 120;
+    this.times.lockdropWithdrawalDuration = 120;
     this.times.auctionVestingLpDuration = 20;
     this.times.lockdropInit = 0;
     this.times.vestTimestamp = 0;
@@ -206,7 +220,7 @@ export class Tge {
       'ASTRO_WHITELIST',
       'ASTRO_VESTING',
       'ASTRO_COIN_REGISTRY',
-      'VESING_LP_CURRENT',
+      'VESTING_LP_CURRENT',
       'LOCKDROP_VAULT',
       'CREDITS_VAULT',
       'VESTING_LP_VAULT',
@@ -224,7 +238,7 @@ export class Tge {
     this.contracts.credits = await instantiateCredits(
       this.instantiator,
       this.codeIds.TGE_CREDITS,
-      this.instantiator.wallet.address.toString(),
+      this.instantiator.wallet.address,
     );
 
     this.airdrop = new Airdrop(this.airdropAccounts);
@@ -247,7 +261,7 @@ export class Tge {
       this.creditsVaultName,
       this.creditsVaultDescription,
       this.contracts.credits,
-      this.instantiator.wallet.address.toString(),
+      this.instantiator.wallet.address,
       this.contracts.airdrop,
     );
 
@@ -260,18 +274,15 @@ export class Tge {
       this.instantiator,
       this.codeIds.ASTRO_COIN_REGISTRY,
     );
-    await this.instantiator.executeContract(
-      this.contracts.coinRegistry,
-      JSON.stringify({
-        add: {
-          native_coins: [
-            [this.atomDenom, 6],
-            [this.usdcDenom, 6],
-            [this.neutronDenom, 6],
-          ],
-        },
-      }),
-    );
+    await this.instantiator.executeContract(this.contracts.coinRegistry, {
+      add: {
+        native_coins: [
+          [this.atomDenom, 6],
+          [this.usdcDenom, 6],
+          [this.neutronDenom, 6],
+        ],
+      },
+    });
 
     this.contracts.astroFactory = await instantiateAstroFactory(
       this.instantiator,
@@ -311,7 +322,7 @@ export class Tge {
 
     await this.instantiator.executeContract(
       this.contracts.astroVesting,
-      JSON.stringify({
+      {
         register_vesting_accounts: {
           vesting_accounts: [
             vestingAccount(this.contracts.astroGenerator, [
@@ -321,7 +332,7 @@ export class Tge {
             ]),
           ],
         },
-      }),
+      },
       [
         {
           denom: this.astroDenom,
@@ -330,14 +341,11 @@ export class Tge {
       ],
     );
 
-    await this.instantiator.executeContract(
-      this.contracts.astroFactory,
-      JSON.stringify({
-        update_config: {
-          generator_address: this.contracts.astroGenerator,
-        },
-      }),
-    );
+    await this.instantiator.executeContract(this.contracts.astroFactory, {
+      update_config: {
+        generator_address: this.contracts.astroGenerator,
+      },
+    });
 
     for (const denom of [this.atomDenom, this.usdcDenom]) {
       await executeFactoryCreatePair(
@@ -365,28 +373,25 @@ export class Tge {
       },
     };
 
-    await this.instantiator.executeContract(
-      this.contracts.astroGenerator,
-      JSON.stringify({
-        setup_pools: {
-          pools: [
-            [this.pairs.atom_ntrn.liquidity, '1'],
-            [this.pairs.usdc_ntrn.liquidity, '1'],
-          ],
-        },
-      }),
-    );
+    await this.instantiator.executeContract(this.contracts.astroGenerator, {
+      setup_pools: {
+        pools: [
+          [this.pairs.atom_ntrn.liquidity, '1'],
+          [this.pairs.usdc_ntrn.liquidity, '1'],
+        ],
+      },
+    });
 
     this.contracts.vestingAtomLp = await instantiateVestingLp(
       this.instantiator,
-      this.codeIds.VESING_LP_CURRENT,
-      this.tokenInfoManager.wallet.address.toString(),
+      this.codeIds.VESTING_LP_CURRENT,
+      this.tokenInfoManager.wallet.address,
       'vesting_atom_lp',
     );
     this.contracts.vestingUsdcLp = await instantiateVestingLp(
       this.instantiator,
-      this.codeIds.VESING_LP_CURRENT,
-      this.tokenInfoManager.wallet.address.toString(),
+      this.codeIds.VESTING_LP_CURRENT,
+      this.tokenInfoManager.wallet.address,
       'vesting_usdc_lp',
     );
 
@@ -407,7 +412,7 @@ export class Tge {
       this.instantiator,
       this.codeIds.TGE_AUCTION,
       null,
-      this.tokenInfoManager.wallet.address.toString(),
+      this.tokenInfoManager.wallet.address,
       this.contracts.priceFeed,
       null,
       this.reserve,
@@ -437,7 +442,7 @@ export class Tge {
       this.instantiator,
       this.codeIds.TGE_LOCKDROP_CURRENT,
       null,
-      this.tokenInfoManager.wallet.address.toString(),
+      this.tokenInfoManager.wallet.address,
       this.contracts.credits,
       this.contracts.auction,
       this.times.lockdropInit,
@@ -503,7 +508,7 @@ export class Tge {
       this.codeIds.ORACLE_HISTORY,
       this.contracts.astroFactory,
       1,
-      this.tokenInfoManager.wallet.address.toString(),
+      this.tokenInfoManager.wallet.address,
       'astroport_oracle_atom',
     );
     this.contracts.oracleUsdc = await instantiateAstroportOracle(
@@ -511,7 +516,7 @@ export class Tge {
       this.codeIds.ORACLE_HISTORY,
       this.contracts.astroFactory,
       1,
-      this.tokenInfoManager.wallet.address.toString(),
+      this.tokenInfoManager.wallet.address,
       'astroport_oracle_usdc',
     );
 
@@ -535,8 +540,8 @@ export class Tge {
       this.contracts.lockdrop,
       this.contracts.oracleUsdc,
       this.contracts.oracleAtom,
-      this.instantiator.wallet.address.toString(),
-      this.tokenInfoManager.wallet.address.toString(),
+      this.instantiator.wallet.address,
+      this.tokenInfoManager.wallet.address,
     );
 
     this.contracts.vestingLpVault = await instantiateVestingLpVault(
@@ -549,29 +554,30 @@ export class Tge {
       this.contracts.oracleUsdc,
       this.contracts.vestingAtomLp,
       this.contracts.vestingUsdcLp,
-      this.instantiator.wallet.address.toString(),
-      this.tokenInfoManager.wallet.address.toString(),
+      this.instantiator.wallet.address,
+      this.tokenInfoManager.wallet.address,
     );
   }
 
   async createNativeAstroDenom() {
     const data = await msgCreateDenom(
       this.instantiator,
-      this.instantiator.wallet.address.toString(),
+      this.instantiator.wallet.address,
       ASTRO_SUBDENOM,
     );
     this.astroDenom = getEventAttribute(
-      (data as any).events,
+      data.events,
       'create_denom',
       'new_token_denom',
     );
     await msgMintDenom(
       this.instantiator,
-      this.instantiator.wallet.address.toString(),
+      this.instantiator.wallet.address,
       {
         denom: this.astroDenom,
         amount: (this.generatorRewardsTotal * 2).toString(),
       },
+      this.instantiator.wallet.address,
     );
   }
 
@@ -616,6 +622,10 @@ export class Tge {
   }
 }
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateAuction = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -638,7 +648,7 @@ export const instantiateAuction = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
+    {
       owner: ownerAddress,
       token_info_manager: tokenInfoManager,
       price_feed_contract: priceFeedContract,
@@ -654,15 +664,19 @@ export const instantiateAuction = async (
       min_ntrn_amount: minNtrnAmount,
       vesting_migration_pack_size: vestingMigrationPackSize,
       vesting_lp_duration: vestingLpDuration,
-    }),
+    },
     label,
   );
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateAirdrop = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -678,7 +692,7 @@ export const instantiateAirdrop = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
+    {
       credits_address: creditsAddress,
       reserve_address: reserveAddress,
       merkle_root: merkleRoot,
@@ -687,15 +701,19 @@ export const instantiateAirdrop = async (
       vesting_duration_seconds: vestingDurationSeconds,
       total_amount: totalAmount,
       hrp,
-    }),
+    },
     label,
   );
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeAuctionUpdateConfig = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -707,34 +725,36 @@ export const executeAuctionUpdateConfig = async (
     ntrn_atom_lp_token_address: string;
   } | null,
 ) =>
-  cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      update_config: {
-        new_config: {
-          lockdrop_contract_address: lockdropAddress,
-          pool_info: poolInfo,
-        },
+  cm.executeContract(contractAddress, {
+    update_config: {
+      new_config: {
+        lockdrop_contract_address: lockdropAddress,
+        pool_info: poolInfo,
       },
-    }),
-  );
+    },
+  });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeAuctionSetTokenInfo = async (
   cm: WalletWrapper,
   contractAddress: string,
   atomDenom: string,
   usdcDenom: string,
 ) =>
-  cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      set_token_info: {
-        atom_denom: atomDenom,
-        usdc_denom: usdcDenom,
-      },
-    }),
-  );
+  cm.executeContract(contractAddress, {
+    set_token_info: {
+      atom_denom: atomDenom,
+      usdc_denom: usdcDenom,
+    },
+  });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateCredits = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -743,35 +763,40 @@ export const instantiateCredits = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
+    {
       dao_address: daoAddress,
-    }),
+    },
     label,
   );
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeCreditsUpdateConfig = async (
   cm: WalletWrapper,
   contractAddress: string,
   airdrop: string,
   lockdrop: string,
 ) =>
-  cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      update_config: {
-        config: {
-          airdrop_address: airdrop,
-          lockdrop_address: lockdrop,
-        },
+  cm.executeContract(contractAddress, {
+    update_config: {
+      config: {
+        airdrop_address: airdrop,
+        lockdrop_address: lockdrop,
       },
-    }),
-  );
+    },
+  });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeCreditsMint = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -780,9 +805,9 @@ export const executeCreditsMint = async (
 ) =>
   cm.executeContract(
     contractAddress,
-    JSON.stringify({
+    {
       mint: {},
-    }),
+    },
     [
       {
         amount,
@@ -791,6 +816,10 @@ export const executeCreditsMint = async (
     ],
   );
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateCreditsVault = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -803,21 +832,25 @@ export const instantiateCreditsVault = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
+    {
       name,
       description,
       credits_contract_address: creditsContract,
       owner,
       airdrop_contract_address: airdropContract,
-    }),
+    },
     label,
   );
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeCreditsVaultUpdateConfig = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -826,18 +859,19 @@ export const executeCreditsVaultUpdateConfig = async (
   name: string | null,
   description: string | null,
 ) =>
-  cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      update_config: {
-        credits_contract_address: creditsContract,
-        owner,
-        name,
-        description,
-      },
-    }),
-  );
+  cm.executeContract(contractAddress, {
+    update_config: {
+      credits_contract_address: creditsContract,
+      owner,
+      name,
+      description,
+    },
+  });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryCreditsVaultConfig = async (
   cm: CosmosWrapper,
   contractAddress: string,
@@ -846,11 +880,19 @@ export const queryCreditsVaultConfig = async (
     config: {},
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LockupRewardsInfo = {
   duration: number;
   coefficient: string;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LockdropLockUpInfoResponse = {
   astroport_lp_token: string;
   astroport_lp_transferred: string | null;
@@ -867,6 +909,10 @@ export type LockdropLockUpInfoResponse = {
   withdrawal_flag: boolean;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LockdropUserInfoResponse = {
   claimable_generator_ntrn_debt: string;
   lockup_infos: LockdropLockUpInfoResponse[];
@@ -875,6 +921,10 @@ export type LockdropUserInfoResponse = {
   total_ntrn_rewards: string;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LockdropPclUserInfoResponse = {
   claimable_incentives_debt: [Token | NativeToken, string][]; // RestrictedVector<AssetInfo, Uint128>
   lockup_infos: LockdropPclLockUpInfoResponse[];
@@ -883,6 +933,10 @@ export type LockdropPclUserInfoResponse = {
   total_ntrn_rewards: string;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LockdropPclLockUpInfoResponse = {
   pool_type: string;
   lp_units_locked: string; // Uint128
@@ -897,6 +951,10 @@ export type LockdropPclLockUpInfoResponse = {
   astroport_lp_transferred: string | null;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LockdropXykPool = {
   lp_token: string;
   amount_in_lockups: string; // Uint128
@@ -907,6 +965,10 @@ export type LockdropXykPool = {
   is_staked: boolean;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LockdropPclPool = {
   lp_token: string;
   amount_in_lockups: string; // Uint128
@@ -916,6 +978,10 @@ export type LockdropPclPool = {
   is_staked: boolean;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateLockdrop = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -934,7 +1000,7 @@ export const instantiateLockdrop = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
+    {
       owner: ownerAddress,
       token_info_manager: tokenInfoManager,
       credits_contract: creditsContract,
@@ -946,15 +1012,19 @@ export const instantiateLockdrop = async (
       max_lock_duration: maxLockDuration,
       max_positions_per_user: maxPositionsPerUser,
       lockup_rewards_info: lockupRewardsInfo,
-    }),
+    },
     label,
   );
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryXykLockdropUserInfo = async (
   chain: CosmosWrapper,
   contractAddress: string,
@@ -964,6 +1034,10 @@ export const queryXykLockdropUserInfo = async (
     user_info: { address: userAddress },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryPclLockdropUserInfo = async (
   chain: CosmosWrapper,
   contractAddress: string,
@@ -973,6 +1047,10 @@ export const queryPclLockdropUserInfo = async (
     user_info: { address: userAddress },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryXykLockdropConfig = (
   chain: CosmosWrapper,
   contractAddress: string,
@@ -981,6 +1059,10 @@ export const queryXykLockdropConfig = (
     config: {},
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type XykLockdropConfig = {
   owner: string;
   token_info_manager: string;
@@ -997,6 +1079,10 @@ export type XykLockdropConfig = {
   lockup_rewards_info: LockupRewardsInfo[];
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryPclLockdropConfig = (
   chain: CosmosWrapper,
   contractAddress: string,
@@ -1005,6 +1091,10 @@ export const queryPclLockdropConfig = (
     config: {},
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type PclLockdropConfig = {
   owner: string;
   xyk_lockdrop_contract: string;
@@ -1015,6 +1105,10 @@ export type PclLockdropConfig = {
   lockup_rewards_info: LockupRewardsInfo[];
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryXykLockdropPool = (
   chain: CosmosWrapper,
   contractAddress: string,
@@ -1024,6 +1118,10 @@ export const queryXykLockdropPool = (
     pool: { pool_type: poolType },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryPclLockdropPool = (
   chain: CosmosWrapper,
   contractAddress: string,
@@ -1033,22 +1131,27 @@ export const queryPclLockdropPool = (
     pool: { pool_type: poolType },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeLockdropUpdateConfig = async (
   cm: WalletWrapper,
   contractAddress: string,
   newGeneratorAddress: string,
 ) =>
-  cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      update_config: {
-        new_config: {
-          generator_address: newGeneratorAddress,
-        },
+  cm.executeContract(contractAddress, {
+    update_config: {
+      new_config: {
+        generator_address: newGeneratorAddress,
       },
-    }),
-  );
+    },
+  });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeLockdropSetTokenInfo = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -1056,29 +1159,34 @@ export const executeLockdropSetTokenInfo = async (
   usdcToken: string,
   astroGenerator: string,
 ) =>
-  cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      set_token_info: {
-        atom_token: atomToken,
-        usdc_token: usdcToken,
-        generator: astroGenerator,
-      },
-    }),
-  );
+  cm.executeContract(contractAddress, {
+    set_token_info: {
+      atom_token: atomToken,
+      usdc_token: usdcToken,
+      generator: astroGenerator,
+    },
+  });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiatePriceFeed = async (
   cm: WalletWrapper,
   codeId: CodeId,
   label = 'price_feed',
 ) => {
-  const res = await cm.instantiateContract(codeId, JSON.stringify({}), label);
+  const res = await cm.instantiateContract(codeId, {}, label);
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateCoinRegistry = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1086,17 +1194,21 @@ export const instantiateCoinRegistry = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
-      owner: cm.wallet.address.toString(),
-    }),
+    {
+      owner: cm.wallet.address,
+    },
     label,
   );
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateAstroFactory = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1108,7 +1220,7 @@ export const instantiateAstroFactory = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
+    {
       pair_configs: [
         {
           code_id: xykPairCodeId,
@@ -1132,47 +1244,52 @@ export const instantiateAstroFactory = async (
         },
       ],
       token_code_id: astroTokenCodeId,
-      owner: cm.wallet.address.toString(),
+      owner: cm.wallet.address,
       whitelist_code_id: 0,
       coin_registry_address: coinRegistryAddress,
-    }),
+    },
     label,
   );
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeFactoryCreatePair = async (
   cm: WalletWrapper,
   contractAddress: string,
   denom1: string,
   denom2: string,
 ) =>
-  cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      create_pair: {
-        pair_type: {
-          xyk: {},
-        },
-        asset_infos: [
-          {
-            native_token: {
-              denom: denom1,
-            },
-          },
-          {
-            native_token: {
-              denom: denom2,
-            },
-          },
-        ],
+  cm.executeContract(contractAddress, {
+    create_pair: {
+      pair_type: {
+        xyk: {},
       },
-    }),
-  );
+      asset_infos: [
+        {
+          native_token: {
+            denom: denom1,
+          },
+        },
+        {
+          native_token: {
+            denom: denom2,
+          },
+        },
+      ],
+    },
+  });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type PairInfo = {
   asset_infos: Record<'native_token' | 'token', { denom: string }>[];
   contract_addr: string;
@@ -1180,10 +1297,18 @@ export type PairInfo = {
   pair_type: Record<string, object>;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type FactoryPairsResponse = {
   pairs: PairInfo[];
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryFactoryPairs = async (
   chain: CosmosWrapper,
   contractAddress: string,
@@ -1192,6 +1317,10 @@ export const queryFactoryPairs = async (
     pairs: {},
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateAstroVesting = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1200,18 +1329,22 @@ export const instantiateAstroVesting = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
-      owner: cm.wallet.address.toString(),
+    {
+      owner: cm.wallet.address,
       vesting_token: vestingToken,
-    }),
+    },
     label,
   );
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type VestingAccountResponse = {
   address: string;
   info: {
@@ -1223,6 +1356,10 @@ export type VestingAccountResponse = {
   };
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 type GeneratorRewardsState = {
   balanceNtrn: number;
   balanceAstro: number;
@@ -1231,6 +1368,10 @@ type GeneratorRewardsState = {
   usdcNtrnLpTokenBalance: number;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryTotalUnclaimedAmountAtHeight = async (
   chain: CosmosWrapper,
   address: string,
@@ -1246,6 +1387,10 @@ export const queryTotalUnclaimedAmountAtHeight = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryNtrnCLBalanceAtHeight = async (
   chain: CosmosWrapper,
   address: string,
@@ -1262,6 +1407,10 @@ export const queryNtrnCLBalanceAtHeight = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryUnclaimmedAmountAtHeight = async (
   chain: CosmosWrapper,
   address: string,
@@ -1279,6 +1428,10 @@ export const queryUnclaimmedAmountAtHeight = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryAvialableAmount = async (
   chain: CosmosWrapper,
   address: string,
@@ -1290,6 +1443,10 @@ export const queryAvialableAmount = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateVestingLp = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1298,55 +1455,61 @@ export const instantiateVestingLp = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
-      owner: cm.wallet.address.toString(),
+    {
+      owner: cm.wallet.address,
       token_info_manager: tokenInfoManager,
       vesting_managers: [],
-    }),
+    },
     label,
   );
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeVestingLpSetVestingToken = async (
   cm: WalletWrapper,
   contractAddress: string,
   vestingTokenContract: string,
 ) =>
-  cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      set_vesting_token: {
-        vesting_token: {
-          token: {
-            contract_addr: vestingTokenContract,
-          },
+  cm.executeContract(contractAddress, {
+    set_vesting_token: {
+      vesting_token: {
+        token: {
+          contract_addr: vestingTokenContract,
         },
       },
-    }),
-  );
+    },
+  });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeVestingLpSetVestingManagers = async (
   cm: WalletWrapper,
   contractAddress: string,
   managers: string[],
 ) =>
-  cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      with_managers_extension: {
-        msg: {
-          add_vesting_managers: {
-            managers,
-          },
+  cm.executeContract(contractAddress, {
+    with_managers_extension: {
+      msg: {
+        add_vesting_managers: {
+          managers,
         },
       },
-    }),
-  );
+    },
+  });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateAstroGenerator = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1360,27 +1523,31 @@ export const instantiateAstroGenerator = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
+    {
       astro_token: {
         native_token: {
           denom,
         },
       },
       factory: factoryContract,
-      owner: cm.wallet.address.toString(),
+      owner: cm.wallet.address,
       start_block: startBlock,
       tokens_per_block: tokensPerBlock,
       vesting_contract: vestingContract,
       whitelist_code_id: whitelistCodeId,
-    }),
+    },
     label,
   );
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateAstroIncentives = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1391,7 +1558,7 @@ export const instantiateAstroIncentives = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
+    {
       astro_token: {
         native_token: {
           denom,
@@ -1400,15 +1567,19 @@ export const instantiateAstroIncentives = async (
       factory: factoryContract,
       owner: cm.wallet.address.toString(),
       vesting_contract: vestingContract,
-    }),
+    },
     label,
   );
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateLockdropVault = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1423,7 +1594,7 @@ export const instantiateLockdropVault = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
+    {
       name: name,
       description: description,
       lockdrop_contract: lockdropContract,
@@ -1431,15 +1602,19 @@ export const instantiateLockdropVault = async (
       oracle_atom_contract: oracleAtom,
       manager: tokenInfoManager,
       owner,
-    }),
+    },
     label,
   );
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeLockdropVaultUpdateConfig = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -1449,21 +1624,22 @@ export const executeLockdropVaultUpdateConfig = async (
   oracleAtomContract: string | null,
   name: string | null,
   description: string | null,
-): Promise<BroadcastTx200ResponseTxResponse> =>
-  cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      update_config: {
-        owner: owner,
-        lockdrop_contract: lockdropContract,
-        oracle_usdc_contract: oracleUsdcContract,
-        oracle_atom_contract: oracleAtomContract,
-        name: name,
-        description: description,
-      },
-    }),
-  );
+): Promise<IndexedTx> =>
+  cm.executeContract(contractAddress, {
+    update_config: {
+      owner: owner,
+      lockdrop_contract: lockdropContract,
+      oracle_usdc_contract: oracleUsdcContract,
+      oracle_atom_contract: oracleAtomContract,
+      name: name,
+      description: description,
+    },
+  });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryLockdropVaultConfig = async (
   cm: CosmosWrapper,
   contractAddress: string,
@@ -1472,6 +1648,10 @@ export const queryLockdropVaultConfig = async (
     config: {},
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeVestingLpVaultUpdateConfig = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -1483,21 +1663,22 @@ export const executeVestingLpVaultUpdateConfig = async (
   name: string,
   description: string,
 ) =>
-  cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      update_config: {
-        owner,
-        atom_vesting_lp_contract: atomVestingLp,
-        atom_oracle_contract: atomOracle,
-        usdc_vesting_lp_contract: usdcVestingLp,
-        usdc_oracle_contract: usdcOracle,
-        name,
-        description,
-      },
-    }),
-  );
+  cm.executeContract(contractAddress, {
+    update_config: {
+      owner,
+      atom_vesting_lp_contract: atomVestingLp,
+      atom_oracle_contract: atomOracle,
+      usdc_vesting_lp_contract: usdcVestingLp,
+      usdc_oracle_contract: usdcOracle,
+      name,
+      description,
+    },
+  });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryVestingLpVaultConfig = async (
   cm: CosmosWrapper,
   contractAddress: string,
@@ -1506,6 +1687,10 @@ export const queryVestingLpVaultConfig = async (
     config: {},
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateAstroportOracle = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1516,43 +1701,48 @@ export const instantiateAstroportOracle = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
+    {
       factory_contract: factoryContract,
       period,
       manager: tokenInfoManager,
-    }),
+    },
     label,
   );
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeAstroportOracleSetAssetInfos = async (
   cm: WalletWrapper,
   contractAddress: string,
   denom1: string,
   denom2: string,
 ) =>
-  cm.executeContract(
-    contractAddress,
-    JSON.stringify({
-      set_asset_infos: [
-        {
-          native_token: {
-            denom: denom1,
-          },
+  cm.executeContract(contractAddress, {
+    set_asset_infos: [
+      {
+        native_token: {
+          denom: denom1,
         },
-        {
-          native_token: {
-            denom: denom2,
-          },
+      },
+      {
+        native_token: {
+          denom: denom2,
         },
-      ],
-    }),
-  );
+      },
+    ],
+  });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateVestingLpVault = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1569,7 +1759,7 @@ export const instantiateVestingLpVault = async (
 ) => {
   const res = await cm.instantiateContract(
     codeId,
-    JSON.stringify({
+    {
       name,
       description,
       lockdrop_contract: lockdrop,
@@ -1577,13 +1767,13 @@ export const instantiateVestingLpVault = async (
       usdc_oracle_contract: usdcOracle,
       atom_vesting_lp_contract: atomVestingLp,
       usdc_vesting_lp_contract: usdcVestingLp,
-      owner: cm.wallet.address.toString(),
+      owner: cm.wallet.address,
       manager: tokenInfoManager,
-    }),
+    },
     label,
   );
   if (!res) {
     throw new Error('res should be truthy');
   }
-  return res[0]._contract_address;
+  return res;
 };

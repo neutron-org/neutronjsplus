@@ -1,6 +1,9 @@
 import { CosmosWrapper } from './cosmos';
-import { getWithAttempts } from './wait';
 
+// TODO: move to interchain tx tests
+/**
+ * @deprecated since version 0.5.0
+ */
 export const getIca = (
   cm: CosmosWrapper,
   contractAddress: string,
@@ -8,8 +11,7 @@ export const getIca = (
   connectionId: string,
   numAttempts = 20,
 ) =>
-  getWithAttempts(
-    cm.blockWaiter,
+  cm.getWithAttempts(
     () =>
       cm.queryContract<{
         interchain_account_address: string;

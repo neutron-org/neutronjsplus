@@ -19,19 +19,20 @@ function getRandomValues(array: any) {
 
 export * as tokenfactory from './tokenfactory';
 export * as cosmosWrapper from './cosmos';
+export * as walletWrapper from './walletWrapper';
 export * as dao from './dao';
-export * as env from './env';
 export * as ica from './ica';
 export * as icq from './icq';
 export * as proposal from './proposal';
 export * as tge from './tge';
 export * as types from './types';
 export * as wait from './wait';
-export { TestStateLocalCosmosTestNet } from './common_localcosmosnet';
 export {
   NEUTRON_DENOM,
   IBC_ATOM_DENOM,
   IBC_USDC_DENOM,
   COSMOS_DENOM,
   IBC_RELAYER_NEUTRON_ADDRESS,
-} from './cosmos';
+  ADMIN_MODULE_ADDRESS,
+} from './constants';
+export * as neutronTypes from './neutronTypes';

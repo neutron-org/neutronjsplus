@@ -1,154 +1,182 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { BroadcastTx200ResponseTxResponse } from '@cosmos-client/core/cjs/openapi/api';
-import { WalletWrapper, packAnyMsg } from './cosmos';
-import Long from 'long';
+import { WalletWrapper } from './walletWrapper';
+import axios from 'axios';
+import { IndexedTx } from '@cosmjs/stargate';
 import {
+  MsgMint,
   MsgBurn,
   MsgChangeAdmin,
   MsgCreateDenom,
-  MsgMint,
   MsgSetBeforeSendHook,
-} from './proto/neutron/osmosis/tokenfactory/v1beta1/tx_pb';
-import axios from 'axios';
-import cosmosclient from '@cosmos-client/core';
-import ICoin = cosmosclient.proto.cosmos.base.v1beta1.ICoin;
+} from '@neutron-org/cosmjs-types/osmosis/tokenfactory/v1beta1/tx';
+import { Coin } from '@neutron-org/cosmjs-types/cosmos/base/v1beta1/coin';
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export interface DenomsFromCreator {
   readonly denoms: readonly string[];
 }
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export interface AuthorityMetadata {
   readonly authority_metadata: { readonly Admin: string };
 }
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export interface BeforeSendHook {
   readonly contract_addr: string;
 }
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const msgMintDenom = async (
   cmNeutron: WalletWrapper,
   creator: string,
-  amount: ICoin,
-): Promise<BroadcastTx200ResponseTxResponse> => {
-  const msgMint = new MsgMint({
+  amount: Coin,
+  mintToAddress = '',
+  fee = {
+    gas: '500000',
+    amount: [{ denom: cmNeutron.chain.denom, amount: '1250' }],
+  },
+): Promise<IndexedTx> => {
+  const value: MsgMint = {
     sender: creator,
     amount,
-  });
-  const res = await cmNeutron.execTx(
-    {
-      gas_limit: Long.fromString('200000'),
-      amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
-    },
-    [packAnyMsg('/osmosis.tokenfactory.v1beta1.MsgMint', msgMint)],
-    10,
-  );
+    mintToAddress,
+  };
+  const msg = {
+    typeUrl: MsgMint.typeUrl,
+    value,
+  };
 
-  return res.tx_response!;
+  return await cmNeutron.execTx(fee, [msg]);
 };
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const msgCreateDenom = async (
   cmNeutron: WalletWrapper,
-  creator: string,
+  sender: string,
   subdenom: string,
-): Promise<BroadcastTx200ResponseTxResponse> => {
-  const msgCreateDenom = new MsgCreateDenom({
-    sender: creator,
+  fee = {
+    gas: '500000',
+    amount: [{ denom: cmNeutron.chain.denom, amount: '1250' }],
+  },
+): Promise<IndexedTx> => {
+  const value: MsgCreateDenom = {
+    sender,
     subdenom,
-  });
-  const res = await cmNeutron.execTx(
-    {
-      gas_limit: Long.fromString('200000'),
-      amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
-    },
-    [
-      packAnyMsg(
-        '/osmosis.tokenfactory.v1beta1.MsgCreateDenom',
-        msgCreateDenom,
-      ),
-    ],
-    10,
-  );
+  };
+  const msg = {
+    typeUrl: MsgCreateDenom.typeUrl,
+    value,
+  };
 
-  return res.tx_response!;
+  return await cmNeutron.execTx(fee, [msg]);
 };
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const msgBurn = async (
   cmNeutron: WalletWrapper,
-  creator: string,
+  sender: string,
   denom: string,
   amountToBurn: string,
-): Promise<BroadcastTx200ResponseTxResponse> => {
-  const msgBurn = new MsgBurn({
-    sender: creator,
+  burnFromAddress = '',
+  fee = {
+    gas: '500000',
+    amount: [{ denom: cmNeutron.chain.denom, amount: '1250' }],
+  },
+): Promise<IndexedTx> => {
+  const value: MsgBurn = {
+    sender,
     amount: {
       denom: denom,
       amount: amountToBurn,
     },
-  });
-  const res = await cmNeutron.execTx(
-    {
-      gas_limit: Long.fromString('200000'),
-      amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
-    },
-    [packAnyMsg('/osmosis.tokenfactory.v1beta1.MsgBurn', msgBurn)],
-    10,
-  );
+    burnFromAddress,
+  };
+  const msg = {
+    typeUrl: MsgBurn.typeUrl,
+    value,
+  };
 
-  return res.tx_response!;
+  return await cmNeutron.execTx(fee, [msg]);
 };
 
 // Create MsgChangeAdmin message
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const msgChangeAdmin = async (
   cmNeutron: WalletWrapper,
   creator: string,
   denom: string,
   newAdmin: string,
-): Promise<BroadcastTx200ResponseTxResponse> => {
-  const msgChangeAdmin = new MsgChangeAdmin({
+): Promise<IndexedTx> => {
+  const value: MsgChangeAdmin = {
     sender: creator,
     denom,
     newAdmin: newAdmin,
-  });
-  const res = await cmNeutron.execTx(
-    {
-      gas_limit: Long.fromString('200000'),
-      amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
-    },
-    [
-      packAnyMsg(
-        '/osmosis.tokenfactory.v1beta1.MsgChangeAdmin',
-        msgChangeAdmin,
-      ),
-    ],
-    10,
-  );
+  };
+  const msg = {
+    typeUrl: MsgChangeAdmin.typeUrl,
+    value,
+  };
+  const fee = {
+    gas: '200000',
+    amount: [{ denom: cmNeutron.chain.denom, amount: '1250' }],
+  };
 
-  return res.tx_response!;
+  return await cmNeutron.execTx(fee, [msg]);
 };
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const msgSetBeforeSendHook = async (
   cmNeutron: WalletWrapper,
   creator: string,
   denom: string,
   contractAddr: string,
-): Promise<BroadcastTx200ResponseTxResponse> => {
-  const msgMint = new MsgSetBeforeSendHook({
+): Promise<IndexedTx> => {
+  const value: MsgSetBeforeSendHook = {
     sender: creator,
     denom,
     contractAddr: contractAddr,
-  });
-  const res = await cmNeutron.execTx(
-    {
-      gas_limit: Long.fromString('200000'),
-      amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
-    },
-    [packAnyMsg('/osmosis.tokenfactory.v1beta1.MsgSetBeforeSendHook', msgMint)],
-    10,
-  );
+  };
+  const msg = {
+    typeUrl: MsgSetBeforeSendHook.typeUrl,
+    value,
+  };
+  const fee = {
+    gas: '200000',
+    amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
+  };
 
-  return res.tx_response!;
+  return await cmNeutron.execTx(fee, [msg]);
 };
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const checkTokenfactoryParams = async (
   sdkUrl: string,
 ): Promise<boolean> => {
@@ -160,6 +188,10 @@ export const checkTokenfactoryParams = async (
   }
 };
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const getDenomsFromCreator = async (
   sdkUrl: string,
   creator: string,
@@ -171,6 +203,10 @@ export const getDenomsFromCreator = async (
   return res.data;
 };
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const getAuthorityMetadata = async (
   sdkUrl: string,
   denom: string,
@@ -182,6 +218,10 @@ export const getAuthorityMetadata = async (
   return res.data;
 };
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const getBeforeSendHook = async (
   sdkUrl: string,
   denom: string,
