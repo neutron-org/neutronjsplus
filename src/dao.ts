@@ -43,6 +43,10 @@ import { ClientState } from '@neutron-org/cosmjs-types/ibc/lightclients/tendermi
 import { ADMIN_MODULE_ADDRESS } from './constants';
 import { DynamicFeesParams, FeeMarketParams } from './feemarket';
 
+// TODO:: move to neutron-integration-tests dao testing helpers
+/**
+ * @deprecated since version 0.5.0
+ */
 export type SubdaoProposalConfig = {
   threshold: any;
   max_voting_period: Duration;
@@ -52,6 +56,10 @@ export type SubdaoProposalConfig = {
   close_proposal_on_execution_failure: boolean;
 };
 
+// TODO:: move to neutron-integration-tests dao testing helpers
+/**
+ * @deprecated since version 0.5.0
+ */
 export type Duration = {
   height: number | null;
   time: number | null;
@@ -170,6 +178,10 @@ export type NewMarkets = {
   }[];
 }[];
 
+// TODO:: move to neutron-integration-tests dao testing deploy
+/**
+ * @deprecated since version 0.5.0
+ */
 export const DaoContractLabels = {
   DAO_CORE: 'neutron.core',
   NEUTRON_VAULT: 'neutron.voting.vaults.neutron',
@@ -185,6 +197,10 @@ export const DaoContractLabels = {
   DAO_PROPOSAL_OVERRULE: 'neutron.proposals.overrule',
 };
 
+// TODO:: move to neutron-integration-tests dao testing deploy
+/**
+ * @deprecated since version 0.5.0
+ */
 export const DaoPrefixes = {
   'Neutron DAO': 'neutron',
   'Security SubDAO': 'security',
@@ -355,6 +371,10 @@ export const getSubDaoContracts = async (
   };
 };
 
+// TODO:: remove and use native rpc query client
+/**
+ * @deprecated since version 0.5.0
+ */
 export const getTreasuryContract = async (
   cm: CosmosWrapper,
 ): Promise<string> => {
@@ -468,6 +488,10 @@ export class Dao {
     );
   }
 
+  // TODO: move to neutron-integration-tests dao helpers
+  /**
+   * @deprecated since version 0.5.0
+   */
   async makeSingleChoiceProposalPass(
     loyalVoters: DaoMember[],
     title: string,
@@ -733,6 +757,7 @@ export class DaoMember {
     );
   }
 
+  // TODO: description
   async executeProposalWithAttempts(
     proposalId: number,
     fee = {
@@ -748,6 +773,7 @@ export class DaoMember {
     );
   }
 
+  // TODO: description
   async executeMultiChoiceProposalWithAttempts(proposalId: number) {
     await this.executeMultiChoiceProposal(proposalId);
     await this.user.chain.getWithAttempts(
@@ -1079,6 +1105,10 @@ export class DaoMember {
     );
   }
 
+  // TODO: move to neutron-integration-tests
+  /**
+   * @deprecated since version 0.5.0
+   */
   async supportAndExecuteProposal(
     proposalId: number,
     customModule = 'single',
@@ -1088,6 +1118,7 @@ export class DaoMember {
     return await this.dao.getTimelockedProposal(proposalId, customModule);
   }
 
+  // TODO: description
   async executeTimelockedProposal(
     proposalId: number,
     customModule = 'single',
@@ -1102,6 +1133,10 @@ export class DaoMember {
     );
   }
 
+  // TODO: optional: move to tests only functionality?
+  /**
+   * @deprecated since version 0.5.0
+   */
   async overruleTimelockedProposal(
     timelockAddress: string,
     proposalId: number,
@@ -1164,6 +1199,7 @@ export class DaoMember {
     return proposalId1;
   }
 
+  // TODO: description
   async submitUpdateConfigProposal(
     title: string,
     description: string,
@@ -1191,6 +1227,7 @@ export class DaoMember {
     );
   }
 
+  // TODO: description
   async submitUpdateSubDaoConfigProposal(
     newConfig: {
       name?: string;
@@ -1220,6 +1257,7 @@ export class DaoMember {
     );
   }
 
+  // TODO: description
   async submitTypedPauseProposal(
     contractAddr: string,
     duration = 10,
@@ -1248,6 +1286,7 @@ export class DaoMember {
     );
   }
 
+  // TODO: description
   async submitUntypedPauseProposal(
     contractAddr: string,
     duration = 10,
@@ -1276,6 +1315,7 @@ export class DaoMember {
     );
   }
 
+  // TODO: description
   async submitUntypedPauseProposalWFunds(
     contractAddr: string,
     duration = 10,
@@ -1306,6 +1346,7 @@ export class DaoMember {
     );
   }
 
+  // TODO: description
   async submitUpdateSubDaoMultisigParticipants(
     newParticipants: string[],
   ): Promise<number> {
@@ -1394,7 +1435,6 @@ export class DaoMember {
   /**
    * submitUnpinCodesProposal creates proposal which unpins given code ids to wasmvm.
    */
-
   async submitUnpinCodesProposal(
     chainManagerAddress: string,
     title: string,
@@ -1421,7 +1461,6 @@ export class DaoMember {
   /**
    * submitUpdateParamsInterchaintxsProposal creates proposal which changes params of interchaintxs module.
    */
-
   async submitUpdateParamsInterchaintxsProposal(
     chainManagerAddress: string,
     title: string,
@@ -1455,7 +1494,6 @@ export class DaoMember {
   /**
    * submitUpdateParamsTransferProposal creates proposal which changes params of transfer module.
    */
-
   async submitUpdateParamsTransferProposal(
     chainManagerAddress: string,
     title: string,
@@ -1486,6 +1524,7 @@ export class DaoMember {
     );
   }
 
+  // TODO: description
   async submitUpdateParamsGlobalfeeProposal(
     chainManagerAddress: string,
     title: string,
@@ -1510,7 +1549,6 @@ export class DaoMember {
   /**
    * submitUpdateParamsInterchainqueriesProposal creates proposal which changes params of interchaintxs module.
    */
-
   async submitUpdateParamsInterchainqueriesProposal(
     chainManagerAddress: string,
     title: string,
@@ -1526,6 +1564,7 @@ export class DaoMember {
     );
   }
 
+  // TODO: description
   async submitAddChainManagerStrategyProposal(
     chainManagerAddress: string,
     title: string,
@@ -1553,7 +1592,6 @@ export class DaoMember {
   /**
    * submitUpdateParamsTokenfactoryProposal creates proposal which changes params of tokenfactory module.
    */
-
   async submitUpdateParamsTokenfactoryProposal(
     chainManagerAddress: string,
     title: string,
@@ -1572,7 +1610,6 @@ export class DaoMember {
   /**
    * submitUpdateParamsFeeburnerProposal creates proposal which changes some params of feeburner module.
    */
-
   async submitUpdateParamsFeeburnerProposal(
     chainManagerAddress: string,
     title: string,
@@ -1591,7 +1628,6 @@ export class DaoMember {
   /**
    * submitUpdateParamsFeerefunderProposal creates proposal which changes some params of feerefunder module.
    */
-
   async submitUpdateParamsFeerefunderProposal(
     chainManagerAddress: string,
     title: string,
@@ -1612,7 +1648,6 @@ export class DaoMember {
   /**
    * submitUpdateParamsCronProposal creates proposal which changes soe params of cron module.
    */
-
   async submitUpdateParamsCronProposal(
     chainManagerAddress: string,
     title: string,
@@ -1631,7 +1666,6 @@ export class DaoMember {
   /**
    * submitUpdateParamsContractmanagerProposal creates proposal which changes some params of contractmanager module.
    */
-
   async submitUpdateParamsContractmanagerProposal(
     chainManagerAddress: string,
     title: string,
@@ -1915,12 +1949,17 @@ export class DaoMember {
     );
   }
 
+  // TODO: description
   async queryVotingPower(
     height?: number,
   ): Promise<VotingPowerAtHeightResponse> {
     return await this.dao.queryVotingPower(this.user.wallet.address, height);
   }
 
+  // TODO: optional: move to neutron-integration-tests helpers
+  /**
+   * @deprecated since version 0.5.0
+   */
   async addSubdaoToDao(subDaoCore: string) {
     const p = await this.submitSingleChoiceProposal(
       'add subdao',
@@ -1933,6 +1972,10 @@ export class DaoMember {
   }
 }
 
+// TODO: optional: move to neutron-integration-tests helpers
+/**
+ * @deprecated since version 0.5.0
+ */
 export const deploySubdao = async (
   cm: WalletWrapper,
   mainDaoCoreAddress: string,
@@ -2071,6 +2114,10 @@ export const deploySubdao = async (
   return new Dao(cm.chain, await getSubDaoContracts(cm.chain, coreDaoContract));
 };
 
+// TODO: optional: move to neutron-integration-tests helpers
+/**
+ * @deprecated since version 0.5.0
+ */
 export const setupSubDaoTimelockSet = async (
   cm: WalletWrapper,
   mainDaoAddress: string,
@@ -2093,6 +2140,10 @@ export const setupSubDaoTimelockSet = async (
   return subDao;
 };
 
+// TODO: optional: move to neutron-integration-tests helpers
+/**
+ * @deprecated since version 0.5.0
+ */
 export const deployNeutronDao = async (
   cm: WalletWrapper,
 ): Promise<DaoContracts> => {

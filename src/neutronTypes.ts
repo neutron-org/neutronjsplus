@@ -13,6 +13,7 @@ import {
 } from '@neutron-org/cosmjs-types/osmosis/tokenfactory/v1beta1/tx';
 import { MsgAuctionBid } from '@neutron-org/cosmjs-types/sdk/auction/v1/tx';
 
+// TODO: use all types from @neutron-org/neutronjs library
 export const neutronTypes: ReadonlyArray<[string, GeneratedType]> = [
   ...defaultRegistryTypes,
   ...wasmTypes,

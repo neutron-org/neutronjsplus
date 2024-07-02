@@ -3,66 +3,108 @@ import { Coin } from '@neutron-org/cosmjs-types/cosmos/base/v1beta1/coin';
 
 // DEX queries
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type ParamsResponse = {
   params: Params;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LimitOrderTrancheUserResponse = {
   limit_order_tranche_user?: LimitOrderTrancheUser;
   withdrawable_shares?: string;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type AllLimitOrderTrancheUserResponse = {
   limit_order_tranche_user: LimitOrderTrancheUser[];
   pagination?: PageResponse;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type AllUserLimitOrdersResponse = {
   limit_orders: LimitOrderTrancheUser[];
   pagination?: PageResponse;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LimitOrderTrancheResponse = {
   limit_order_tranche?: LimitOrderTranche;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type AllLimitOrderTrancheResponse = {
   limit_order_tranche: LimitOrderTranche[];
   pagination?: PageResponse;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type AllUserDepositsResponse = {
   deposits: DepositRecord[];
   pagination?: PageResponse;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type AllTickLiquidityResponse = {
   tick_liquidity: TickLiquidity[];
   pagination?: PageResponse;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type InactiveLimitOrderTrancheResponse = {
   inactive_limit_order_tranche: LimitOrderTranche;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type AllInactiveLimitOrderTrancheResponse = {
   inactive_limit_order_tranche: LimitOrderTranche[];
   pagination?: PageResponse;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type AllPoolReservesResponse = {
   pool_reserves: PoolReserves[];
   pagination?: PageResponse;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type PoolReservesResponse = {
   pool_reserves: PoolReserves;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type EstimateMultiHopSwapResponse = {
   coin_out: Coin;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type EstimatePlaceLimitOrderResponse = {
   // Total amount of coin used for the limit order
   // You can derive makerLimitInCoin using the equation: totalInCoin = swapInCoin + makerLimitInCoin
@@ -75,21 +117,32 @@ export type EstimatePlaceLimitOrderResponse = {
   swap_out_coin: Coin;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type PoolResponse = {
   pool: Pool;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type PoolMetadataResponse = {
   pool_metadata: PoolMetadata;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type AllPoolMetadataResponse = {
   pool_metadata: PoolMetadata[];
   pagination?: PageResponse;
 };
 
 // types
-
+/**
+ * @deprecated since version 0.5.0
+ */
 export enum LimitOrderType {
   GoodTilCanceled = 0,
   FillOrKill = 1,
@@ -98,10 +151,16 @@ export enum LimitOrderType {
   GoodTilTime = 4,
 }
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type MultiHopRoute = {
   hops: string[];
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LimitOrderTrancheUser = {
   trade_pair_id: TradePairID;
   tick_index_taker_to_maker: string; // Int64
@@ -113,16 +172,25 @@ export type LimitOrderTrancheUser = {
   order_type: LimitOrderType;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type TradePairID = {
   maker_denom: string;
   taker_denom: string;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type Params = {
   fee_tiers: string[]; // Uint64
   max_true_taker_spread: string; // PrecDec
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LimitOrderTranche = {
   key: LimitOrderTrancheKey;
   reserves_maker_denom: string; // Int128
@@ -133,12 +201,18 @@ export type LimitOrderTranche = {
   price_taker_to_maker: string; // PrecDec
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LimitOrderTrancheKey = {
   trade_pair_id: TradePairID;
   tick_index_taker_to_maker: string; // Int64
   tranche_key: string;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type DepositRecord = {
   pair_id: PairID;
   shares_owned: string; // Int128
@@ -150,15 +224,24 @@ export type DepositRecord = {
   pool?: Pool; // Option<Pool>
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type PairID = {
   token0: string;
   token1: string;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type TickLiquidity =
   | { pool_reserves: PoolReserves }
   | { limit_order_tranche: LimitOrderTranche };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type PoolReserves = {
   key: PoolReservesKey;
   reserves_maker_denom: string; // Int128
@@ -166,18 +249,27 @@ export type PoolReserves = {
   price_opposite_taker_to_maker: string; // PrecDec
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type PoolReservesKey = {
   trade_pair_id: TradePairID;
   tick_index_taker_to_maker: string; // Int64
   fee?: string; // Option<Uint64>
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type Pool = {
   id: string; // Uint64
   lower_tick0: PoolReserves;
   lower_tick1: PoolReserves;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type PoolMetadata = {
   id: string; // Uint64
   tick: string; // Int64

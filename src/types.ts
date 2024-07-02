@@ -124,6 +124,9 @@ export type PauseInfoResponse = {
 // Strategy defines a permission strategy in the chain manager.
 export type Strategy = any;
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export const NeutronContract = {
   IBC_TRANSFER: 'ibc_transfer.wasm',
   MSG_RECEIVER: 'msg_receiver.wasm',
@@ -385,15 +388,27 @@ export class Wallet {
 export type CodeId = number;
 
 // DenomTraceResponse is the response model for the ibc transfer denom trace query.
+// TODO: use rpc authogeneration
+/**
+ * @deprecated since version 0.5.0
+ */
 export type DenomTraceResponse = {
   path?: string;
   base_denom?: string;
 };
 
+// TODO: use rpc authogeneration
+/**
+ * @deprecated since version 0.5.0
+ */
 export type TotalSupplyByDenomResponse = {
   amount: Coin;
 };
 
+// TODO: use rpc authogeneration
+/**
+ * @deprecated since version 0.5.0
+ */
 export type DenomMetadataResponse = {
   metadatas: [
     {
@@ -419,6 +434,10 @@ export type DenomMetadataResponse = {
   };
 };
 
+// TODO: use rpc authogeneration
+/**
+ * @deprecated since version 0.5.0
+ */
 // TotalBurnedNeutronsAmountResponse is the response model for the feeburner's total-burned-neutrons.
 export type TotalBurnedNeutronsAmountResponse = {
   total_burned_neutrons_amount: {

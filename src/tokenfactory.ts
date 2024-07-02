@@ -11,18 +11,34 @@ import {
 } from '@neutron-org/cosmjs-types/osmosis/tokenfactory/v1beta1/tx';
 import { Coin } from '@neutron-org/cosmjs-types/cosmos/base/v1beta1/coin';
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export interface DenomsFromCreator {
   readonly denoms: readonly string[];
 }
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export interface AuthorityMetadata {
   readonly authority_metadata: { readonly Admin: string };
 }
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export interface BeforeSendHook {
   readonly contract_addr: string;
 }
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const msgMintDenom = async (
   cmNeutron: WalletWrapper,
   creator: string,
@@ -46,6 +62,10 @@ export const msgMintDenom = async (
   return await cmNeutron.execTx(fee, [msg]);
 };
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const msgCreateDenom = async (
   cmNeutron: WalletWrapper,
   sender: string,
@@ -67,6 +87,10 @@ export const msgCreateDenom = async (
   return await cmNeutron.execTx(fee, [msg]);
 };
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const msgBurn = async (
   cmNeutron: WalletWrapper,
   sender: string,
@@ -95,6 +119,10 @@ export const msgBurn = async (
 };
 
 // Create MsgChangeAdmin message
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const msgChangeAdmin = async (
   cmNeutron: WalletWrapper,
   creator: string,
@@ -118,6 +146,10 @@ export const msgChangeAdmin = async (
   return await cmNeutron.execTx(fee, [msg]);
 };
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const msgSetBeforeSendHook = async (
   cmNeutron: WalletWrapper,
   creator: string,
@@ -141,6 +173,10 @@ export const msgSetBeforeSendHook = async (
   return await cmNeutron.execTx(fee, [msg]);
 };
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const checkTokenfactoryParams = async (
   sdkUrl: string,
 ): Promise<boolean> => {
@@ -152,6 +188,10 @@ export const checkTokenfactoryParams = async (
   }
 };
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const getDenomsFromCreator = async (
   sdkUrl: string,
   creator: string,
@@ -163,6 +203,10 @@ export const getDenomsFromCreator = async (
   return res.data;
 };
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const getAuthorityMetadata = async (
   sdkUrl: string,
   denom: string,
@@ -174,6 +218,10 @@ export const getAuthorityMetadata = async (
   return res.data;
 };
 
+// TODO: use RPC
+/**
+ * @deprecated since version 0.5.0
+ */
 export const getBeforeSendHook = async (
   sdkUrl: string,
   denom: string,

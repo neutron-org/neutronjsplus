@@ -1,16 +1,28 @@
+/**
+ * @deprecated since version 0.5.0
+ */
 export type ParamsResponse = {
   params: Params;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type CurrencyPair = {
   base: string;
   quote: string;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LastUpdatedResponse = {
   last_updated: number;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type MarketMapResponse = {
   // MarketMap defines the global set of market configurations for all providers
   // and markets.
@@ -23,10 +35,16 @@ export type MarketMapResponse = {
   chain_id: string;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type MarketResponse = {
   market: Market;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type QuotePrice = {
   price: string;
   // // BlockTimestamp tracks the block height associated with this price update.
@@ -37,15 +55,24 @@ export type QuotePrice = {
   block_height: number;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type Params = {
   admin: string;
   market_authorities: string[];
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type MarketMap = {
   markets: Map<string, Market>;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type Market = {
   // Tickers is the full list of tickers and their associated configurations
   // to be stored on-chain.
@@ -55,6 +82,9 @@ export type Market = {
   provider_configs: Map<string, ProviderConfig>;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type ProviderConfig = {
   // Name corresponds to the name of the provider for which the configuration is
   // being set.
@@ -76,6 +106,9 @@ export type ProviderConfig = {
   metadata_json: string;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export type Ticker = {
   // CurrencyPair is the currency pair for this ticker.
   currency_pair: CurrencyPair;

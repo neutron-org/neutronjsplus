@@ -33,6 +33,10 @@ const sha256 = (x: string): Buffer => {
   return hash.digest();
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export class Airdrop {
   private tree: MerkleTree;
 
@@ -55,6 +59,10 @@ export class Airdrop {
   }
 }
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const getTimestamp = (secondsFromNow: number): number =>
   (Date.now() / 1000 + secondsFromNow) | 0;
 
@@ -83,6 +91,11 @@ export const getTimestamp = (secondsFromNow: number): number =>
  * await tge.deployLockdrop();
  * await tge.deployLockdropVault();
  *
+ */
+
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
  */
 export class Tge {
   chain: CosmosWrapper;
@@ -609,6 +622,10 @@ export class Tge {
   }
 }
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateAuction = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -656,6 +673,10 @@ export const instantiateAuction = async (
   return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateAirdrop = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -689,6 +710,10 @@ export const instantiateAirdrop = async (
   return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeAuctionUpdateConfig = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -709,6 +734,10 @@ export const executeAuctionUpdateConfig = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeAuctionSetTokenInfo = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -722,6 +751,10 @@ export const executeAuctionSetTokenInfo = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateCredits = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -741,6 +774,10 @@ export const instantiateCredits = async (
   return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeCreditsUpdateConfig = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -756,6 +793,10 @@ export const executeCreditsUpdateConfig = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeCreditsMint = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -775,6 +816,10 @@ export const executeCreditsMint = async (
     ],
   );
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateCreditsVault = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -802,6 +847,10 @@ export const instantiateCreditsVault = async (
   return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeCreditsVaultUpdateConfig = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -819,6 +868,10 @@ export const executeCreditsVaultUpdateConfig = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryCreditsVaultConfig = async (
   cm: CosmosWrapper,
   contractAddress: string,
@@ -827,11 +880,19 @@ export const queryCreditsVaultConfig = async (
     config: {},
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LockupRewardsInfo = {
   duration: number;
   coefficient: string;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LockdropLockUpInfoResponse = {
   astroport_lp_token: string;
   astroport_lp_transferred: string | null;
@@ -848,6 +909,10 @@ export type LockdropLockUpInfoResponse = {
   withdrawal_flag: boolean;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LockdropUserInfoResponse = {
   claimable_generator_ntrn_debt: string;
   lockup_infos: LockdropLockUpInfoResponse[];
@@ -856,6 +921,10 @@ export type LockdropUserInfoResponse = {
   total_ntrn_rewards: string;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LockdropPclUserInfoResponse = {
   claimable_incentives_debt: [Token | NativeToken, string][]; // RestrictedVector<AssetInfo, Uint128>
   lockup_infos: LockdropPclLockUpInfoResponse[];
@@ -864,6 +933,10 @@ export type LockdropPclUserInfoResponse = {
   total_ntrn_rewards: string;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LockdropPclLockUpInfoResponse = {
   pool_type: string;
   lp_units_locked: string; // Uint128
@@ -878,6 +951,10 @@ export type LockdropPclLockUpInfoResponse = {
   astroport_lp_transferred: string | null;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LockdropXykPool = {
   lp_token: string;
   amount_in_lockups: string; // Uint128
@@ -888,6 +965,10 @@ export type LockdropXykPool = {
   is_staked: boolean;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type LockdropPclPool = {
   lp_token: string;
   amount_in_lockups: string; // Uint128
@@ -897,6 +978,10 @@ export type LockdropPclPool = {
   is_staked: boolean;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateLockdrop = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -936,6 +1021,10 @@ export const instantiateLockdrop = async (
   return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryXykLockdropUserInfo = async (
   chain: CosmosWrapper,
   contractAddress: string,
@@ -945,6 +1034,10 @@ export const queryXykLockdropUserInfo = async (
     user_info: { address: userAddress },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryPclLockdropUserInfo = async (
   chain: CosmosWrapper,
   contractAddress: string,
@@ -954,6 +1047,10 @@ export const queryPclLockdropUserInfo = async (
     user_info: { address: userAddress },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryXykLockdropConfig = (
   chain: CosmosWrapper,
   contractAddress: string,
@@ -962,6 +1059,10 @@ export const queryXykLockdropConfig = (
     config: {},
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type XykLockdropConfig = {
   owner: string;
   token_info_manager: string;
@@ -978,6 +1079,10 @@ export type XykLockdropConfig = {
   lockup_rewards_info: LockupRewardsInfo[];
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryPclLockdropConfig = (
   chain: CosmosWrapper,
   contractAddress: string,
@@ -986,6 +1091,10 @@ export const queryPclLockdropConfig = (
     config: {},
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type PclLockdropConfig = {
   owner: string;
   xyk_lockdrop_contract: string;
@@ -996,6 +1105,10 @@ export type PclLockdropConfig = {
   lockup_rewards_info: LockupRewardsInfo[];
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryXykLockdropPool = (
   chain: CosmosWrapper,
   contractAddress: string,
@@ -1005,6 +1118,10 @@ export const queryXykLockdropPool = (
     pool: { pool_type: poolType },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryPclLockdropPool = (
   chain: CosmosWrapper,
   contractAddress: string,
@@ -1014,6 +1131,10 @@ export const queryPclLockdropPool = (
     pool: { pool_type: poolType },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeLockdropUpdateConfig = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -1027,6 +1148,10 @@ export const executeLockdropUpdateConfig = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeLockdropSetTokenInfo = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -1042,6 +1167,10 @@ export const executeLockdropSetTokenInfo = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiatePriceFeed = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1054,6 +1183,10 @@ export const instantiatePriceFeed = async (
   return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateCoinRegistry = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1072,6 +1205,10 @@ export const instantiateCoinRegistry = async (
   return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateAstroFactory = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1119,6 +1256,10 @@ export const instantiateAstroFactory = async (
   return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeFactoryCreatePair = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -1145,6 +1286,10 @@ export const executeFactoryCreatePair = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type PairInfo = {
   asset_infos: Record<'native_token' | 'token', { denom: string }>[];
   contract_addr: string;
@@ -1152,10 +1297,18 @@ export type PairInfo = {
   pair_type: Record<string, object>;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type FactoryPairsResponse = {
   pairs: PairInfo[];
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryFactoryPairs = async (
   chain: CosmosWrapper,
   contractAddress: string,
@@ -1164,6 +1317,10 @@ export const queryFactoryPairs = async (
     pairs: {},
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateAstroVesting = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1184,6 +1341,10 @@ export const instantiateAstroVesting = async (
   return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export type VestingAccountResponse = {
   address: string;
   info: {
@@ -1195,6 +1356,10 @@ export type VestingAccountResponse = {
   };
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 type GeneratorRewardsState = {
   balanceNtrn: number;
   balanceAstro: number;
@@ -1203,6 +1368,10 @@ type GeneratorRewardsState = {
   usdcNtrnLpTokenBalance: number;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryTotalUnclaimedAmountAtHeight = async (
   chain: CosmosWrapper,
   address: string,
@@ -1218,6 +1387,10 @@ export const queryTotalUnclaimedAmountAtHeight = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryNtrnCLBalanceAtHeight = async (
   chain: CosmosWrapper,
   address: string,
@@ -1234,6 +1407,10 @@ export const queryNtrnCLBalanceAtHeight = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryUnclaimmedAmountAtHeight = async (
   chain: CosmosWrapper,
   address: string,
@@ -1251,6 +1428,10 @@ export const queryUnclaimmedAmountAtHeight = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryAvialableAmount = async (
   chain: CosmosWrapper,
   address: string,
@@ -1262,6 +1443,10 @@ export const queryAvialableAmount = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateVestingLp = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1283,6 +1468,10 @@ export const instantiateVestingLp = async (
   return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeVestingLpSetVestingToken = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -1298,6 +1487,10 @@ export const executeVestingLpSetVestingToken = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeVestingLpSetVestingManagers = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -1313,6 +1506,10 @@ export const executeVestingLpSetVestingManagers = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateAstroGenerator = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1347,6 +1544,10 @@ export const instantiateAstroGenerator = async (
   return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateAstroIncentives = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1375,6 +1576,10 @@ export const instantiateAstroIncentives = async (
   return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateLockdropVault = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1406,6 +1611,10 @@ export const instantiateLockdropVault = async (
   return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeLockdropVaultUpdateConfig = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -1427,6 +1636,10 @@ export const executeLockdropVaultUpdateConfig = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryLockdropVaultConfig = async (
   cm: CosmosWrapper,
   contractAddress: string,
@@ -1435,6 +1648,10 @@ export const queryLockdropVaultConfig = async (
     config: {},
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeVestingLpVaultUpdateConfig = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -1458,6 +1675,10 @@ export const executeVestingLpVaultUpdateConfig = async (
     },
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const queryVestingLpVaultConfig = async (
   cm: CosmosWrapper,
   contractAddress: string,
@@ -1466,6 +1687,10 @@ export const queryVestingLpVaultConfig = async (
     config: {},
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateAstroportOracle = async (
   cm: WalletWrapper,
   codeId: CodeId,
@@ -1489,6 +1714,10 @@ export const instantiateAstroportOracle = async (
   return res;
 };
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const executeAstroportOracleSetAssetInfos = async (
   cm: WalletWrapper,
   contractAddress: string,
@@ -1510,6 +1739,10 @@ export const executeAstroportOracleSetAssetInfos = async (
     ],
   });
 
+// TODO: remove it completely
+/**
+ * @deprecated since version 0.5.0
+ */
 export const instantiateVestingLpVault = async (
   cm: WalletWrapper,
   codeId: CodeId,

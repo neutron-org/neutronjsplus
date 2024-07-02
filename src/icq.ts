@@ -2,7 +2,10 @@ import axios, { AxiosResponse } from 'axios';
 import { CosmosWrapper } from './cosmos';
 import { WalletWrapper } from './walletWrapper';
 
+// TODO: move to helpers for neutron_interchain_queries contract
 /**
+ * @deprecated since version 0.5.0
+ *
  * getRegisteredQuery queries the contract for a registered query details registered by the given
  * queryId.
  */
@@ -38,7 +41,10 @@ export const getRegisteredQuery = (
     },
   });
 
+// TODO: move to helpers for neutron_interchain_queries contract
 /**
+ * @deprecated since version 0.5.0
+ *
  * waitForICQResultWithRemoteHeight waits until ICQ gets updated to
  * reflect data corresponding to remote height `>= targetHeight`
  */
@@ -57,7 +63,9 @@ export const waitForICQResultWithRemoteHeight = (
     numAttempts,
   );
 
+// TODO: move to helpers for neutron_interchain_queries contract
 /**
+ * @deprecated since version 0.5.0
  * queryTransfersNumber queries the contract for recorded transfers number.
  */
 export const queryTransfersNumber = (
@@ -70,7 +78,10 @@ export const queryTransfersNumber = (
     get_transfers_number: {},
   });
 
+// TODO: move to helpers for neutron_interchain_queries contract
 /**
+ *
+ * @deprecated since version 0.5.0
  * waitForTransfersAmount waits until contract has `expectedTransfersAmount`
  * number of incoming transfers stored.
  */
@@ -87,6 +98,7 @@ export const waitForTransfersAmount = (
     numAttempts,
   );
 
+// TODO: description
 type UnsuccessfulSubmitIcqTx = {
   // QueryID is the query_id transactions was submitted for
   query_id: number;
@@ -102,11 +114,13 @@ type UnsuccessfulSubmitIcqTx = {
   message: string;
 };
 
+// TODO: description
 export type ResubmitQuery = {
   query_id: number;
   hash: string;
 };
 
+// TODO: description
 export const getUnsuccessfulTxs = async (
   icqWebHost: string,
 ): Promise<Array<UnsuccessfulSubmitIcqTx>> => {
@@ -115,6 +129,7 @@ export const getUnsuccessfulTxs = async (
   return req.data;
 };
 
+// TODO: description
 export const postResubmitTxs = async (
   icqWebHost: string,
   txs: Array<ResubmitQuery>,
@@ -124,7 +139,10 @@ export const postResubmitTxs = async (
   return await axios.post(url, data);
 };
 
+// TODO: move to helpers for neutron_interchain_queries contract
 /**
+ * @deprecated since version 0.5.0
+ *
  * registerTransfersQuery sends a register_transfers_query execute msg to the contractAddress with
  * the given parameters and checks the tx result to be successful.
  */
@@ -148,7 +166,10 @@ export const registerTransfersQuery = async (
   }
 };
 
+// TODO: move to helpers for neutron_interchain_queries contract
 /**
+ * @deprecated since version 0.5.0
+ *
  * queryRecipientTxs queries the contract for recorded transfers to the given recipient address.
  */
 export const queryRecipientTxs = (
