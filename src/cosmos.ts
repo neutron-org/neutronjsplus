@@ -7,7 +7,6 @@ import {
   ChannelsList,
   IBCClientStatus,
   PageRequest,
-  PauseInfoResponse,
   CurrentPlanResponse,
   PinnedCodesResponse,
   IcaHostParamsResponse,
@@ -354,16 +353,6 @@ export class CosmosWrapper {
       },
     );
     return strategies[0][0];
-  }
-
-  /**
-   * @deprecated since version 0.5.0
-   */
-  // TODO: do not belong here - move out to the dao.ts or something
-  async queryPausedInfo(addr: string): Promise<PauseInfoResponse> {
-    return await this.queryContract<PauseInfoResponse>(addr, {
-      pause_info: {},
-    });
   }
 
   /**

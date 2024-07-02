@@ -190,6 +190,13 @@ export type DaoContracts = {
   };
 };
 
+export type PauseInfoResponse = {
+  paused: {
+    until_height: number;
+  };
+  unpaused: Record<string, never>;
+};
+
 export const getVotingModule = async (
   client: CosmWasmClient,
   daoAddress: string,
@@ -496,6 +503,12 @@ export class Dao {
         },
       },
     );
+  }
+
+  async queryPausedInfo(addr: string): Promise<PauseInfoResponse> {
+    return await this.client.queryContractSmart(addr, {
+      pause_info: {},
+    });
   }
 }
 

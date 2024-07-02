@@ -114,13 +114,6 @@ type Schedule = {
   msgs: any[];
 };
 
-export type PauseInfoResponse = {
-  paused: {
-    until_height: number;
-  };
-  unpaused: Record<string, never>;
-};
-
 // Strategy defines a permission strategy in the chain manager.
 export type Strategy = any;
 

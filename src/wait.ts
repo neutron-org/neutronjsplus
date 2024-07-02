@@ -63,3 +63,25 @@ export const waitBlocks = async (
     await sleep(1000);
   }
 };
+
+export const queryContractWithWait = async <T>(
+  client: CosmWasmClient,
+  contract: string,
+  query: any,
+  numAttempts = 20,
+): Promise<T> => {
+  while (numAttempts > 0) {
+    const res: T = await client
+      .queryContractSmart(contract, query)
+      .catch(() => null);
+
+    if (res !== null) {
+      return res;
+    }
+
+    numAttempts--;
+    await waitBlocks(1, client);
+  }
+
+  throw new Error('failed to query contract');
+};
