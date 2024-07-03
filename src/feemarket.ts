@@ -19,12 +19,6 @@ export type FeeMarketParams = {
   // when it is within the target +/- threshold.
   beta: string; // Dec
 
-  // Theta is the threshold for the learning rate. If the learning rate is
-  // above or below the target +/- threshold, we additively increase the
-  // learning rate by Alpha. Otherwise, we multiplicatively decrease the
-  // learning rate by Beta.
-  theta: string; // Dec
-
   // Delta is the amount we additively increase/decrease the base fee when the
   // net block utilization difference in the window is above/below the target
   // utilization.
@@ -39,9 +33,6 @@ export type FeeMarketParams = {
 
   // MaxLearningRate is the upper bound for the learning rate.
   max_learning_rate: string; // Dec
-
-  // TargetBlockUtilization is the target block utilization.
-  target_block_utilization: number;
 
   // MaxBlockUtilization is the maximum block utilization.
   max_block_utilization: number;
