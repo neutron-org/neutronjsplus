@@ -46,7 +46,7 @@ export const msgMintDenom = async (
   mintToAddress = '',
   fee = {
     gas: '500000',
-    amount: [{ denom: cmNeutron.chain.denom, amount: '1250' }],
+    amount: [{ denom: cmNeutron.chain.denom, amount: '2000' }],
   },
 ): Promise<IndexedTx> => {
   const value: MsgMint = {
