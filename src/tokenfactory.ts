@@ -36,8 +36,8 @@ export const msgMintDenom = async (
   });
   const res = await cmNeutron.execTx(
     {
-      gas_limit: Long.fromString('200000'),
-      amount: [{ denom: cmNeutron.chain.denom, amount: '1000' }],
+      gas_limit: Long.fromString('500000'),
+      amount: [{ denom: cmNeutron.chain.denom, amount: '2000' }],
     },
     [packAnyMsg('/osmosis.tokenfactory.v1beta1.MsgMint', msgMint)],
     10,
