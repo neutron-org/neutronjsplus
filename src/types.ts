@@ -358,6 +358,9 @@ export type ParamsInterchainqueriesResponse = {
   params: ParamsInterchainqueriesInfo;
 };
 
+/**
+ * @deprecated since version 0.5.0
+ */
 export class Wallet {
   addrPrefix: string;
   directwallet: DirectSecp256k1HdWallet;
