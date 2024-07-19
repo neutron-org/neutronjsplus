@@ -1285,8 +1285,8 @@ export class DaoMember {
     };
 
     return await this.submitSingleChoiceProposal(
-      'pause proposal',
-      'pauses contract',
+      'unpause proposal',
+      'unpauses contract',
       [message],
       '',
       customModule,
