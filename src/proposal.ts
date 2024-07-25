@@ -451,7 +451,7 @@ export const updateGlobalFeeParamsProposal = (
               minimum_gas_prices: info.minimum_gas_prices,
               bypass_min_fee_msg_types: info.bypass_min_fee_msg_types,
               max_total_bypass_min_fee_msg_gas_usage:
-                info.max_total_bypass_min_fee_msg_gas_usage,
+              info.max_total_bypass_min_fee_msg_gas_usage,
             },
           }),
         },
