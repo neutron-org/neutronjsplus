@@ -1,9 +1,5 @@
-import {
-  Event as CosmosEvent,
-} from '@cosmjs/stargate';
-
+import { Event as CosmosEvent } from '@cosmjs/stargate';
 import { IndexedTx } from '@cosmjs/stargate';
-
 
 export const getSequenceId = (tx: IndexedTx | undefined): number => {
   if (!tx) {
@@ -20,8 +16,6 @@ export const getSequenceId = (tx: IndexedTx | undefined): number => {
     }
   }
 };
-
-
 
 export const createBankSendMessage = (
   addr: string,
@@ -60,4 +54,3 @@ export const getEventAttribute = (
 
   return attrValue;
 };
-

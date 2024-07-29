@@ -236,7 +236,6 @@ export type FeeMarketParams = {
   distribute_fees: boolean;
 };
 
-
 // 'none' is a choice that represents selecting none of the options; still counts toward quorum
 // and allows proposals with all bad options to be voted against.
 export type MultipleChoiceOptionType = 'none' | 'standard';
@@ -451,7 +450,7 @@ export const updateGlobalFeeParamsProposal = (
               minimum_gas_prices: info.minimum_gas_prices,
               bypass_min_fee_msg_types: info.bypass_min_fee_msg_types,
               max_total_bypass_min_fee_msg_gas_usage:
-              info.max_total_bypass_min_fee_msg_gas_usage,
+                info.max_total_bypass_min_fee_msg_gas_usage,
             },
           }),
         },

@@ -1,7 +1,7 @@
 /*
 This code should be inserted BEFORE all imports mostly for bip39 package.
 Because in some cases it can not find crypto.getRandomValues in the global object
-so this polifill will fix it.
+so this polyfill will fix it.
 */
 import crypto from 'crypto';
 if (typeof global === 'object' && !('crypto' in global)) {
