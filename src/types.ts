@@ -48,12 +48,12 @@ export type SingleChoiceProposal = {
   readonly total_power: string;
   readonly proposal: {
     status:
-      | 'open'
-      | 'rejected'
-      | 'passed'
-      | 'executed'
-      | 'closed'
-      | 'execution_failed';
+    | 'open'
+    | 'rejected'
+    | 'passed'
+    | 'executed'
+    | 'closed'
+    | 'execution_failed';
     readonly votes: {
       yes: string;
       no: string;
@@ -125,7 +125,7 @@ export type Strategy = any;
 export const NeutronContract = {
   IBC_TRANSFER: 'ibc_transfer.wasm',
   MSG_RECEIVER: 'msg_receiver.wasm',
-  STARGATE_QUERIER: 'stargate_querier.wasm',
+  GRPC_QUERIER: 'grpc_querier.wasm',
   INTERCHAIN_QUERIES: 'neutron_interchain_queries.wasm',
   INTERCHAIN_TXS: 'neutron_interchain_txs.wasm',
   REFLECT: 'reflect.wasm',
@@ -175,7 +175,7 @@ export const NeutronContract = {
   BEFORE_SEND_HOOK_TEST: 'before_send_hook_test.wasm',
   // https://github.com/CosmWasm/cosmwasm/tree/main/contracts/floaty
   FLOATY: '../contracts_thirdparty/floaty_2.0.wasm',
-  DEX_STARGATE: 'dex_stargate.wasm',
+  DEX_GRPC: 'dex_grpc.wasm',
   DEX_DEV: 'dex.wasm',
 
   // TGE liquidity migration related contracts with fixed versions
