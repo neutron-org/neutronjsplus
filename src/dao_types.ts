@@ -100,3 +100,9 @@ export type PauseInfoResponse = {
   };
   unpaused: Record<string, never>;
 };
+
+export type TimelockConfig = {
+  owner: string;
+  overrule_pre_propose: string;
+  subdao: string;
+};
