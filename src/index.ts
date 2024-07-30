@@ -17,8 +17,10 @@ function getRandomValues(array: any) {
   return (crypto.webcrypto as any).getRandomValues(array);
 }
 
+export * as constants from './constants';
+export * as cosmos from './cosmos';
 export * as dao from './dao';
+export * as daoTypes from './dao_types';
 export * as proposal from './proposal';
 export * as types from './types';
 export * as wait from './wait';
-export * as neutronTypes from './neutronTypes';
