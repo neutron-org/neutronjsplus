@@ -3,6 +3,7 @@ import bech32 from 'bech32';
 import {
   ParamsContractmanagerInfo,
   ParamsCronInfo,
+  ParamsDexInfo,
   ParamsFeeburnerInfo,
   ParamsFeerefunderInfo,
   ParamsInterchainqueriesInfo,
@@ -343,6 +344,10 @@ export type ParamsContractmanagerResponse = {
 
 export type ParamsCronResponse = {
   params: ParamsCronInfo;
+};
+
+export type ParamsDexResponse = {
+  params: ParamsDexInfo;
 };
 
 export type ParamsFeerefunderResponse = {
