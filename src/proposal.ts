@@ -23,6 +23,8 @@ export type ParamsInterchainqueriesInfo = {
   query_submit_timeout: number;
   query_deposit: null;
   tx_query_removal_limit: number;
+  max_kv_query_keys_count: number;
+  max_transactions_filters: number;
 };
 
 export type WhitelistedHook = {
@@ -235,7 +237,6 @@ export type FeeMarketParams = {
   // distributed to all stakers.
   distribute_fees: boolean;
 };
-
 
 // 'none' is a choice that represents selecting none of the options; still counts toward quorum
 // and allows proposals with all bad options to be voted against.
@@ -451,7 +452,7 @@ export const updateGlobalFeeParamsProposal = (
               minimum_gas_prices: info.minimum_gas_prices,
               bypass_min_fee_msg_types: info.bypass_min_fee_msg_types,
               max_total_bypass_min_fee_msg_gas_usage:
-              info.max_total_bypass_min_fee_msg_gas_usage,
+                info.max_total_bypass_min_fee_msg_gas_usage,
             },
           }),
         },
