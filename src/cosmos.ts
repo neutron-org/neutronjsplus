@@ -29,8 +29,10 @@ import {
   ParamsFeerefunderResponse,
   ParamsContractmanagerResponse,
   ParamsCronResponse,
+  ParamsDexResponse,
   ParamsTokenfactoryResponse,
-  Strategy, TransferParamsResponse,
+  Strategy,
+  TransferParamsResponse,
 } from './types';
 import { DEBUG_SUBMIT_TX, getContractBinary, getHeight } from './env';
 import { Message } from '@bufbuild/protobuf';
@@ -213,12 +215,9 @@ export class CosmosWrapper {
   }
 
   async queryTransferParams(): Promise<TransferParamsResponse> {
-    const req = await axios.get(
-      `${this.sdk.url}/ibc/apps/transfer/v1/params`,
-    );
+    const req = await axios.get(`${this.sdk.url}/ibc/apps/transfer/v1/params`);
 
     return req.data;
-
   }
 
   async queryFeeburnerParams(): Promise<ParamsFeeburnerResponse> {
@@ -245,6 +244,12 @@ export class CosmosWrapper {
 
   async queryCronParams(): Promise<ParamsCronResponse> {
     const req = await axios.get(`${this.sdk.url}/neutron/cron/params`);
+
+    return req.data;
+  }
+
+  async queryDexParams(): Promise<ParamsDexResponse> {
+    const req = await axios.get(`${this.sdk.url}/neutron/dex/params`);
 
     return req.data;
   }
