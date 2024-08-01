@@ -21,7 +21,7 @@ export type ParamsInterchaintxsInfo = {
 
 export type ParamsInterchainqueriesInfo = {
   query_submit_timeout: number;
-  query_deposit: null;
+  query_deposit: Coin[];
   tx_query_removal_limit: number;
   max_kv_query_keys_count: number;
   max_transactions_filters: number;
