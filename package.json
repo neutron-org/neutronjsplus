@@ -1,6 +1,6 @@
 {
   "name": "@neutron-org/neutronjsplus",
-  "version": "0.4.0-rc19",
+  "version": "0.4.0-rc21",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "Apache-2.0",
@@ -10,26 +10,23 @@
   },
   "scripts": {
     "build": "rimraf ./build && tsc",
-    "proto": "mkdir -p ./src/generated && bash ./gen-proto.sh",
     "lint": "eslint ./src",
     "fmt": "eslint ./src --fix"
   },
   "dependencies": {
-    "@bufbuild/protobuf": "^1.4.2",
-    "@cosmos-client/core": "^0.47.4",
-    "@cosmos-client/cosmwasm": "^0.40.3",
-    "@cosmos-client/ibc": "^1.2.1",
-    "axios": "^0.27.2",
+    "@cosmjs/cosmwasm-stargate": "^0.32.4",
+    "@cosmjs/proto-signing": "^0.32.4",
+    "@cosmjs/stargate": "0.32.4",
+    "@neutron-org/cosmjs-types": "0.9.2-rc1",
+    "axios": "1.6.0",
+    "bip39": "^3.1.0",
     "long": "^5.2.1",
     "merkletreejs": "^0.3.9"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.20.2",
     "@babel/preset-typescript": "^7.18.6",
-    "@bufbuild/buf": "^1.28.1",
-    "@bufbuild/protoc-gen-es": "^1.4.2",
     "@types/express": "^4.17.9",
-    "@types/long": "^5.0.0",
     "@types/node": "^20.4.5",
     "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@typescript-eslint/parser": "^6.12.0",
@@ -59,6 +56,6 @@
     ]
   },
   "engines": {
-    "node": ">=11.0 <17"
+    "node": ">=20.0"
   }
 }
