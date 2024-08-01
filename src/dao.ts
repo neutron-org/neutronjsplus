@@ -1527,13 +1527,28 @@ export class DaoMember {
     chainManagerAddress: string,
     title: string,
     description: string,
-    message: ParamsInterchainqueriesInfo,
+    params: ParamsInterchainqueriesInfo,
     amount: string,
   ): Promise<number> {
+    const message = chainManagerWrapper(chainManagerAddress, {
+      custom: {
+        submit_admin_proposal: {
+          admin_proposal: {
+            proposal_execute_message: {
+              message: JSON.stringify({
+                '@type': '/neutron.interchainqueries.MsgUpdateParams',
+                authority: ADMIN_MODULE_ADDRESS,
+                params,
+              }),
+            },
+          },
+        },
+      },
+    });
     return await this.submitSingleChoiceProposal(
       title,
       description,
-      [chainManagerWrapper(chainManagerAddress, message)],
+      [message],
       amount,
     );
   }
