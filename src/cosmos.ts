@@ -1,9 +1,6 @@
-import {
-  Event as CosmosEvent,
-} from '@cosmjs/stargate';
-
+import { Event as CosmosEvent } from '@cosmjs/stargate';
 import { IndexedTx } from '@cosmjs/stargate';
-
+import crypto from "crypto";
 
 export const getSequenceId = (tx: IndexedTx | undefined): number => {
   if (!tx) {
@@ -20,8 +17,6 @@ export const getSequenceId = (tx: IndexedTx | undefined): number => {
     }
   }
 };
-
-
 
 export const createBankSendMessage = (
   addr: string,
@@ -40,6 +35,32 @@ export const createBankSendMessage = (
     },
   },
 });
+
+export const getEventAttributesFromTx = (
+  data: any,
+  event: string,
+  attributes: string[],
+): Array<
+  Record<(typeof attributes)[number], string> | Record<string, never>
+> => {
+  const events = data?.tx_response.events;
+  const resp = [];
+  for (const e of events) {
+    if (event === e.type) {
+      let out = {};
+      for (const a of e.attributes) {
+        if (attributes.includes(a.key)) {
+          out[a.key] = a.value;
+        }
+        if (Object.keys(out).length == attributes.length) {
+          resp.push(out);
+          out = {};
+        }
+      }
+    }
+  }
+  return resp;
+};
 
 export const getEventAttribute = (
   events: readonly CosmosEvent[],
@@ -61,3 +82,11 @@ export const getEventAttribute = (
   return attrValue;
 };
 
+export const getIBCDenom = (portName, channelName, denom: string): string => {
+  const uatomIBCHash = crypto
+    .createHash('sha256')
+    .update(`${portName}/${channelName}/${denom}`)
+    .digest('hex')
+    .toUpperCase();
+  return `ibc/${uatomIBCHash}`;
+};

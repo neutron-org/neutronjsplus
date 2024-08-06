@@ -14,6 +14,7 @@ import {
   ParamChangeProposalInfo,
   ParamsContractmanagerInfo,
   ParamsCronInfo,
+  ParamsDexInfo,
   ParamsFeeburnerInfo,
   ParamsFeerefunderInfo,
   ParamsGlobalfeeInfo,
@@ -41,160 +42,19 @@ import { ADMIN_MODULE_ADDRESS } from './constants';
 import { DynamicFeesParams, FeeMarketParams } from './proposal';
 import { getWithAttempts } from './wait';
 import { ProtobufRpcClient } from '@cosmjs/stargate';
-
-export type SubdaoProposalConfig = {
-  threshold: any;
-  max_voting_period: Duration;
-  min_voting_period: Duration;
-  allow_revoting: boolean;
-  dao: string;
-  close_proposal_on_execution_failure: boolean;
-};
-
-export type Duration = {
-  height: number | null;
-  time: number | null;
-};
-
-export type ProposalFailedExecutionErrorResponse = string;
-
-export type GetSubdaoResponse = { addr: string; charter: string };
-
-export type TimeLockSingleChoiceProposal = {
-  id: number;
-  msgs: Array<Record<string, any>>; // Vec<CosmosMsg<NeutronMsg>>
-  status: string;
-};
-
-export type TimelockConfig = {
-  owner: string;
-  overrule_pre_propose: string;
-  subdao: string;
-};
-
-export type TimelockProposalListResponse = {
-  proposals: Array<TimeLockSingleChoiceProposal>;
-};
-
-export type SubDaoConfig = {
-  name: string;
-  description: string;
-  dao_uri: string;
-  main_dao: string;
-  security_dao: string;
-};
-
-export type LockdropVaultConfig = {
-  name: string;
-  description: string;
-  lockdrop_contract: string;
-  oracle_usdc_contract: string;
-  oracle_atom_contract: string;
-  owner: string;
-};
-
-export type VestingLpVaultConfig = {
-  name: string;
-  description: string;
-  atom_vesting_lp_contract: string;
-  atom_oracle_contract: string;
-  usdc_vesting_lp_contract: string;
-  usdc_oracle_contract: string;
-  owner: string;
-};
-
-export type CreditsVaultConfig = {
-  name: string;
-  description: string;
-  credits_contract_address: string;
-  owner: string;
-  airdrop_contract_address: string;
-};
-
-export type VaultBondingStatus = {
-  bonding_enabled: string;
-  unbondable_amount: string;
-  height: number;
-};
-
-export type VotingVaultsModule = {
-  address: string;
-  vaults: {
-    neutron: {
-      address: string;
-    };
-    lockdrop: {
-      address: string;
-    };
-  };
-};
-
-export type VotingCw4Module = {
-  address: string;
-  cw4group: {
-    address: string;
-  };
-};
-
-export type ProposalModule = {
-  address: string;
-  pre_propose: {
-    address: string;
-    timelock?: {
-      address: string;
-    };
-  };
-};
-
-export type NewMarkets = {
-  ticker: {
-    currency_pair: {
-      Base: string;
-      Quote: string;
-    };
-    decimals: number;
-    min_provider_count: number;
-    enabled: boolean;
-    metadata_JSON: string;
-  };
-  provider_configs: {
-    name: string;
-    off_chain_ticker: string;
-    normalize_by_pair?: {
-      Base: string;
-      Quote: string;
-    };
-    invert?: boolean;
-    metadata_JSON?: string;
-  }[];
-}[];
-
-export const DaoPrefixes = {
-  'Neutron DAO': 'neutron',
-  'Security SubDAO': 'security',
-  'Grants SubDAO': 'grants',
-};
-
-export type DaoContracts = {
-  name: string;
-  core: {
-    address: string;
-  };
-  proposals: {
-    [name: string]: ProposalModule;
-  };
-  voting: VotingVaultsModule | VotingCw4Module;
-  subdaos?: {
-    [name: string]: DaoContracts;
-  };
-};
-
-export type PauseInfoResponse = {
-  paused: {
-    until_height: number;
-  };
-  unpaused: Record<string, never>;
-};
+import {
+  DaoContracts,
+  DaoPrefixes,
+  GetSubdaoResponse,
+  NewMarkets,
+  PauseInfoResponse,
+  ProposalFailedExecutionErrorResponse,
+  ProposalModule,
+  SubdaoProposalConfig,
+  TimeLockSingleChoiceProposal,
+  VotingCw4Module,
+  VotingVaultsModule,
+} from './dao_types';
 
 export const getVotingModule = async (
   client: CosmWasmClient,
@@ -1214,7 +1074,7 @@ export class DaoMember {
       wasm: {
         execute: {
           contract_addr: this.dao.contracts.core.address,
-          msg: wrapMsg({
+          msg: toBase64String({
             update_config: newConfig,
           }),
           funds: [],
@@ -1241,7 +1101,7 @@ export class DaoMember {
       wasm: {
         execute: {
           contract_addr: contractAddr,
-          msg: wrapMsg({
+          msg: toBase64String({
             pause: {
               duration: { time: duration },
             },
@@ -1270,7 +1130,7 @@ export class DaoMember {
       wasm: {
         execute: {
           contract_addr: contractAddr,
-          msg: wrapMsg({
+          msg: toBase64String({
             pause: {
               duration: duration,
             },
@@ -1301,7 +1161,7 @@ export class DaoMember {
       wasm: {
         execute: {
           contract_addr: contractAddr,
-          msg: wrapMsg({
+          msg: toBase64String({
             pause: {
               duration: duration,
             },
@@ -1329,7 +1189,7 @@ export class DaoMember {
         execute: {
           contract_addr: (this.dao.contracts.voting as VotingCw4Module).cw4group
             .address,
-          msg: wrapMsg({
+          msg: toBase64String({
             update_members: {
               remove: [],
               add: newParticipants.map((m) => ({
@@ -1653,6 +1513,25 @@ export class DaoMember {
   }
 
   /**
+   * submitUpdateParamsDexProposal creates proposal which changes soe params of dex module.
+   */
+
+  async submitUpdateParamsDexProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    message: ParamsDexInfo,
+    amount: string,
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [chainManagerWrapper(chainManagerAddress, message)],
+      amount,
+    );
+  }
+
+  /**
    * submitUpdateParamsContractmanagerProposal creates proposal which changes some params of contractmanager module.
    */
   async submitUpdateParamsContractmanagerProposal(
@@ -1946,10 +1825,11 @@ export class DaoMember {
   }
 }
 
+// returns dao core address
 export const getNeutronDAOCore = async (
   client: CosmWasmClient,
   rpcClient: ProtobufRpcClient,
-) => {
+): Promise<string> => {
   const queryClient = new AdminQueryClient(rpcClient);
   const admins = await queryClient.Admins();
   const chainManager = admins.admins[0];
@@ -1974,4 +1854,5 @@ export const DaoContractLabels = {
   DAO_PROPOSAL_OVERRULE: 'neutron.proposals.overrule',
 };
 
-export const wrapMsg = (x) => Buffer.from(JSON.stringify(x)).toString('base64');
+export const toBase64String = (x) =>
+  Buffer.from(JSON.stringify(x)).toString('base64');
