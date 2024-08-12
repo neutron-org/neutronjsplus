@@ -1,7 +1,5 @@
-import { google } from '@cosmos-client/core/cjs/proto';
-import { ADMIN_MODULE_ADDRESS } from './cosmos';
-import cosmosclient from '@cosmos-client/core';
-import { DynamicFeesParams } from './feemarket';
+import { Coin } from '@cosmjs/proto-signing';
+import { ADMIN_MODULE_ADDRESS } from './constants';
 
 export type ParamChangeProposalInfo = {
   title: string;
@@ -56,7 +54,7 @@ export type ParamsFeerefunderInfo = {
 };
 
 export type ParamsGlobalfeeInfo = {
-  minimum_gas_prices: cosmosclient.proto.cosmos.base.v1beta1.ICoin[];
+  minimum_gas_prices: Coin[];
   bypass_min_fee_msg_types: string[];
   max_total_bypass_min_fee_msg_gas_usage: string;
 };
@@ -101,7 +99,10 @@ export type UpgradeInfo = {
   name: string;
   height: number;
   info: string;
-  upgraded_client_state: google.protobuf.Any;
+  upgraded_client_state: {
+    type_url: string;
+    value: string;
+  };
 };
 
 export type CurrencyPairInfo = {
@@ -116,7 +117,9 @@ export type SendProposalInfo = {
 };
 
 export type MultiChoiceProposal = {
+  // Title  of the proposal
   readonly title: string;
+  // Description of the proposal
   readonly description: string;
   // The address that created this proposal.
   readonly proposer: string;
@@ -186,6 +189,58 @@ export type MultipleChoiceVotes = {
 export type ChainManagerStrategy = {
   address: string;
   permissions: any[];
+};
+
+export type DynamicFeesParams = {
+  ntrn_prices: Array<DecCoin>;
+};
+
+export type DecCoin = {
+  denom: string;
+  amount: string;
+};
+
+export type FeeMarketParams = {
+  // Alpha is the amount we additively increase the learning rate
+  // when it is above or below the target +/- threshold.
+  alpha: string; // Dec
+
+  // Beta is the amount we multiplicatively decrease the learning rate
+  // when it is within the target +/- threshold.
+  beta: string; // Dec
+
+  // Delta is the amount we additively increase/decrease the base fee when the
+  // net block utilization difference in the window is above/below the target
+  // utilization.
+  delta: string; // Dec
+
+  // MinBaseGasPrice determines the initial gas price of the module and the global
+  // minimum for the network.
+  min_base_gas_price: string; // Dec
+
+  // MinLearningRate is the lower bound for the learning rate.
+  min_learning_rate: string; // Dec
+
+  // MaxLearningRate is the upper bound for the learning rate.
+  max_learning_rate: string; // Dec
+
+  // MaxBlockUtilization is the maximum block utilization.
+  max_block_utilization: number;
+
+  // Window defines the window size for calculating an adaptive learning rate
+  // over a moving window of blocks.
+  window: number;
+
+  // FeeDenom is the denom that will be used for all fee payments.
+  fee_denom: string;
+
+  // Enabled is a boolean that determines whether the EIP1559 fee market is
+  // enabled.
+  enabled: boolean;
+
+  // DistributeFees is a boolean that determines whether the fees are burned or
+  // distributed to all stakers.
+  distribute_fees: boolean;
 };
 
 // 'none' is a choice that represents selecting none of the options; still counts toward quorum
