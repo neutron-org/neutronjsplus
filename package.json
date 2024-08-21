@@ -18,7 +18,7 @@
     "@cosmjs/proto-signing": "^0.32.4",
     "@cosmjs/stargate": "0.32.4",
     "@neutron-org/cosmjs-types": "0.9.2-rc1",
-    "axios": "1.6.0",
+    "axios": "1.7.2",
     "bip39": "^3.1.0",
     "long": "^5.2.1",
     "merkletreejs": "^0.3.9"
