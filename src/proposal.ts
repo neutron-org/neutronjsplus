@@ -196,19 +196,19 @@ export type DynamicFeesParams = {
 };
 
 export type ConsensusParams = {
-  block?: {
+  block: {
     max_gas: number;
     max_bytes: number;
   };
-  evidence?: {
+  evidence: {
     max_age_num_blocks: number;
-    max_age_duration: string; // TODO: whats the json to Duration type?
+    max_age_duration: number;
     max_bytes: number;
   };
-  validator?: {
+  validator: {
     pub_key_types: string[];
   };
-  abci?: {
+  abci: {
     vote_extensions_enable_height: number;
   };
 };
