@@ -195,6 +195,24 @@ export type DynamicFeesParams = {
   ntrn_prices: Array<DecCoin>;
 };
 
+export type ConsensusParams = {
+  block?: {
+    max_gas: number;
+    max_bytes: number;
+  };
+  evidence?: {
+    max_age_num_blocks: number;
+    max_age_duration: string; // TODO: whats the json to Duration type?
+    max_bytes: number;
+  };
+  validator?: {
+    pub_key_types: string[];
+  };
+  abci?: {
+    vote_extensions_enable_height: number;
+  };
+};
+
 export type DecCoin = {
   denom: string;
   amount: string;
@@ -721,6 +739,24 @@ export const updateDynamicFeesParamsProposal = (
             '@type': '/neutron.dynamicfees.v1.MsgUpdateParams',
             authority: ADMIN_MODULE_ADDRESS,
             params,
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateConsensusParamsProposal = (
+  params: ConsensusParams,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/cosmos.consensus.v1.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            ...params,
           }),
         },
       },
