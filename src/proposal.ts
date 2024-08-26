@@ -202,13 +202,13 @@ export type ConsensusParams = {
   };
   evidence: {
     max_age_num_blocks: number;
-    max_age_duration: number;
+    max_age_duration: string; // Duration
     max_bytes: number;
   };
   validator: {
     pub_key_types: string[];
   };
-  abci: {
+  abci?: {
     vote_extensions_enable_height: number;
   };
 };
