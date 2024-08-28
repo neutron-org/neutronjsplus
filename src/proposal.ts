@@ -1,5 +1,6 @@
 import { Coin } from '@cosmjs/proto-signing';
 import { ADMIN_MODULE_ADDRESS } from './constants';
+import { MsgExecuteContract } from '@neutron-org/cosmjs-types/neutron/cron/schedule';
 
 export type ParamChangeProposalInfo = {
   title: string;
@@ -721,6 +722,49 @@ export const updateDynamicFeesParamsProposal = (
             '@type': '/neutron.dynamicfees.v1.MsgUpdateParams',
             authority: ADMIN_MODULE_ADDRESS,
             params,
+          }),
+        },
+      },
+    },
+  },
+});
+
+export interface AddSchedule {
+  name: string;
+  period: number;
+  msgs: MsgExecuteContract[];
+  execution_stage: number;
+}
+
+export interface RemoveSchedule {
+  name: string;
+}
+
+export const addCronScheduleProposal = (params: AddSchedule): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.cron.MsgAddSchedule',
+            authority: ADMIN_MODULE_ADDRESS,
+            ...params,
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const removeCronScheduleProposal = (params: RemoveSchedule): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.cron.MsgRemoveSchedule',
+            authority: ADMIN_MODULE_ADDRESS,
+            ...params,
           }),
         },
       },
