@@ -10,6 +10,7 @@ import {
   chainManagerWrapper,
   clearAdminProposal,
   clientUpdateProposal,
+  ConsensusParams,
   paramChangeProposal,
   ParamChangeProposalInfo,
   ParamsContractmanagerInfo,
@@ -28,6 +29,7 @@ import {
   SendProposalInfo,
   unpinCodesProposal,
   updateAdminProposal,
+  updateConsensusParamsProposal,
   upgradeProposal,
 } from './proposal';
 import {
@@ -1377,6 +1379,25 @@ export class DaoMember {
       amount,
       'single',
       fee,
+    );
+  }
+
+  async submitUpdateParamsConsensusProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    params: ConsensusParams,
+    amount: string,
+  ): Promise<number> {
+    const wrappedMessage = chainManagerWrapper(
+      chainManagerAddress,
+      updateConsensusParamsProposal(params),
+    );
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [wrappedMessage],
+      amount,
     );
   }
 
