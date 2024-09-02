@@ -21,8 +21,10 @@ export type ParamsInterchaintxsInfo = {
 
 export type ParamsInterchainqueriesInfo = {
   query_submit_timeout: number;
-  query_deposit: null;
+  query_deposit: Coin[];
   tx_query_removal_limit: number;
+  max_kv_query_keys_count: number;
+  max_transactions_filters: number;
 };
 
 export type WhitelistedHook = {
@@ -193,6 +195,24 @@ export type ChainManagerStrategy = {
 
 export type DynamicFeesParams = {
   ntrn_prices: Array<DecCoin>;
+};
+
+export type ConsensusParams = {
+  block: {
+    max_gas: number;
+    max_bytes: number;
+  };
+  evidence: {
+    max_age_num_blocks: number;
+    max_age_duration: string; // Duration
+    max_bytes: number;
+  };
+  validator: {
+    pub_key_types: string[];
+  };
+  abci?: {
+    vote_extensions_enable_height: number;
+  };
 };
 
 export type DecCoin = {
@@ -721,6 +741,24 @@ export const updateDynamicFeesParamsProposal = (
             '@type': '/neutron.dynamicfees.v1.MsgUpdateParams',
             authority: ADMIN_MODULE_ADDRESS,
             params,
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateConsensusParamsProposal = (
+  params: ConsensusParams,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/cosmos.consensus.v1.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            ...params,
           }),
         },
       },
