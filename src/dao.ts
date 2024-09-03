@@ -11,6 +11,7 @@ import {
   chainManagerWrapper,
   clearAdminProposal,
   clientUpdateProposal,
+  ConsensusParams,
   paramChangeProposal,
   ParamChangeProposalInfo,
   ParamsContractmanagerInfo,
@@ -30,6 +31,7 @@ import {
   SendProposalInfo,
   unpinCodesProposal,
   updateAdminProposal,
+  updateConsensusParamsProposal,
   upgradeProposal,
 } from './proposal';
 import {
@@ -1382,6 +1384,25 @@ export class DaoMember {
     );
   }
 
+  async submitUpdateParamsConsensusProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    params: ConsensusParams,
+    amount: string,
+  ): Promise<number> {
+    const wrappedMessage = chainManagerWrapper(
+      chainManagerAddress,
+      updateConsensusParamsProposal(params),
+    );
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [wrappedMessage],
+      amount,
+    );
+  }
+
   /**
    * submitUpdateParamsInterchainqueriesProposal creates proposal which changes params of interchaintxs module.
    */
@@ -1389,13 +1410,28 @@ export class DaoMember {
     chainManagerAddress: string,
     title: string,
     description: string,
-    message: ParamsInterchainqueriesInfo,
+    params: ParamsInterchainqueriesInfo,
     amount: string,
   ): Promise<number> {
+    const message = chainManagerWrapper(chainManagerAddress, {
+      custom: {
+        submit_admin_proposal: {
+          admin_proposal: {
+            proposal_execute_message: {
+              message: JSON.stringify({
+                '@type': '/neutron.interchainqueries.MsgUpdateParams',
+                authority: ADMIN_MODULE_ADDRESS,
+                params,
+              }),
+            },
+          },
+        },
+      },
+    });
     return await this.submitSingleChoiceProposal(
       title,
       description,
-      [chainManagerWrapper(chainManagerAddress, message)],
+      [message],
       amount,
     );
   }

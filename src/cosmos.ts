@@ -1,6 +1,6 @@
 import { Event as CosmosEvent } from '@cosmjs/stargate';
 import { IndexedTx } from '@cosmjs/stargate';
-import crypto from "crypto";
+import crypto from 'crypto';
 
 export const getSequenceId = (tx: IndexedTx | undefined): number => {
   if (!tx) {
