@@ -670,28 +670,6 @@ export const sendProposal = (info: SendProposalInfo): any => ({
   },
 });
 
-export const addSchedule = (
-  name: string,
-  period: number,
-  msgs: string[],
-): any => ({
-  custom: {
-    add_schedule: {
-      name,
-      period,
-      msgs,
-    },
-  },
-});
-
-export const removeSchedule = (name: string): any => ({
-  custom: {
-    remove_schedule: {
-      name,
-    },
-  },
-});
-
 export const chainManagerWrapper = (
   chainManagerAddress: string,
   proposal: any,
@@ -740,7 +718,7 @@ export interface RemoveSchedule {
   name: string;
 }
 
-export const addCronScheduleProposal = (params: AddSchedule): any => ({
+export const addCronScheduleProposal = (info: AddSchedule): any => ({
   custom: {
     submit_admin_proposal: {
       admin_proposal: {
@@ -748,7 +726,7 @@ export const addCronScheduleProposal = (params: AddSchedule): any => ({
           message: JSON.stringify({
             '@type': '/neutron.cron.MsgAddSchedule',
             authority: ADMIN_MODULE_ADDRESS,
-            ...params,
+            ...info,
           }),
         },
       },
@@ -756,7 +734,7 @@ export const addCronScheduleProposal = (params: AddSchedule): any => ({
   },
 });
 
-export const removeCronScheduleProposal = (params: RemoveSchedule): any => ({
+export const removeCronScheduleProposal = (info: RemoveSchedule): any => ({
   custom: {
     submit_admin_proposal: {
       admin_proposal: {
@@ -764,7 +742,7 @@ export const removeCronScheduleProposal = (params: RemoveSchedule): any => ({
           message: JSON.stringify({
             '@type': '/neutron.cron.MsgRemoveSchedule',
             authority: ADMIN_MODULE_ADDRESS,
-            ...params,
+            ...info,
           }),
         },
       },

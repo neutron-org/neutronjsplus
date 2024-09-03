@@ -6,7 +6,8 @@ import {
   VotingPowerAtHeightResponse,
 } from './types';
 import {
-  addSchedule,
+  addCronScheduleProposal,
+  AddSchedule,
   chainManagerWrapper,
   clearAdminProposal,
   clientUpdateProposal,
@@ -24,7 +25,8 @@ import {
   ParamsTransferInfo,
   pinCodesCustomAuthorityProposal,
   pinCodesProposal,
-  removeSchedule,
+  removeCronScheduleProposal,
+  RemoveSchedule,
   SendProposalInfo,
   unpinCodesProposal,
   updateAdminProposal,
@@ -1651,13 +1653,11 @@ export class DaoMember {
     title: string,
     description: string,
     amount: string,
-    name: string,
-    period: number,
-    msgs: any[],
+    info: AddSchedule,
   ): Promise<number> {
     const message = chainManagerWrapper(
       chainManagerAddress,
-      addSchedule(name, period, msgs),
+      addCronScheduleProposal(info),
     );
     return await this.submitSingleChoiceProposal(
       title,
@@ -1675,8 +1675,7 @@ export class DaoMember {
     title: string,
     description: string,
     amount: string,
-    name: string,
-    customModule = 'single',
+    info: RemoveSchedule,
     wrapForChainManager = true,
   ): Promise<number> {
     // This ugly piece of code is required because we are not going
@@ -1688,16 +1687,18 @@ export class DaoMember {
     // TODO(pr0n00gler).
     let message: any;
     if (wrapForChainManager) {
-      message = chainManagerWrapper(chainManagerAddress, removeSchedule(name));
+      message = chainManagerWrapper(
+        chainManagerAddress,
+        removeCronScheduleProposal(info),
+      );
     } else {
-      message = removeSchedule(name);
+      message = removeCronScheduleProposal(info);
     }
     return await this.submitSingleChoiceProposal(
       title,
       description,
       [message],
       amount,
-      customModule,
     );
   }
 
