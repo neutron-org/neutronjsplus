@@ -1712,6 +1712,7 @@ export class DaoMember {
     description: string,
     amount: string,
     info: RemoveSchedule,
+    customModule = 'single',
     wrapForChainManager = true,
   ): Promise<number> {
     // This ugly piece of code is required because we are not going
@@ -1735,6 +1736,7 @@ export class DaoMember {
       description,
       [message],
       amount,
+      customModule,
     );
   }
 
