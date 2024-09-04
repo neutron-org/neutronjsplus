@@ -731,7 +731,7 @@ export interface AddSchedule {
   name: string;
   period: number;
   msgs: MsgExecuteContract[];
-  execution_stage: number;
+  execution_stage: string;
 }
 
 export interface RemoveSchedule {
