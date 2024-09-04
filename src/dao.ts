@@ -7,9 +7,11 @@ import {
 } from './types';
 import {
   addCronScheduleProposal,
+  AddSchedule,
   chainManagerWrapper,
   clearAdminProposal,
   clientUpdateProposal,
+  ConsensusParams,
   paramChangeProposal,
   ParamChangeProposalInfo,
   ParamsContractmanagerInfo,
@@ -25,9 +27,11 @@ import {
   pinCodesCustomAuthorityProposal,
   pinCodesProposal,
   removeCronScheduleProposal,
+  RemoveSchedule,
   SendProposalInfo,
   unpinCodesProposal,
   updateAdminProposal,
+  updateConsensusParamsProposal,
   upgradeProposal,
 } from './proposal';
 import {
@@ -1381,6 +1385,25 @@ export class DaoMember {
     );
   }
 
+  async submitUpdateParamsConsensusProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    params: ConsensusParams,
+    amount: string,
+  ): Promise<number> {
+    const wrappedMessage = chainManagerWrapper(
+      chainManagerAddress,
+      updateConsensusParamsProposal(params),
+    );
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [wrappedMessage],
+      amount,
+    );
+  }
+
   /**
    * submitUpdateParamsInterchainqueriesProposal creates proposal which changes params of interchaintxs module.
    */
@@ -1388,13 +1411,28 @@ export class DaoMember {
     chainManagerAddress: string,
     title: string,
     description: string,
-    message: ParamsInterchainqueriesInfo,
+    params: ParamsInterchainqueriesInfo,
     amount: string,
   ): Promise<number> {
+    const message = chainManagerWrapper(chainManagerAddress, {
+      custom: {
+        submit_admin_proposal: {
+          admin_proposal: {
+            proposal_execute_message: {
+              message: JSON.stringify({
+                '@type': '/neutron.interchainqueries.MsgUpdateParams',
+                authority: ADMIN_MODULE_ADDRESS,
+                params,
+              }),
+            },
+          },
+        },
+      },
+    });
     return await this.submitSingleChoiceProposal(
       title,
       description,
-      [chainManagerWrapper(chainManagerAddress, message)],
+      [message],
       amount,
     );
   }
@@ -1652,14 +1690,11 @@ export class DaoMember {
     title: string,
     description: string,
     amount: string,
-    name: string,
-    period: number,
-    msgs: MsgExecuteContract[],
-    execution_stage: number,
+    info: AddSchedule,
   ): Promise<number> {
     const message = chainManagerWrapper(
       chainManagerAddress,
-      addCronScheduleProposal({ name, period, msgs, execution_stage }),
+      addCronScheduleProposal(info),
     );
     return await this.submitSingleChoiceProposal(
       title,
@@ -1677,7 +1712,7 @@ export class DaoMember {
     title: string,
     description: string,
     amount: string,
-    name: string,
+    info: RemoveSchedule,
     customModule = 'single',
     wrapForChainManager = true,
   ): Promise<number> {
@@ -1690,9 +1725,12 @@ export class DaoMember {
     // TODO(pr0n00gler).
     let message: any;
     if (wrapForChainManager) {
-      message = chainManagerWrapper(chainManagerAddress, removeCronScheduleProposal({ name }));
+      message = chainManagerWrapper(
+        chainManagerAddress,
+        removeCronScheduleProposal(info),
+      );
     } else {
-      message = removeCronScheduleProposal({ name });
+      message = removeCronScheduleProposal(info);
     }
     return await this.submitSingleChoiceProposal(
       title,

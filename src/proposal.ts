@@ -22,8 +22,10 @@ export type ParamsInterchaintxsInfo = {
 
 export type ParamsInterchainqueriesInfo = {
   query_submit_timeout: number;
-  query_deposit: null;
+  query_deposit: Coin[];
   tx_query_removal_limit: number;
+  max_kv_query_keys_count: number;
+  max_transactions_filters: number;
 };
 
 export type WhitelistedHook = {
@@ -194,6 +196,24 @@ export type ChainManagerStrategy = {
 
 export type DynamicFeesParams = {
   ntrn_prices: Array<DecCoin>;
+};
+
+export type ConsensusParams = {
+  block: {
+    max_gas: number;
+    max_bytes: number;
+  };
+  evidence: {
+    max_age_num_blocks: number;
+    max_age_duration: string; // Duration
+    max_bytes: number;
+  };
+  validator: {
+    pub_key_types: string[];
+  };
+  abci?: {
+    vote_extensions_enable_height: number;
+  };
 };
 
 export type DecCoin = {
@@ -670,28 +690,6 @@ export const sendProposal = (info: SendProposalInfo): any => ({
   },
 });
 
-export const addSchedule = (
-  name: string,
-  period: number,
-  msgs: string[],
-): any => ({
-  custom: {
-    add_schedule: {
-      name,
-      period,
-      msgs,
-    },
-  },
-});
-
-export const removeSchedule = (name: string): any => ({
-  custom: {
-    remove_schedule: {
-      name,
-    },
-  },
-});
-
 export const chainManagerWrapper = (
   chainManagerAddress: string,
   proposal: any,
@@ -740,7 +738,7 @@ export interface RemoveSchedule {
   name: string;
 }
 
-export const addCronScheduleProposal = (params: AddSchedule): any => ({
+export const addCronScheduleProposal = (info: AddSchedule): any => ({
   custom: {
     submit_admin_proposal: {
       admin_proposal: {
@@ -748,7 +746,7 @@ export const addCronScheduleProposal = (params: AddSchedule): any => ({
           message: JSON.stringify({
             '@type': '/neutron.cron.MsgAddSchedule',
             authority: ADMIN_MODULE_ADDRESS,
-            ...params,
+            ...info,
           }),
         },
       },
@@ -756,13 +754,31 @@ export const addCronScheduleProposal = (params: AddSchedule): any => ({
   },
 });
 
-export const removeCronScheduleProposal = (params: RemoveSchedule): any => ({
+export const removeCronScheduleProposal = (info: RemoveSchedule): any => ({
   custom: {
     submit_admin_proposal: {
       admin_proposal: {
         proposal_execute_message: {
           message: JSON.stringify({
             '@type': '/neutron.cron.MsgRemoveSchedule',
+            authority: ADMIN_MODULE_ADDRESS,
+            ...info,
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateConsensusParamsProposal = (
+  params: ConsensusParams,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/cosmos.consensus.v1.MsgUpdateParams',
             authority: ADMIN_MODULE_ADDRESS,
             ...params,
           }),
