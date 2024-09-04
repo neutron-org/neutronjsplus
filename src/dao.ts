@@ -6,7 +6,7 @@ import {
   VotingPowerAtHeightResponse,
 } from './types';
 import {
-  addSchedule,
+  addCronScheduleProposal,
   chainManagerWrapper,
   clearAdminProposal,
   clientUpdateProposal,
@@ -24,7 +24,7 @@ import {
   ParamsTransferInfo,
   pinCodesCustomAuthorityProposal,
   pinCodesProposal,
-  removeSchedule,
+  removeCronScheduleProposal,
   SendProposalInfo,
   unpinCodesProposal,
   updateAdminProposal,
@@ -36,8 +36,9 @@ import {
   ExecuteResult,
   SigningCosmWasmClient,
 } from '@cosmjs/cosmwasm-stargate';
-import { ClientState } from '@neutron-org/cosmjs-types/ibc/lightclients/tendermint/v1/tendermint';
-import { QueryClientImpl as AdminQueryClient } from '@neutron-org/cosmjs-types/cosmos/adminmodule/adminmodule/query';
+import { ClientState } from '@neutron-org/neutronjs/ibc/lightclients/tendermint/v1/tendermint';
+import { MsgExecuteContract } from '@neutron-org/neutronjs/neutron/cron/schedule';
+import { QueryClientImpl as AdminQueryClient } from '@neutron-org/neutronjs/cosmos/adminmodule/adminmodule/query.rpc.Query';
 import { ADMIN_MODULE_ADDRESS } from './constants';
 import { DynamicFeesParams, FeeMarketParams } from './proposal';
 import { getWithAttempts } from './wait';
@@ -128,7 +129,7 @@ export const getProposalModules = async (
         address: timelockAddr,
       };
       // eslint-disable-next-line no-empty
-    } catch (e) {}
+    } catch (e) { }
 
     proposalsStructure[moduleType] = {
       address: proposalModule.address,
@@ -206,7 +207,7 @@ export const getSubDaoContracts = async (
 };
 
 export class Dao {
-  constructor(private client: CosmWasmClient, public contracts: DaoContracts) {}
+  constructor(private client: CosmWasmClient, public contracts: DaoContracts) { }
 
   async checkPassedProposal(proposalId: number) {
     await getWithAttempts(
@@ -290,12 +291,12 @@ export class Dao {
       voting_power_at_height:
         typeof height === 'undefined'
           ? {
-              address: addr,
-            }
+            address: addr,
+          }
           : {
-              address: addr,
-              height: height,
-            },
+            address: addr,
+            height: height,
+          },
     });
   }
 
@@ -377,7 +378,7 @@ export class DaoMember {
     private client: SigningCosmWasmClient,
     public user: string,
     private denom: string,
-  ) {}
+  ) { }
 
   /**
    * voteYes  vote 'yes' for given proposal.
@@ -525,7 +526,7 @@ export class DaoMember {
     if (proposalId < 0) {
       throw new Error(
         'failed to get proposal ID from the proposal creation tx attributes: ' +
-          JSON.stringify(proposalTx.events),
+        JSON.stringify(proposalTx.events),
       );
     }
     return proposalId;
@@ -745,7 +746,7 @@ export class DaoMember {
     if (proposalId < 0) {
       throw new Error(
         'failed to get proposal ID from the proposal creation tx attributes: ' +
-          JSON.stringify(proposalTx.events),
+        JSON.stringify(proposalTx.events),
       );
     }
     return proposalId;
@@ -1027,7 +1028,7 @@ export class DaoMember {
     if (proposalId < 0) {
       throw new Error(
         'failed to get proposal ID from the proposal creation tx attributes: ' +
-          JSON.stringify(proposalTx.events),
+        JSON.stringify(proposalTx.events),
       );
     }
     return proposalId1;
@@ -1653,11 +1654,12 @@ export class DaoMember {
     amount: string,
     name: string,
     period: number,
-    msgs: any[],
+    msgs: MsgExecuteContract[],
+    execution_stage: number,
   ): Promise<number> {
     const message = chainManagerWrapper(
       chainManagerAddress,
-      addSchedule(name, period, msgs),
+      addCronScheduleProposal({ name, period, msgs, execution_stage }),
     );
     return await this.submitSingleChoiceProposal(
       title,
@@ -1688,9 +1690,9 @@ export class DaoMember {
     // TODO(pr0n00gler).
     let message: any;
     if (wrapForChainManager) {
-      message = chainManagerWrapper(chainManagerAddress, removeSchedule(name));
+      message = chainManagerWrapper(chainManagerAddress, removeCronScheduleProposal({ name }));
     } else {
-      message = removeSchedule(name);
+      message = removeCronScheduleProposal({ name });
     }
     return await this.submitSingleChoiceProposal(
       title,
@@ -1816,7 +1818,7 @@ export const getNeutronDAOCore = async (
   rpcClient: ProtobufRpcClient,
 ): Promise<string> => {
   const queryClient = new AdminQueryClient(rpcClient);
-  const admins = await queryClient.Admins();
+  const admins = await queryClient.admins();
   const chainManager = admins.admins[0];
   const strategies = await client.queryContractSmart(chainManager, {
     strategies: {},

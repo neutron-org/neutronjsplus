@@ -1,6 +1,6 @@
 import { Coin } from '@cosmjs/proto-signing';
 import { ADMIN_MODULE_ADDRESS } from './constants';
-import { MsgExecuteContract } from '@neutron-org/cosmjs-types/neutron/cron/schedule';
+import { MsgExecuteContract } from '@neutron-org/neutronjs/neutron/cron/schedule';
 
 export type ParamChangeProposalInfo = {
   title: string;
@@ -147,12 +147,12 @@ export type MultiChoiceProposal = {
   readonly choices: CheckedMultipleChoiceOption[];
   // Proposal status (Open, rejected, executed, execution failed, closed, passed)
   readonly status:
-    | 'open'
-    | 'rejected'
-    | 'passed'
-    | 'executed'
-    | 'closed'
-    | 'execution_failed';
+  | 'open'
+  | 'rejected'
+  | 'passed'
+  | 'executed'
+  | 'closed'
+  | 'execution_failed';
   // Voting settings (threshold, quorum, etc.)
   readonly voting_strategy: VotingStrategy;
   // The total power when the proposal started (used to calculate percentages)
