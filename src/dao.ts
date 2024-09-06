@@ -7,6 +7,7 @@ import {
 } from './types';
 import {
   addCronScheduleProposal,
+    addScheduleBindings,
   AddSchedule,
   chainManagerWrapper,
   clearAdminProposal,
@@ -27,6 +28,7 @@ import {
   pinCodesCustomAuthorityProposal,
   pinCodesProposal,
   removeCronScheduleProposal,
+    removeScheduleBindings,
   RemoveSchedule,
   SendProposalInfo,
   unpinCodesProposal,
@@ -1690,10 +1692,13 @@ export class DaoMember {
     description: string,
     amount: string,
     info: AddSchedule,
+    bindings = false,
   ): Promise<number> {
     const message = chainManagerWrapper(
       chainManagerAddress,
-      addCronScheduleProposal(info),
+      bindings
+        ? addScheduleBindings(info.name, info.period, info.msgs)
+        : addCronScheduleProposal(info),
     );
     return await this.submitSingleChoiceProposal(
       title,
@@ -1714,6 +1719,7 @@ export class DaoMember {
     info: RemoveSchedule,
     customModule = 'single',
     wrapForChainManager = true,
+    bindings = false,
   ): Promise<number> {
     // This ugly piece of code is required because we are not going
     // to remove the security address functionality from the cron module
@@ -1726,10 +1732,14 @@ export class DaoMember {
     if (wrapForChainManager) {
       message = chainManagerWrapper(
         chainManagerAddress,
-        removeCronScheduleProposal(info),
+        bindings
+          ? removeScheduleBindings(info.name)
+          : removeCronScheduleProposal(info),
       );
     } else {
-      message = removeCronScheduleProposal(info);
+      message = bindings
+          ? removeScheduleBindings(info.name)
+          : removeCronScheduleProposal(info);
     }
     return await this.submitSingleChoiceProposal(
       title,

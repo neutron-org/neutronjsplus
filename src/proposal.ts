@@ -690,6 +690,28 @@ export const sendProposal = (info: SendProposalInfo): any => ({
   },
 });
 
+export const addScheduleBindings = (
+  name: string,
+  period: number,
+  msgs: MsgExecuteContract[],
+): any => ({
+  custom: {
+    add_schedule: {
+      name,
+      period,
+      msgs,
+    },
+  },
+});
+
+export const removeScheduleBindings = (name: string): any => ({
+  custom: {
+    remove_schedule: {
+      name,
+    },
+  },
+});
+
 export const chainManagerWrapper = (
   chainManagerAddress: string,
   proposal: any,
