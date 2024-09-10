@@ -1184,10 +1184,10 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@neutron-org/cosmjs-types@0.9.2-rc1":
-  version "0.9.2-rc1"
-  resolved "https://registry.yarnpkg.com/@neutron-org/cosmjs-types/-/cosmjs-types-0.9.2-rc1.tgz#ca1fc1dc9566858dbd765e8f82c8a70097bcc84b"
-  integrity sha512-ju2AqJ14yO4+JF8RwY4ZVy7f2HVjhdf66SfhS6y4ucBZm997/E/yYVMnpWmUncVg8ARooISOKaOYNagqz0am6Q==
+"@neutron-org/cosmjs-types@0.9.2":
+  version "0.9.2"
+  resolved "https://registry.yarnpkg.com/@neutron-org/cosmjs-types/-/cosmjs-types-0.9.2.tgz#26b62f289e423797ad32fdebdaead6ae0b91a50a"
+  integrity sha512-mbfNzpKHH2NaYAq1uBzNm8RpF5wawEI+BclSnaB44Wsa0ENTC+Nsv7L7iDD1nfZNXyilFsKrS9FX3PegITtxoQ==
 
 "@noble/curves@1.4.2", "@noble/curves@~1.4.0":
   version "1.4.2"
