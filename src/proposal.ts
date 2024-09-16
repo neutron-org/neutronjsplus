@@ -1,5 +1,6 @@
 import { Coin } from '@cosmjs/proto-signing';
 import { ADMIN_MODULE_ADDRESS } from './constants';
+import { MsgExecuteContract } from '@neutron-org/neutronjs/neutron/cron/schedule';
 
 export type ParamChangeProposalInfo = {
   title: string;
@@ -148,12 +149,12 @@ export type MultiChoiceProposal = {
   readonly choices: CheckedMultipleChoiceOption[];
   // Proposal status (Open, rejected, executed, execution failed, closed, passed)
   readonly status:
-    | 'open'
-    | 'rejected'
-    | 'passed'
-    | 'executed'
-    | 'closed'
-    | 'execution_failed';
+  | 'open'
+  | 'rejected'
+  | 'passed'
+  | 'executed'
+  | 'closed'
+  | 'execution_failed';
   // Voting settings (threshold, quorum, etc.)
   readonly voting_strategy: VotingStrategy;
   // The total power when the proposal started (used to calculate percentages)
@@ -689,10 +690,10 @@ export const sendProposal = (info: SendProposalInfo): any => ({
   },
 });
 
-export const addSchedule = (
+export const addScheduleBindings = (
   name: string,
   period: number,
-  msgs: string[],
+  msgs: MsgExecuteContract[],
 ): any => ({
   custom: {
     add_schedule: {
@@ -703,7 +704,7 @@ export const addSchedule = (
   },
 });
 
-export const removeSchedule = (name: string): any => ({
+export const removeScheduleBindings = (name: string): any => ({
   custom: {
     remove_schedule: {
       name,
@@ -741,6 +742,49 @@ export const updateDynamicFeesParamsProposal = (
             '@type': '/neutron.dynamicfees.v1.MsgUpdateParams',
             authority: ADMIN_MODULE_ADDRESS,
             params,
+          }),
+        },
+      },
+    },
+  },
+});
+
+export interface AddSchedule {
+  name: string;
+  period: number;
+  msgs: MsgExecuteContract[];
+  execution_stage: string;
+}
+
+export interface RemoveSchedule {
+  name: string;
+}
+
+export const addCronScheduleProposal = (info: AddSchedule): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.cron.MsgAddSchedule',
+            authority: ADMIN_MODULE_ADDRESS,
+            ...info,
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const removeCronScheduleProposal = (info: RemoveSchedule): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.cron.MsgRemoveSchedule',
+            authority: ADMIN_MODULE_ADDRESS,
+            ...info,
           }),
         },
       },
