@@ -7,7 +7,7 @@ import {
 } from './types';
 import {
   addCronScheduleProposal,
-    addScheduleBindings,
+  addScheduleBindings,
   AddSchedule,
   chainManagerWrapper,
   clearAdminProposal,
@@ -28,13 +28,13 @@ import {
   pinCodesCustomAuthorityProposal,
   pinCodesProposal,
   removeCronScheduleProposal,
-    removeScheduleBindings,
+  removeScheduleBindings,
   RemoveSchedule,
   SendProposalInfo,
   unpinCodesProposal,
   updateAdminProposal,
   updateConsensusParamsProposal,
-  upgradeProposal,
+  upgradeProposal, ParamsRateLimitInfo,
 } from './proposal';
 import {
   Contract,
@@ -1328,6 +1328,38 @@ export class DaoMember {
       title,
       description,
       [messageWrapped],
+      amount,
+    );
+  }
+  /**
+   * submitUpdateParamsRateLimitProposal creates proposal which changes params of ibc-rate-limit module.
+   */
+  async submitUpdateParamsRateLimitProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    params: ParamsRateLimitInfo,
+    amount: string,
+  ): Promise<number> {
+    const message = chainManagerWrapper(chainManagerAddress, {
+      custom: {
+        submit_admin_proposal: {
+          admin_proposal: {
+            proposal_execute_message: {
+              message: JSON.stringify({
+                '@type': '/neutron.ibcratelimit.v1beta1.MsgUpdateParams',
+                authority: ADMIN_MODULE_ADDRESS,
+                params,
+              }),
+            },
+          },
+        },
+      },
+    });
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
       amount,
     );
   }

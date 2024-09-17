@@ -20,6 +20,10 @@ export type ParamsInterchaintxsInfo = {
   msg_submit_tx_max_messages: number;
 };
 
+export type ParamsRateLimitInfo = {
+  contract_address: string;
+};
+
 export type ParamsInterchainqueriesInfo = {
   query_submit_timeout: number;
   query_deposit: Coin[];
