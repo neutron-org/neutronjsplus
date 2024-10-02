@@ -20,6 +20,10 @@ export type ParamsInterchaintxsInfo = {
   msg_submit_tx_max_messages: number;
 };
 
+export type ParamsRateLimitInfo = {
+  contract_address: string;
+};
+
 export type ParamsInterchainqueriesInfo = {
   query_submit_timeout: number;
   query_deposit: Coin[];
@@ -149,12 +153,12 @@ export type MultiChoiceProposal = {
   readonly choices: CheckedMultipleChoiceOption[];
   // Proposal status (Open, rejected, executed, execution failed, closed, passed)
   readonly status:
-  | 'open'
-  | 'rejected'
-  | 'passed'
-  | 'executed'
-  | 'closed'
-  | 'execution_failed';
+    | 'open'
+    | 'rejected'
+    | 'passed'
+    | 'executed'
+    | 'closed'
+    | 'execution_failed';
   // Voting settings (threshold, quorum, etc.)
   readonly voting_strategy: VotingStrategy;
   // The total power when the proposal started (used to calculate percentages)
