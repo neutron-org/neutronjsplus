@@ -1870,7 +1870,7 @@ export class DaoMember {
               admin_proposal: {
                 proposal_execute_message: {
                   message: JSON.stringify({
-                    '@type': '/slinky.marketmap.v1.MsgUpdateMarkets',
+                    '@type': '/connect.marketmap.v2.MsgUpdateMarkets',
                     authority: ADMIN_MODULE_ADDRESS,
                     update_markets: newMarkets,
                   }),
