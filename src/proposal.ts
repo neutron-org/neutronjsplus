@@ -800,7 +800,7 @@ export const updateConsumerParamsProposal = (params: ConsumerParams): any => ({
       admin_proposal: {
         proposal_execute_message: {
           message: JSON.stringify({
-            '@type': '"/interchain_security.ccv.consumer.v1.MsgUpdateParams"',
+            '@type': '/interchain_security.ccv.consumer.v1.MsgUpdateParams',
             authority: ADMIN_MODULE_ADDRESS,
             params,
           }),
