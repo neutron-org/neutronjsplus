@@ -36,6 +36,7 @@ import {
   updateAdminProposal,
   updateConsensusParamsProposal,
   upgradeProposal,
+  ConsumerParams,
 } from './proposal';
 import {
   Contract,
@@ -1403,6 +1404,27 @@ export class DaoMember {
     title: string,
     description: string,
     message: ParamsGlobalfeeInfo,
+    amount: string,
+    fee = {
+      gas: '4000000',
+      amount: [{ denom: this.denom, amount: '10000' }],
+    },
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [chainManagerWrapper(chainManagerAddress, message)],
+      amount,
+      'single',
+      fee,
+    );
+  }
+
+  async submitUpdateParamsConsumerProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    message: ConsumerParams,
     amount: string,
     fee = {
       gas: '4000000',
