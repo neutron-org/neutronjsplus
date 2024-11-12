@@ -739,12 +739,14 @@ export const addScheduleBindings = (
   name: string,
   period: number,
   msgs: MsgExecuteContract[],
+  executionStage: string,
 ): any => ({
   custom: {
     add_schedule: {
       name,
       period,
       msgs,
+      execution_stage: executionStage,
     },
   },
 });

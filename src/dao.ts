@@ -1752,7 +1752,12 @@ export class DaoMember {
     const message = chainManagerWrapper(
       chainManagerAddress,
       bindings
-        ? addScheduleBindings(info.name, info.period, info.msgs)
+        ? addScheduleBindings(
+            info.name,
+            info.period,
+            info.msgs,
+            info.execution_stage,
+          )
         : addCronScheduleProposal(info),
     );
     return await this.submitSingleChoiceProposal(
