@@ -36,7 +36,6 @@ import {
   updateAdminProposal,
   updateConsensusParamsProposal,
   upgradeProposal,
-  ConsumerParams,
 } from './proposal';
 import {
   Contract,
@@ -63,6 +62,8 @@ import {
   VotingCw4Module,
   VotingVaultsModule,
 } from './dao_types';
+
+import { ConsumerParams } from '@neutron-org/neutronjs/interchain_security/ccv/v1/shared_consumer';
 
 export const getVotingModule = async (
   client: CosmWasmClient,
