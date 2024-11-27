@@ -1,6 +1,7 @@
 import { Coin } from '@cosmjs/proto-signing';
 import { ADMIN_MODULE_ADDRESS } from './constants';
 import { MsgExecuteContract } from '@neutron-org/neutronjs/neutron/cron/schedule';
+import { ConsumerParams } from '@neutron-org/neutronjs/interchain_security/ccv/v1/shared_consumer';
 
 export type ParamChangeProposalInfo = {
   title: string;
@@ -698,12 +699,14 @@ export const addScheduleBindings = (
   name: string,
   period: number,
   msgs: MsgExecuteContract[],
+  executionStage: string,
 ): any => ({
   custom: {
     add_schedule: {
       name,
       period,
       msgs,
+      execution_stage: executionStage,
     },
   },
 });
@@ -744,6 +747,22 @@ export const updateDynamicFeesParamsProposal = (
         proposal_execute_message: {
           message: JSON.stringify({
             '@type': '/neutron.dynamicfees.v1.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params,
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateConsumerParamsProposal = (params: ConsumerParams): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/interchain_security.ccv.consumer.v1.MsgUpdateParams',
             authority: ADMIN_MODULE_ADDRESS,
             params,
           }),
