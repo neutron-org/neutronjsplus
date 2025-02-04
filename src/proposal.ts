@@ -61,7 +61,7 @@ export interface MonthlyPaymentScheduleType {}
  */
 export interface BlockBasedPaymentScheduleType {
   /** The number of blocks in a payment period. */
-  blocks_per_period: bigint;
+  blocks_per_period: string;
 }
 /** Endless periods with payments never made. */
 export interface EmptyPaymentScheduleType {}
