@@ -17,6 +17,55 @@ export type PinCodesInfo = {
   codes_ids: number[];
 };
 
+export type ParamsRevenue = {
+  /** The denom to be used for compensation. */
+  denom_compensation: string;
+  /** The compensation amount in USD. */
+  base_compensation: string;
+  /**
+   * Specifies performance requirements for validators in scope of blocks signing and creation. If
+   * not met, the validator is not rewarded.
+   */
+  blocks_performance_requirement?: PerformanceRequirement;
+  /**
+   * Specifies performance requirements for validators in scope of the oracle price votes. If not
+   * met, the validator is not rewarded.
+   */
+  oracle_votes_performance_requirement?: PerformanceRequirement;
+  monthly_payment_schedule_type?: MonthlyPaymentScheduleType;
+  block_based_payment_schedule_type?: BlockBasedPaymentScheduleType;
+  empty_payment_schedule_type?: EmptyPaymentScheduleType;
+  /** The window in seconds to calculate TWAP price of NTRN */
+  TWAPWindow: bigint;
+};
+
+/** Specifies a performance criteria that validators must meet to qualify for network rewards. */
+export interface PerformanceRequirement {
+  /**
+   * The fraction of the total performance a validator can miss without affecting their reward.
+   * Represented as a decimal value in the range [0.0, 1.0], where 1.0 corresponds to 100%.
+   */
+  allowed_to_miss: string;
+  /**
+   * The minimum fraction of the total performance a validator must achieve to be eligible for
+   * network rewards. Validators falling below this threshold will not receive any rewards.
+   * Represented as a decimal value in the range [0.0, 1.0], where 1.0 corresponds to 100%.
+   */
+  required_at_least: string;
+}
+
+export interface MonthlyPaymentScheduleType {}
+/**
+ * Periods defined by a specific number of blocks, with payments made when the required block
+ * count is reached.
+ */
+export interface BlockBasedPaymentScheduleType {
+  /** The number of blocks in a payment period. */
+  blocks_per_period: bigint;
+}
+/** Endless periods with payments never made. */
+export interface EmptyPaymentScheduleType {}
+
 export type ParamsInterchaintxsInfo = {
   msg_submit_tx_max_messages: number;
 };
@@ -356,6 +405,22 @@ export const unpinCodesProposal = (info: PinCodesInfo): any => ({
             '@type': '/cosmwasm.wasm.v1.MsgUnpinCodes',
             authority: ADMIN_MODULE_ADDRESS,
             code_ids: info.codes_ids,
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateRevenueParamsProposal = (params: ParamsRevenue): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.revenue.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params,
           }),
         },
       },
