@@ -36,7 +36,7 @@ export type ParamsRevenue = {
   block_based_payment_schedule_type?: BlockBasedPaymentScheduleType;
   empty_payment_schedule_type?: EmptyPaymentScheduleType;
   /** The window in seconds to calculate TWAP price of NTRN */
-  TWAPWindow: bigint;
+  TWAP_Window: string; // seconds serrizlized, e.g. '123s'
 };
 
 /** Specifies a performance criteria that validators must meet to qualify for network rewards. */
