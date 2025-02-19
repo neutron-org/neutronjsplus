@@ -43,9 +43,9 @@ export type ParamsRevenue = {
  * payment schedule which is a state variable, but is updated via MsgUpdateParams.
  */
 export interface PaymentScheduleType {
-  monthlyPaymentScheduleType?: MonthlyPaymentScheduleType;
-  blockBasedPaymentScheduleType?: BlockBasedPaymentScheduleType;
-  emptyPaymentScheduleType?: EmptyPaymentScheduleType;
+  monthly_payment_schedule_type?: MonthlyPaymentScheduleType;
+  block_based_payment_schedule_type?: BlockBasedPaymentScheduleType;
+  empty_payment_schedule_type?: EmptyPaymentScheduleType;
 }
 /** Specifies a performance criteria that validators must meet to qualify for network rewards. */
 export interface PerformanceRequirement {
