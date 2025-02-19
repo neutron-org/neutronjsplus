@@ -18,8 +18,6 @@ export type PinCodesInfo = {
 };
 
 export type ParamsRevenue = {
-  /** The denom to be used for compensation. */
-  denom_compensation: string;
   /** The compensation amount in USD. */
   base_compensation: string;
   /**
@@ -32,13 +30,23 @@ export type ParamsRevenue = {
    * met, the validator is not rewarded.
    */
   oracle_votes_performance_requirement?: PerformanceRequirement;
-  monthly_payment_schedule_type?: MonthlyPaymentScheduleType;
-  block_based_payment_schedule_type?: BlockBasedPaymentScheduleType;
-  empty_payment_schedule_type?: EmptyPaymentScheduleType;
+  /** Indicates the currently active type of payment schedule. */
+  payment_schedule_type: PaymentScheduleType;
   /** The window in seconds to calculate TWAP price of `base_compensation` */
   twap_window: string; // seconds serrizlized, e.g. '123s'
 };
 
+/**
+ * A model that contains information specific to the currently active payment schedule type. The
+ * oneof implementations define the payment schedule that must be used currently.
+ * This is a module's parameter. It's not updated automatically in runtime in contrast to the
+ * payment schedule which is a state variable, but is updated via MsgUpdateParams.
+ */
+export interface PaymentScheduleType {
+  monthlyPaymentScheduleType?: MonthlyPaymentScheduleType;
+  blockBasedPaymentScheduleType?: BlockBasedPaymentScheduleType;
+  emptyPaymentScheduleType?: EmptyPaymentScheduleType;
+}
 /** Specifies a performance criteria that validators must meet to qualify for network rewards. */
 export interface PerformanceRequirement {
   /**
