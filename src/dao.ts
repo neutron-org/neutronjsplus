@@ -1645,6 +1645,21 @@ export class DaoMember {
     );
   }
 
+  async submitUpdateParamsSlashingProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    message: any, // message built with updateShaslingParamsProposal function
+    amount: string,
+  ): Promise<number> {
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [chainManagerWrapper(chainManagerAddress, message)],
+      amount,
+    );
+  }
+
   /**
    * submitClientUpdateProposal creates proposal which updates client.
    */
