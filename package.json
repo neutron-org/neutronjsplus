@@ -19,7 +19,7 @@
     "@cosmjs/cosmwasm-stargate": "^0.32.4",
     "@cosmjs/proto-signing": "^0.32.4",
     "@cosmjs/stargate": "0.32.4",
-    "@neutron-org/neutronjs": "https://github.com/neutron-org/neutronjs-private.git#1e997db42d98d730a6b1213a46229d12b93d0b53",
+    "@neutron-org/neutronjs": "https://github.com/neutron-org/neutronjs-private.git#1876532063baea8f5007defd9b785cb10763a62e",
     "axios": "1.6.0",
     "bip39": "^3.1.0",
     "long": "^5.2.1",
