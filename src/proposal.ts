@@ -36,6 +36,14 @@ export type ParamsRevenue = {
   twap_window: string; // seconds serrizlized, e.g. '123s'
 };
 
+export type SlashingParams = {
+  signed_blocks_window: string;
+  min_signed_per_window: string;
+  downtime_jail_duration: string;
+  slash_fraction_double_sign: string;
+  slash_fraction_downtime: string;
+};
+
 /**
  * A model that contains information specific to the currently active payment schedule type. The
  * oneof implementations define the payment schedule that must be used currently.
@@ -427,6 +435,22 @@ export const updateRevenueParamsProposal = (params: ParamsRevenue): any => ({
         proposal_execute_message: {
           message: JSON.stringify({
             '@type': '/neutron.revenue.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params,
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateSlashingParamsProposal = (params: SlashingParams): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/cosmos.slashing.v1beta1.MsgUpdateParams',
             authority: ADMIN_MODULE_ADDRESS,
             params,
           }),
