@@ -142,6 +142,7 @@ export type ParamsDexInfo = {
   paused: boolean;
   max_jits_per_block: number;
   good_til_purge_allowance: number;
+  whitelisted_lps: string[];
 };
 
 export type ParamsContractmanagerInfo = {
@@ -641,6 +642,7 @@ export const updateDexParamsProposal = (info: ParamsDexInfo): any => ({
               paused: info.paused,
               max_jits_per_block: info.max_jits_per_block,
               good_til_purge_allowance: info.good_til_purge_allowance,
+              whitelisted_lps: info.whitelisted_lps,
             },
           }),
         },
