@@ -18,8 +18,10 @@ export type PinCodesInfo = {
 };
 
 export type ParamsRevenue = {
-  /** The compensation amount in USD. */
-  base_compensation: string;
+  /** The asset used in revenue payments to validators. */
+  reward_asset: string;
+  /** Quotation of the reward asset. */
+  reward_quote: RewardQuote;
   /**
    * Specifies performance requirements for validators in scope of blocks signing and creation. If
    * not met, the validator is not rewarded.
@@ -34,6 +36,20 @@ export type ParamsRevenue = {
   payment_schedule_type: PaymentScheduleType;
   /** The window in seconds to calculate TWAP price of `base_compensation` */
   twap_window: string; // seconds serrizlized, e.g. '123s'
+};
+
+/** Defines information about the reward quote. */
+export type RewardQuote = {
+  /**
+   * The compensation amount measured in the quote asset. The amount is divided by the price of
+   * the reward asset to determine the base revenue amount.
+   */
+  amount: string;
+  /**
+   * The name of the quote asset. It is used as a quote in price queries to the slinky oracle
+   * module to determine the price of the reward asset.
+   */
+  asset: string;
 };
 
 export type SlashingParams = {
