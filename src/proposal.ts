@@ -17,6 +17,87 @@ export type PinCodesInfo = {
   codes_ids: number[];
 };
 
+export type ParamsRevenue = {
+  /** The asset used in revenue payments to validators. */
+  reward_asset: string;
+  /** Quotation of the reward asset. */
+  reward_quote: RewardQuote;
+  /**
+   * Specifies performance requirements for validators in scope of blocks signing and creation. If
+   * not met, the validator is not rewarded.
+   */
+  blocks_performance_requirement?: PerformanceRequirement;
+  /**
+   * Specifies performance requirements for validators in scope of the oracle price votes. If not
+   * met, the validator is not rewarded.
+   */
+  oracle_votes_performance_requirement?: PerformanceRequirement;
+  /** Indicates the currently active type of payment schedule. */
+  payment_schedule_type: PaymentScheduleType;
+  /** The window in seconds to calculate TWAP price of `base_compensation` */
+  twap_window: string; // seconds serrizlized, e.g. '123s'
+};
+
+/** Defines information about the reward quote. */
+export type RewardQuote = {
+  /**
+   * The compensation amount measured in the quote asset. The amount is divided by the price of
+   * the reward asset to determine the base revenue amount.
+   */
+  amount: string;
+  /**
+   * The name of the quote asset. It is used as a quote in price queries to the slinky oracle
+   * module to determine the price of the reward asset.
+   */
+  asset: string;
+};
+
+export type SlashingParams = {
+  signed_blocks_window: string;
+  min_signed_per_window: string;
+  downtime_jail_duration: string;
+  slash_fraction_double_sign: string;
+  slash_fraction_downtime: string;
+};
+
+/**
+ * A model that contains information specific to the currently active payment schedule type. The
+ * oneof implementations define the payment schedule that must be used currently.
+ * This is a module's parameter. It's not updated automatically in runtime in contrast to the
+ * payment schedule which is a state variable, but is updated via MsgUpdateParams.
+ */
+export interface PaymentScheduleType {
+  monthly_payment_schedule_type?: MonthlyPaymentScheduleType;
+  block_based_payment_schedule_type?: BlockBasedPaymentScheduleType;
+  empty_payment_schedule_type?: EmptyPaymentScheduleType;
+}
+/** Specifies a performance criteria that validators must meet to qualify for network rewards. */
+export interface PerformanceRequirement {
+  /**
+   * The fraction of the total performance a validator can miss without affecting their reward.
+   * Represented as a decimal value in the range [0.0, 1.0], where 1.0 corresponds to 100%.
+   */
+  allowed_to_miss: string;
+  /**
+   * The minimum fraction of the total performance a validator must achieve to be eligible for
+   * network rewards. Validators falling below this threshold will not receive any rewards.
+   * Represented as a decimal value in the range [0.0, 1.0], where 1.0 corresponds to 100%.
+   */
+  required_at_least: string;
+}
+
+export interface MonthlyPaymentScheduleType {}
+/**
+ * Periods defined by a specific number of blocks, with payments made when the required block
+ * count is reached.
+ */
+export interface BlockBasedPaymentScheduleType {
+  /** The number of blocks in a payment period. */
+  blocks_per_period: string;
+}
+/** Endless periods with payments never made. */
+export interface EmptyPaymentScheduleType {}
+
 export type ParamsInterchaintxsInfo = {
   msg_submit_tx_max_messages: number;
 };
@@ -357,6 +438,38 @@ export const unpinCodesProposal = (info: PinCodesInfo): any => ({
             '@type': '/cosmwasm.wasm.v1.MsgUnpinCodes',
             authority: ADMIN_MODULE_ADDRESS,
             code_ids: info.codes_ids,
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateRevenueParamsProposal = (params: ParamsRevenue): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.revenue.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params,
+          }),
+        },
+      },
+    },
+  },
+});
+
+export const updateSlashingParamsProposal = (params: SlashingParams): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/cosmos.slashing.v1beta1.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params,
           }),
         },
       },
