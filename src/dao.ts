@@ -1633,6 +1633,9 @@ export class DaoMember {
     );
   }
 
+  /**
+   * submitUpdateParamsRevenueProposal creates proposal which changes some params of revenue module.
+   */
   async submitUpdateParamsRevenueProposal(
     chainManagerAddress: string,
     title: string,
@@ -1648,6 +1651,9 @@ export class DaoMember {
     );
   }
 
+  /**
+   * submitUpdateParamsSlashingProposal creates proposal which changes some params of slashing module.
+   */
   async submitUpdateParamsSlashingProposal(
     chainManagerAddress: string,
     title: string,
@@ -1663,8 +1669,10 @@ export class DaoMember {
     );
   }
 
+  /**
+   * submitAddToBlacklistProposal creates proposal which adds blacklisted addresses to staking vault contract.
+   */
   async submitAddToBlacklistProposal(
-    dao: DaoMember,
     contractAddress: string,
     title: string,
     description: string,
@@ -1685,7 +1693,7 @@ export class DaoMember {
       },
     };
 
-    return await dao.submitSingleChoiceProposal(
+    return await this.submitSingleChoiceProposal(
       title,
       description,
       [wasmMessage],
@@ -1693,8 +1701,10 @@ export class DaoMember {
     );
   }
 
+  /**
+   * submitRemoveFromBlacklistProposal creates proposal which removes blacklisted addresses from staking vault contract.
+   */
   async submitRemoveFromBlacklistProposal(
-    dao: DaoMember,
     contractAddress: string,
     title: string,
     description: string,
@@ -1715,7 +1725,7 @@ export class DaoMember {
       },
     };
 
-    return await dao.submitSingleChoiceProposal(
+    return await this.submitSingleChoiceProposal(
       title,
       description,
       [wasmMessage],
@@ -1723,8 +1733,10 @@ export class DaoMember {
     );
   }
 
+  /**
+   * submitUpdateParamsStakingProposal creates proposal which changes some params of staking module.
+   */
   async submitUpdateParamsStakingProposal(
-    dao: DaoMember,
     chainManagerAddress: string,
     title: string,
     description: string,
@@ -1747,7 +1759,7 @@ export class DaoMember {
       },
     });
 
-    return await dao.submitSingleChoiceProposal(
+    return await this.submitSingleChoiceProposal(
       title,
       description,
       [message],
