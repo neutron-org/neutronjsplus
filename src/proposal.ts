@@ -947,3 +947,21 @@ export const updateConsensusParamsProposal = (
     },
   },
 });
+
+export type Duration = string;
+
+export type AddToBlacklistInfo = {
+  addresses: string[];
+};
+
+export type RemoveFromBlacklistInfo = {
+  addresses: string[];
+};
+
+export type ParamsStakingInfo = {
+  unbonding_time: Duration;
+  max_validators: string;
+  max_entries: string;
+  historical_entries: string;
+  bond_denom: string;
+};
