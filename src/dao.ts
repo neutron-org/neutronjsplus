@@ -36,6 +36,9 @@ import {
   updateAdminProposal,
   updateConsensusParamsProposal,
   upgradeProposal,
+  AddToBlacklistInfo,
+  RemoveFromBlacklistInfo,
+  ParamsStakingInfo,
 } from './proposal';
 import {
   Contract,
@@ -1630,6 +1633,9 @@ export class DaoMember {
     );
   }
 
+  /**
+   * submitUpdateParamsRevenueProposal creates proposal which changes some params of revenue module.
+   */
   async submitUpdateParamsRevenueProposal(
     chainManagerAddress: string,
     title: string,
@@ -1645,17 +1651,118 @@ export class DaoMember {
     );
   }
 
+  /**
+   * submitUpdateParamsSlashingProposal creates proposal which changes some params of slashing module.
+   */
   async submitUpdateParamsSlashingProposal(
     chainManagerAddress: string,
     title: string,
     description: string,
-    message: any, // message built with updateShaslingParamsProposal function
+    message: any, // message built with updateSlashingParamsProposal function
     amount: string,
   ): Promise<number> {
     return await this.submitSingleChoiceProposal(
       title,
       description,
       [chainManagerWrapper(chainManagerAddress, message)],
+      amount,
+    );
+  }
+
+  /**
+   * submitAddToBlacklistProposal creates proposal which adds blacklisted addresses to staking vault contract.
+   */
+  async submitAddToBlacklistProposal(
+    contractAddress: string,
+    title: string,
+    description: string,
+    blacklist: AddToBlacklistInfo,
+    deposit: string,
+  ): Promise<number> {
+    const wasmMessage = {
+      wasm: {
+        execute: {
+          contract_addr: contractAddress,
+          msg: Buffer.from(
+            JSON.stringify({
+              add_to_blacklist: blacklist,
+            }),
+          ).toString('base64'),
+          funds: [],
+        },
+      },
+    };
+
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [wasmMessage],
+      deposit,
+    );
+  }
+
+  /**
+   * submitRemoveFromBlacklistProposal creates proposal which removes blacklisted addresses from staking vault contract.
+   */
+  async submitRemoveFromBlacklistProposal(
+    contractAddress: string,
+    title: string,
+    description: string,
+    blacklist: RemoveFromBlacklistInfo,
+    deposit: string,
+  ): Promise<number> {
+    const wasmMessage = {
+      wasm: {
+        execute: {
+          contract_addr: contractAddress,
+          msg: Buffer.from(
+            JSON.stringify({
+              remove_from_blacklist: blacklist,
+            }),
+          ).toString('base64'),
+          funds: [],
+        },
+      },
+    };
+
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [wasmMessage],
+      deposit,
+    );
+  }
+
+  /**
+   * submitUpdateParamsStakingProposal creates proposal which changes some params of staking module.
+   */
+  async submitUpdateParamsStakingProposal(
+    chainManagerAddress: string,
+    title: string,
+    description: string,
+    params: ParamsStakingInfo,
+    amount: string,
+  ): Promise<number> {
+    const message = chainManagerWrapper(chainManagerAddress, {
+      custom: {
+        submit_admin_proposal: {
+          admin_proposal: {
+            proposal_execute_message: {
+              message: JSON.stringify({
+                '@type': '/cosmos.staking.v1beta1.MsgUpdateParams',
+                authority: ADMIN_MODULE_ADDRESS,
+                params,
+              }),
+            },
+          },
+        },
+      },
+    });
+
+    return await this.submitSingleChoiceProposal(
+      title,
+      description,
+      [message],
       amount,
     );
   }
