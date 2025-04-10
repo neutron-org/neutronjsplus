@@ -62,6 +62,7 @@ import {
   VotingCw4Module,
   VotingVaultsModule,
 } from './dao_types';
+import { Eip191SigningCosmwasmClient } from './eip191_cosmwasm_client';
 
 export const getVotingModule = async (
   client: CosmWasmClient,
@@ -381,7 +382,7 @@ export class Dao {
 export class DaoMember {
   constructor(
     public dao: Dao,
-    private client: SigningCosmWasmClient,
+    private client: SigningCosmWasmClient | Eip191SigningCosmwasmClient,
     public user: string,
     private denom: string,
   ) {}
