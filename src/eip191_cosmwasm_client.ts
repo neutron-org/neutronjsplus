@@ -204,9 +204,7 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
       throw new Error('no account found');
     }
     const baseAccount = BaseAccount.decode(rawAccount.value);
-    // const accountNumber = uint64FromProto(baseAccount.accountNumber).toNumber();
     const sequence = uint64FromProto(baseAccount.sequence).toNumber();
-    console.log('sequence: ' + sequence.toString());
 
     // const { sequence } = await this.getSequence(signerAddress);
     const rpc = createProtobufRpcClient(this.forceGetQueryClient());
@@ -504,7 +502,6 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
       sequence,
       timeoutHeight,
     );
-    // console.log('SignDoc: \n' + JSON.stringify(signDoc) + '\n');
 
     // Use the EIP-191 signer to sign the document
     const { signature, signed } = await (
@@ -568,7 +565,6 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     // When uploading a contract, the simulation is only 1-2% away from the actual gas usage.
     // So we have a smaller default gas multiplier than signAndBroadcast.
     const usedFee = fee == 'auto' ? 1.1 : fee;
-    console.log('senderAddress: ' + senderAddress);
     const result = await this.signAndBroadcast(
       senderAddress,
       [storeCodeMsg],
