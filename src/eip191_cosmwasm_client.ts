@@ -205,7 +205,7 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
       ...neutronInterchainqueriesTxAmino.AminoConverter,
       ...neutronInterchaintxsV1TxAmino.AminoConverter,
       ...neutronRevenueTxAmino.AminoConverter,
-      ...neutronTransferV1TxAmino.AminoConverter,
+      // ...neutronTransferV1TxAmino.AminoConverter,
       ...feemarketAminoConverters,
       ...gaiaAminoConverters,
       ...ibcAminoConverters,
