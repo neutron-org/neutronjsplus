@@ -53,7 +53,7 @@ import {
   MsgDelegateEncodeObject,
   MsgUndelegateEncodeObject,
   MsgWithdrawDelegatorRewardEncodeObject,
-  AminoConverters,
+  // AminoConverters,
 } from '@cosmjs/stargate';
 import {
   CosmWasmClient,
@@ -92,6 +92,13 @@ import {
 import { MsgWithdrawDelegatorReward } from 'cosmjs-types/cosmos/distribution/v1beta1/tx';
 import { Eip191Signer, isEip191Signer } from './eip191';
 import { neutronAminoConverters } from '@neutron-org/neutronjs/neutron/client';
+import { cosmosAminoConverters } from '@neutron-org/neutronjs/cosmos/client';
+import { gaiaAminoConverters } from '@neutron-org/neutronjs/gaia/client';
+import { feemarketAminoConverters } from '@neutron-org/neutronjs/feemarket/client';
+import { ibcAminoConverters } from '@neutron-org/neutronjs/ibc/client';
+import { osmosisAminoConverters } from '@neutron-org/neutronjs/osmosis/client';
+import { sdkAminoConverters } from '@neutron-org/neutronjs/sdk/client';
+import { slinkyAminoConverters } from '@neutron-org/neutronjs/slinky/client';
 
 /**
  * Signing information for a single signer that is not included in the transaction.
@@ -102,10 +109,6 @@ export interface SignerData {
   readonly accountNumber: number;
   readonly sequence: number;
   readonly chainId: string;
-}
-
-function createNeutronAminoConverters(): AminoConverters {
-  return neutronAminoConverters;
 }
 
 export class Eip191SigningCosmwasmClient extends CosmWasmClient {
@@ -179,7 +182,14 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
       aminoTypes = new AminoTypes({
         ...createDefaultAminoConverters(),
         ...createWasmAminoConverters(),
-        ...createNeutronAminoConverters(),
+        ...neutronAminoConverters,
+        ...cosmosAminoConverters,
+        ...feemarketAminoConverters,
+        ...gaiaAminoConverters,
+        ...ibcAminoConverters,
+        ...osmosisAminoConverters,
+        ...sdkAminoConverters,
+        ...slinkyAminoConverters,
       }),
     } = options;
     this.registry = registry;
