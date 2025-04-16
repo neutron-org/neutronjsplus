@@ -1028,9 +1028,9 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@neutron-org/neutronjs@https://github.com/neutron-org/neutronjs.git#14e43e554cf55b8e3611d6a4f804c92f546b7f8e":
+"@neutron-org/neutronjs@https://github.com/neutron-org/neutronjs.git#7a819b9ffe8f0f24ec015bd3a5605917c6a63ddf":
   version "4.2.0"
-  resolved "https://github.com/neutron-org/neutronjs.git#14e43e554cf55b8e3611d6a4f804c92f546b7f8e"
+  resolved "https://github.com/neutron-org/neutronjs.git#7a819b9ffe8f0f24ec015bd3a5605917c6a63ddf"
 
 "@noble/curves@1.4.2", "@noble/curves@~1.4.0":
   version "1.4.2"
