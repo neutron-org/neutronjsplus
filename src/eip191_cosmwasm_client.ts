@@ -3,7 +3,6 @@ import {
   makeSignDoc as makeSignDocAmino,
   OfflineAminoSigner,
   StdFee,
-  // Pubkey as AminoPubkey,
 } from '@cosmjs/amino';
 import { AuthInfo, Fee, Tx, TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { fromBase64, toUtf8 } from '@cosmjs/encoding';
@@ -54,6 +53,7 @@ import {
   MsgDelegateEncodeObject,
   MsgUndelegateEncodeObject,
   MsgWithdrawDelegatorRewardEncodeObject,
+  AminoConverters,
 } from '@cosmjs/stargate';
 import {
   CosmWasmClient,
@@ -91,6 +91,7 @@ import {
 } from '@neutron-org/neutronjs/cosmos/staking/v1beta1/tx';
 import { MsgWithdrawDelegatorReward } from 'cosmjs-types/cosmos/distribution/v1beta1/tx';
 import { Eip191Signer, isEip191Signer } from './eip191';
+import { neutronAminoConverters } from '@neutron-org/neutronjs/neutron/client';
 
 /**
  * Signing information for a single signer that is not included in the transaction.
@@ -101,6 +102,10 @@ export interface SignerData {
   readonly accountNumber: number;
   readonly sequence: number;
   readonly chainId: string;
+}
+
+function createNeutronAminoConverters(): AminoConverters {
+  return neutronAminoConverters;
 }
 
 export class Eip191SigningCosmwasmClient extends CosmWasmClient {
@@ -174,6 +179,7 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
       aminoTypes = new AminoTypes({
         ...createDefaultAminoConverters(),
         ...createWasmAminoConverters(),
+        ...createNeutronAminoConverters(),
       }),
     } = options;
     this.registry = registry;
