@@ -153,7 +153,7 @@ export type ParamsCronInfo = {
 };
 
 export type ParamsDexInfo = {
-  fee_tiers: number[];
+  fee_tiers: (string | number)[];
   paused: boolean;
   max_jits_per_block: number;
   good_til_purge_allowance: number;
