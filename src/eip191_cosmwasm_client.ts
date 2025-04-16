@@ -91,7 +91,7 @@ import {
 } from '@neutron-org/neutronjs/cosmos/staking/v1beta1/tx';
 import { MsgWithdrawDelegatorReward } from 'cosmjs-types/cosmos/distribution/v1beta1/tx';
 import { Eip191Signer, isEip191Signer } from './eip191';
-import { neutronAminoConverters } from '@neutron-org/neutronjs/neutron/client';
+// import { neutronAminoConverters } from '@neutron-org/neutronjs/neutron/client';
 import { cosmosAminoConverters } from '@neutron-org/neutronjs/cosmos/client';
 import { gaiaAminoConverters } from '@neutron-org/neutronjs/gaia/client';
 import { feemarketAminoConverters } from '@neutron-org/neutronjs/feemarket/client';
@@ -99,18 +99,18 @@ import { ibcAminoConverters } from '@neutron-org/neutronjs/ibc/client';
 import { osmosisAminoConverters } from '@neutron-org/neutronjs/osmosis/client';
 import { sdkAminoConverters } from '@neutron-org/neutronjs/sdk/client';
 import { slinkyAminoConverters } from '@neutron-org/neutronjs/slinky/client';
-import * as neutronContractmanagerTxAmino from '@neutron-org/neutronjs/src/neutron/contractmanager/tx.amino';
-import * as neutronCronTxAmino from '@neutron-org/neutronjs/src/neutron/cron/tx.amino';
-import * as neutronDexTxAmino from '@neutron-org/neutronjs/src/neutron/dex/tx.amino';
-import * as neutronDynamicfeesV1TxAmino from '@neutron-org/neutronjs/src/neutron/dynamicfees/v1/tx.amino';
-import * as neutronFeeburnerTxAmino from '@neutron-org/neutronjs/src/neutron/feeburner/tx.amino';
-import * as neutronFeerefunderTxAmino from '@neutron-org/neutronjs/src/neutron/feerefunder/tx.amino';
-import * as neutronHarpoonTxAmino from '@neutron-org/neutronjs/src/neutron/harpoon/tx.amino';
-import * as neutronIbcratelimitV1beta1TxAmino from '@neutron-org/neutronjs/src/neutron/ibcratelimit/v1beta1/tx.amino';
-import * as neutronInterchainqueriesTxAmino from '@neutron-org/neutronjs/src/neutron/interchainqueries/tx.amino';
-import * as neutronInterchaintxsV1TxAmino from '@neutron-org/neutronjs/src/neutron/interchaintxs/v1/tx.amino';
-import * as neutronRevenueTxAmino from '@neutron-org/neutronjs/src/neutron/revenue/tx.amino';
-import * as neutronTransferV1TxAmino from '@neutron-org/neutronjs/src/neutron/transfer/v1/tx.amino';
+import * as neutronContractmanagerTxAmino from '@neutron-org/neutronjs/neutron/contractmanager/tx.amino';
+import * as neutronCronTxAmino from '@neutron-org/neutronjs/neutron/cron/tx.amino';
+import * as neutronDexTxAmino from '@neutron-org/neutronjs/neutron/dex/tx.amino';
+import * as neutronDynamicfeesV1TxAmino from '@neutron-org/neutronjs/neutron/dynamicfees/v1/tx.amino';
+import * as neutronFeeburnerTxAmino from '@neutron-org/neutronjs/neutron/feeburner/tx.amino';
+import * as neutronFeerefunderTxAmino from '@neutron-org/neutronjs/neutron/feerefunder/tx.amino';
+import * as neutronHarpoonTxAmino from '@neutron-org/neutronjs/neutron/harpoon/tx.amino';
+import * as neutronIbcratelimitV1beta1TxAmino from '@neutron-org/neutronjs/neutron/ibcratelimit/v1beta1/tx.amino';
+import * as neutronInterchainqueriesTxAmino from '@neutron-org/neutronjs/neutron/interchainqueries/tx.amino';
+import * as neutronInterchaintxsV1TxAmino from '@neutron-org/neutronjs/neutron/interchaintxs/v1/tx.amino';
+import * as neutronRevenueTxAmino from '@neutron-org/neutronjs/neutron/revenue/tx.amino';
+import * as neutronTransferV1TxAmino from '@neutron-org/neutronjs/neutron/transfer/v1/tx.amino';
 
 /**
  * Signing information for a single signer that is not included in the transaction.
