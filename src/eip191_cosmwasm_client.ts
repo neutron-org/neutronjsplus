@@ -99,6 +99,18 @@ import { ibcAminoConverters } from '@neutron-org/neutronjs/ibc/client';
 import { osmosisAminoConverters } from '@neutron-org/neutronjs/osmosis/client';
 import { sdkAminoConverters } from '@neutron-org/neutronjs/sdk/client';
 import { slinkyAminoConverters } from '@neutron-org/neutronjs/slinky/client';
+import * as neutronContractmanagerTxAmino from '@neutron-org/neutronjs/src/neutron/contractmanager/tx.amino';
+import * as neutronCronTxAmino from '@neutron-org/neutronjs/src/neutron/cron/tx.amino';
+import * as neutronDexTxAmino from '@neutron-org/neutronjs/src/neutron/dex/tx.amino';
+import * as neutronDynamicfeesV1TxAmino from '@neutron-org/neutronjs/src/neutron/dynamicfees/v1/tx.amino';
+import * as neutronFeeburnerTxAmino from '@neutron-org/neutronjs/src/neutron/feeburner/tx.amino';
+import * as neutronFeerefunderTxAmino from '@neutron-org/neutronjs/src/neutron/feerefunder/tx.amino';
+import * as neutronHarpoonTxAmino from '@neutron-org/neutronjs/src/neutron/harpoon/tx.amino';
+import * as neutronIbcratelimitV1beta1TxAmino from '@neutron-org/neutronjs/src/neutron/ibcratelimit/v1beta1/tx.amino';
+import * as neutronInterchainqueriesTxAmino from '@neutron-org/neutronjs/src/neutron/interchainqueries/tx.amino';
+import * as neutronInterchaintxsV1TxAmino from '@neutron-org/neutronjs/src/neutron/interchaintxs/v1/tx.amino';
+import * as neutronRevenueTxAmino from '@neutron-org/neutronjs/src/neutron/revenue/tx.amino';
+import * as neutronTransferV1TxAmino from '@neutron-org/neutronjs/src/neutron/transfer/v1/tx.amino';
 
 /**
  * Signing information for a single signer that is not included in the transaction.
@@ -177,20 +189,36 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     options: SigningStargateClientOptions,
   ) {
     super(cometClient);
+    const aminoConverters = {
+      ...createDefaultAminoConverters(),
+      ...createWasmAminoConverters(),
+      ...cosmosAminoConverters,
+      // ...neutronAminoConverters,
+      ...neutronContractmanagerTxAmino.AminoConverter,
+      ...neutronCronTxAmino.AminoConverter,
+      ...neutronDexTxAmino.AminoConverter,
+      ...neutronDynamicfeesV1TxAmino.AminoConverter,
+      ...neutronFeeburnerTxAmino.AminoConverter,
+      ...neutronFeerefunderTxAmino.AminoConverter,
+      ...neutronHarpoonTxAmino.AminoConverter,
+      ...neutronIbcratelimitV1beta1TxAmino.AminoConverter,
+      ...neutronInterchainqueriesTxAmino.AminoConverter,
+      ...neutronInterchaintxsV1TxAmino.AminoConverter,
+      ...neutronRevenueTxAmino.AminoConverter,
+      ...neutronTransferV1TxAmino.AminoConverter,
+      ...feemarketAminoConverters,
+      ...gaiaAminoConverters,
+      ...ibcAminoConverters,
+      ...osmosisAminoConverters,
+      ...sdkAminoConverters,
+      ...slinkyAminoConverters,
+    };
+    console.log(
+      'amino converters: \n ' + JSON.stringify(Object.keys(aminoConverters)),
+    );
     const {
       registry = new Registry(defaultRegistryTypes),
-      aminoTypes = new AminoTypes({
-        ...createDefaultAminoConverters(),
-        ...createWasmAminoConverters(),
-        ...neutronAminoConverters,
-        ...cosmosAminoConverters,
-        ...feemarketAminoConverters,
-        ...gaiaAminoConverters,
-        ...ibcAminoConverters,
-        ...osmosisAminoConverters,
-        ...sdkAminoConverters,
-        ...slinkyAminoConverters,
-      }),
+      aminoTypes = new AminoTypes(aminoConverters),
     } = options;
     this.registry = registry;
     this.aminoTypes = aminoTypes;
