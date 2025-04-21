@@ -39,7 +39,6 @@ import { ChangeAdminResult } from '@cosmjs/cosmwasm-stargate/build/signingcosmwa
 import {
   AminoTypes,
   calculateFee,
-  createDefaultAminoConverters,
   defaultRegistryTypes,
   DeliverTxResponse,
   GasPrice,
@@ -54,11 +53,9 @@ import {
   MsgDelegateEncodeObject,
   MsgUndelegateEncodeObject,
   MsgWithdrawDelegatorRewardEncodeObject,
-  // AminoConverters,
 } from '@cosmjs/stargate';
 import {
   CosmWasmClient,
-  createWasmAminoConverters,
   ExecuteInstruction,
   ExecuteResult,
   InstantiateOptions,
@@ -92,26 +89,7 @@ import {
 } from '@neutron-org/neutronjs/cosmos/staking/v1beta1/tx';
 import { MsgWithdrawDelegatorReward } from 'cosmjs-types/cosmos/distribution/v1beta1/tx';
 import { Eip191Signer, isEip191Signer } from './eip191';
-// import { neutronAminoConverters } from '@neutron-org/neutronjs/neutron/client';
-import { cosmosAminoConverters } from '@neutron-org/neutronjs/cosmos/client';
-import { gaiaAminoConverters } from '@neutron-org/neutronjs/gaia/client';
-import { feemarketAminoConverters } from '@neutron-org/neutronjs/feemarket/client';
-import { ibcAminoConverters } from '@neutron-org/neutronjs/ibc/client';
-import { osmosisAminoConverters } from '@neutron-org/neutronjs/osmosis/client';
-import { sdkAminoConverters } from '@neutron-org/neutronjs/sdk/client';
-import { slinkyAminoConverters } from '@neutron-org/neutronjs/slinky/client';
-import * as neutronContractmanagerTxAmino from '@neutron-org/neutronjs/neutron/contractmanager/tx.amino';
-import * as neutronCronTxAmino from '@neutron-org/neutronjs/neutron/cron/tx.amino';
-import * as neutronDexTxAmino from '@neutron-org/neutronjs/neutron/dex/tx.amino';
-import * as neutronDynamicfeesV1TxAmino from '@neutron-org/neutronjs/neutron/dynamicfees/v1/tx.amino';
-import * as neutronFeeburnerTxAmino from '@neutron-org/neutronjs/neutron/feeburner/tx.amino';
-import * as neutronFeerefunderTxAmino from '@neutron-org/neutronjs/neutron/feerefunder/tx.amino';
-import * as neutronHarpoonTxAmino from '@neutron-org/neutronjs/neutron/harpoon/tx.amino';
-import * as neutronIbcratelimitV1beta1TxAmino from '@neutron-org/neutronjs/neutron/ibcratelimit/v1beta1/tx.amino';
-import * as neutronInterchainqueriesTxAmino from '@neutron-org/neutronjs/neutron/interchainqueries/tx.amino';
-import * as neutronInterchaintxsV1TxAmino from '@neutron-org/neutronjs/neutron/interchaintxs/v1/tx.amino';
-import * as neutronRevenueTxAmino from '@neutron-org/neutronjs/neutron/revenue/tx.amino';
-// import * as neutronTransferV1TxAmino from '@neutron-org/neutronjs/neutron/transfer/v1/tx.amino';
+import { aminoConverters } from './amino';
 
 /**
  * Signing information for a single signer that is not included in the transaction.
@@ -190,30 +168,7 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     options: SigningStargateClientOptions,
   ) {
     super(cometClient);
-    const aminoConverters = {
-      ...createDefaultAminoConverters(),
-      ...createWasmAminoConverters(),
-      ...cosmosAminoConverters,
-      // ...neutronAminoConverters,
-      ...neutronContractmanagerTxAmino.AminoConverter,
-      ...neutronCronTxAmino.AminoConverter,
-      ...neutronDexTxAmino.AminoConverter,
-      ...neutronDynamicfeesV1TxAmino.AminoConverter,
-      ...neutronFeeburnerTxAmino.AminoConverter,
-      ...neutronFeerefunderTxAmino.AminoConverter,
-      ...neutronHarpoonTxAmino.AminoConverter,
-      ...neutronIbcratelimitV1beta1TxAmino.AminoConverter,
-      ...neutronInterchainqueriesTxAmino.AminoConverter,
-      ...neutronInterchaintxsV1TxAmino.AminoConverter,
-      ...neutronRevenueTxAmino.AminoConverter,
-      // ...neutronTransferV1TxAmino.AminoConverter,
-      ...feemarketAminoConverters,
-      ...gaiaAminoConverters,
-      ...ibcAminoConverters,
-      ...osmosisAminoConverters,
-      ...sdkAminoConverters,
-      ...slinkyAminoConverters,
-    };
+
     console.log(
       'amino converters: \n ' + JSON.stringify(Object.keys(aminoConverters)),
     );
@@ -227,6 +182,10 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     this.broadcastTimeoutMs = options.broadcastTimeoutMs;
     this.broadcastPollIntervalMs = options.broadcastPollIntervalMs;
     this.gasPrice = options.gasPrice;
+  }
+
+  public getAminoTypes(): AminoTypes {
+    return this.aminoTypes;
   }
 
   public async simulate(
@@ -381,6 +340,7 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     }
 
     if (isEip191Signer(this.signer)) {
+      console.log('sign eip191');
       return this.signEip191(
         signerAddress,
         messages,
@@ -477,6 +437,7 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     { accountNumber, sequence, chainId }: SignerData,
     timeoutHeight?: bigint,
   ): Promise<TxRaw> {
+    console.log('signDirect');
     assert(isOfflineDirectSigner(this.signer as OfflineSigner));
     const accountFromSigner = (await this.signer.getAccounts()).find(
       (account) => account.address === signerAddress,
