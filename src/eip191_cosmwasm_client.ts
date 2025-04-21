@@ -10,6 +10,7 @@ import { Int53, Uint53 } from '@cosmjs/math';
 import { PubKey } from '@neutron-org/neutronjs/neutron/crypto/v1beta1/ethsecp256k1/keys';
 import { Any } from 'cosmjs-types/google/protobuf/any';
 import { Uint64 } from '@cosmjs/math';
+import pako from 'pako';
 import {
   ServiceClientImpl,
   SimulateRequest,
@@ -110,7 +111,7 @@ import * as neutronIbcratelimitV1beta1TxAmino from '@neutron-org/neutronjs/neutr
 import * as neutronInterchainqueriesTxAmino from '@neutron-org/neutronjs/neutron/interchainqueries/tx.amino';
 import * as neutronInterchaintxsV1TxAmino from '@neutron-org/neutronjs/neutron/interchaintxs/v1/tx.amino';
 import * as neutronRevenueTxAmino from '@neutron-org/neutronjs/neutron/revenue/tx.amino';
-import * as neutronTransferV1TxAmino from '@neutron-org/neutronjs/neutron/transfer/v1/tx.amino';
+// import * as neutronTransferV1TxAmino from '@neutron-org/neutronjs/neutron/transfer/v1/tx.amino';
 
 /**
  * Signing information for a single signer that is not included in the transaction.
@@ -208,7 +209,7 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
       // ...neutronTransferV1TxAmino.AminoConverter,
       ...feemarketAminoConverters,
       ...gaiaAminoConverters,
-      // ...ibcAminoConverters,
+      ...ibcAminoConverters,
       ...osmosisAminoConverters,
       ...sdkAminoConverters,
       ...slinkyAminoConverters,
@@ -594,14 +595,12 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     memo = '',
     instantiatePermission?: AccessConfig,
   ): Promise<UploadResult> {
-    // TODO: fix
-    // const compressed = pako.gzip(wasmCode, { level: 9 });
+    const compressed = pako.gzip(wasmCode, { level: 9 });
     const storeCodeMsg: MsgStoreCodeEncodeObject = {
       typeUrl: '/cosmwasm.wasm.v1.MsgStoreCode',
       value: MsgStoreCode.fromPartial({
         sender: senderAddress,
-        // wasmByteCode: compressed,
-        wasmByteCode: wasmCode,
+        wasmByteCode: compressed,
         instantiatePermission,
       }),
     };
