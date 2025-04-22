@@ -319,7 +319,6 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     if (explicitSignerData) {
       signerData = explicitSignerData;
     } else {
-      // const { accountNumber, sequence } = await this.getSequence(signerAddress);
       const rawAccount = await this.forceGetQueryClient().auth.account(
         signerAddress,
       );
