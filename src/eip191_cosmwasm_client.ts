@@ -209,6 +209,7 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     }
     const baseAccount = BaseAccount.decode(rawAccount.value);
     const sequence = uint64FromProto(baseAccount.sequence).toNumber();
+    console.log('simulate sequence: ', sequence);
 
     // const { sequence } = await this.getSequence(signerAddress);
     const rpc = createProtobufRpcClient(this.forceGetQueryClient());
@@ -330,6 +331,7 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
         baseAccount.accountNumber,
       ).toNumber();
       const sequence = uint64FromProto(baseAccount.sequence).toNumber();
+      console.log('sign sequence: ' + sequence);
       const chainId = await this.getChainId();
       signerData = {
         accountNumber: accountNumber,

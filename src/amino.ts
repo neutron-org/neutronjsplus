@@ -39,6 +39,7 @@ export const aminoConverters = {
   ...neutronTransferV1TxAmino.AminoConverter,
   ...feemarketAminoConverters,
   ...gaiaAminoConverters,
+  // this fails converting
   // ...ibcAminoConverters,
   ...osmosisAminoConverters,
   ...sdkAminoConverters,
