@@ -14,11 +14,11 @@ import * as neutronInterchaintxsV1TxAmino from '@neutron-org/neutronjs/neutron/i
 import * as neutronRevenueTxAmino from '@neutron-org/neutronjs/neutron/revenue/tx.amino';
 import { feemarketAminoConverters } from '@neutron-org/neutronjs/feemarket/client';
 import { gaiaAminoConverters } from '@neutron-org/neutronjs/gaia/client';
-import { ibcAminoConverters } from '@neutron-org/neutronjs/ibc/client';
+// import { ibcAminoConverters } from '@neutron-org/neutronjs/ibc/client';
 import { osmosisAminoConverters } from '@neutron-org/neutronjs/osmosis/client';
 import { sdkAminoConverters } from '@neutron-org/neutronjs/sdk/client';
 import { slinkyAminoConverters } from '@neutron-org/neutronjs/slinky/client';
-// import * as neutronTransferV1TxAmino from '@neutron-org/neutronjs/neutron/transfer/v1/tx.amino';
+import * as neutronTransferV1TxAmino from '@neutron-org/neutronjs/neutron/transfer/v1/tx.amino';
 
 export const aminoConverters = {
   ...createDefaultAminoConverters(),
@@ -36,10 +36,10 @@ export const aminoConverters = {
   ...neutronInterchainqueriesTxAmino.AminoConverter,
   ...neutronInterchaintxsV1TxAmino.AminoConverter,
   ...neutronRevenueTxAmino.AminoConverter,
-  // ...neutronTransferV1TxAmino.AminoConverter,
+  ...neutronTransferV1TxAmino.AminoConverter,
   ...feemarketAminoConverters,
   ...gaiaAminoConverters,
-  ...ibcAminoConverters,
+  // ...ibcAminoConverters,
   ...osmosisAminoConverters,
   ...sdkAminoConverters,
   ...slinkyAminoConverters,
