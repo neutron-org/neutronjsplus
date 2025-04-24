@@ -6,6 +6,8 @@ import { StdSignDoc } from '@cosmjs/amino/build/signdoc';
  */
 export interface Eip191Signer {
   getAccounts(): Promise<readonly AccountData[]>;
+  // Signs given signDoc using eip191 signature.
+  // If you rename this function, fix isEip191Signer function as well.
   signEip191(
     signerAddress: string,
     signDoc: StdSignDoc,
@@ -20,25 +22,3 @@ export function isEip191Signer(
 ): signer is OfflineSigner | Eip191Signer {
   return 'signEip191' in signer;
 }
-
-// TODO: do we need this in here?
-// import { SDKProvider } from '@metamask/sdk';
-//
-// // Metamask implementation of Eip191 signer
-// export class MetamaskEip191Signer implements Eip191Signer {
-//   constructor(private readonly ext: SDKProvider) {
-//     // TODO
-//   }
-//
-//   getAccounts(): Promise<readonly AccountData[]> {
-//     // TODO
-//     throw new Error('Method not implemented.');
-//   }
-//   signEip191(
-//     _signerAddress: string,
-//     _signDoc: StdSignDoc,
-//   ): Promise<{ signature: { signature: Buffer }; signed: any }> {
-//     // TODO
-//     throw new Error('Method not implemented.');
-//   }
-// }

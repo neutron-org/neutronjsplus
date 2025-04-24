@@ -169,9 +169,6 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
   ) {
     super(cometClient);
 
-    console.log(
-      'amino converters: \n ' + JSON.stringify(Object.keys(aminoConverters)),
-    );
     const {
       registry = new Registry(defaultRegistryTypes),
       aminoTypes = new AminoTypes(aminoConverters),
@@ -209,9 +206,6 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     }
     const baseAccount = BaseAccount.decode(rawAccount.value);
     const sequence = uint64FromProto(baseAccount.sequence).toNumber();
-    console.log('simulate sequence: ', sequence);
-
-    // const { sequence } = await this.getSequence(signerAddress);
     const rpc = createProtobufRpcClient(this.forceGetQueryClient());
     const { gasInfo } = await simulate(rpc, anyMsgs, memo, pubkey, sequence);
     assertDefined(gasInfo);
@@ -302,7 +296,8 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
    * Gets account number and sequence from the API, creates a sign doc,
    * creates a single signature and assembles the signed transaction.
    *
-   * The sign mode (SIGN_MODE_DIRECT or SIGN_MODE_LEGACY_AMINO_JSON) is determined by this client's signer.
+   * The sign mode (SIGN_MODE_DIRECT, SIGN_MODE_LEGACY_AMINO_JSON or SIGN_MODE_EIP_191)
+   * is determined by this client's signer.
    *
    * You can pass signer data (account number, sequence and chain ID) explicitly instead of querying them
    * from the chain. This is needed when signing for a multisig account, but it also allows for offline signing
@@ -331,7 +326,6 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
         baseAccount.accountNumber,
       ).toNumber();
       const sequence = uint64FromProto(baseAccount.sequence).toNumber();
-      console.log('sign sequence: ' + sequence);
       const chainId = await this.getChainId();
       signerData = {
         accountNumber: accountNumber,
@@ -341,7 +335,6 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     }
 
     if (isEip191Signer(this.signer)) {
-      console.log('sign eip191');
       return this.signEip191(
         signerAddress,
         messages,
@@ -438,7 +431,6 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     { accountNumber, sequence, chainId }: SignerData,
     timeoutHeight?: bigint,
   ): Promise<TxRaw> {
-    console.log('signDirect');
     assert(isOfflineDirectSigner(this.signer as OfflineSigner));
     const accountFromSigner = (await this.signer.getAccounts()).find(
       (account) => account.address === signerAddress,

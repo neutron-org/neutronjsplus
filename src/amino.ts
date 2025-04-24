@@ -1,4 +1,7 @@
-import { createDefaultAminoConverters } from '@cosmjs/stargate';
+import {
+  AminoConverters,
+  createDefaultAminoConverters,
+} from '@cosmjs/stargate';
 import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
 import { cosmosAminoConverters } from '@neutron-org/neutronjs/cosmos/client';
 import * as neutronContractmanagerTxAmino from '@neutron-org/neutronjs/neutron/contractmanager/tx.amino';
