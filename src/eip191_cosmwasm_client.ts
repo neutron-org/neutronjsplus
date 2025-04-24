@@ -88,7 +88,7 @@ import {
   MsgUndelegate,
 } from '@neutron-org/neutronjs/cosmos/staking/v1beta1/tx';
 import { MsgWithdrawDelegatorReward } from 'cosmjs-types/cosmos/distribution/v1beta1/tx';
-import { Eip191Signer, isEip191Signer } from './eip191';
+import { Eip191Signer, isEip191Signer } from './eip191_signer';
 import { aminoConverters } from './amino';
 
 /**
