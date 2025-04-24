@@ -102,13 +102,15 @@ export interface SignerData {
   readonly chainId: string;
 }
 
+// Eip191SigningCosmwasmClient has the same interface as SigningCosmWasmClient from cosmjs.
+// It is mostly a copypaste of one with modified sign method that allows
+// for SIGN_MODE_EIP_191 to be used with the Neutron chain.
 export class Eip191SigningCosmwasmClient extends CosmWasmClient {
   public readonly registry: Registry;
   public readonly broadcastTimeoutMs: number | undefined;
   public readonly broadcastPollIntervalMs: number | undefined;
   private readonly signer: OfflineSigner | Eip191Signer;
 
-  // private readonly signer: OfflineSigner | Eip191Signer;
   private readonly aminoTypes: AminoTypes;
   private readonly gasPrice: GasPrice | undefined;
   // Starting with Cosmos SDK 0.47, we see many cases in which 1.3 is not enough anymore
@@ -179,10 +181,6 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     this.broadcastTimeoutMs = options.broadcastTimeoutMs;
     this.broadcastPollIntervalMs = options.broadcastPollIntervalMs;
     this.gasPrice = options.gasPrice;
-  }
-
-  public getAminoTypes(): AminoTypes {
-    return this.aminoTypes;
   }
 
   public async simulate(
