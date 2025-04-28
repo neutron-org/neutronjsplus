@@ -123,6 +123,7 @@ export type ParamsTokenfactoryInfo = {
   denom_creation_gas_consume: number;
   fee_collector_address: string;
   whitelisted_hooks: WhitelistedHook[];
+  track_before_send_gas_limit: number;
 };
 
 export type ParamsFeeburnerInfo = {
@@ -534,6 +535,7 @@ export const updateTokenfactoryParamsProposal = (
               denom_creation_gas_consume: info.denom_creation_gas_consume,
               fee_collector_address: info.fee_collector_address,
               whitelisted_hooks: info.whitelisted_hooks,
+              track_before_send_gas_limit: info.track_before_send_gas_limit,
             },
           }),
         },
