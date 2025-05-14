@@ -63,8 +63,6 @@ import {
   VotingVaultsModule,
 } from './dao_types';
 
-import { ConsumerParams } from '@neutron-org/neutronjs/interchain_security/ccv/v1/shared_consumer';
-
 export const getVotingModule = async (
   client: CosmWasmClient,
   daoAddress: string,
@@ -1405,27 +1403,6 @@ export class DaoMember {
     title: string,
     description: string,
     message: ParamsGlobalfeeInfo,
-    amount: string,
-    fee = {
-      gas: '4000000',
-      amount: [{ denom: this.denom, amount: '10000' }],
-    },
-  ): Promise<number> {
-    return await this.submitSingleChoiceProposal(
-      title,
-      description,
-      [chainManagerWrapper(chainManagerAddress, message)],
-      amount,
-      'single',
-      fee,
-    );
-  }
-
-  async submitUpdateParamsConsumerProposal(
-    chainManagerAddress: string,
-    title: string,
-    description: string,
-    message: ConsumerParams,
     amount: string,
     fee = {
       gas: '4000000',
