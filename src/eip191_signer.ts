@@ -13,12 +13,3 @@ export interface Eip191Signer {
     signDoc: StdSignDoc,
   ): Promise<{ signature: { signature: Buffer }; signed: any }>;
 }
-
-/**
- * Type guard to check if a signer is an EIP-191 signer
- */
-export function isEip191Signer(
-  signer: OfflineSigner | Eip191Signer,
-): signer is OfflineSigner | Eip191Signer {
-  return 'signEip191' in signer;
-}
