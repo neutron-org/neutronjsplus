@@ -50,6 +50,7 @@ import {
   MsgDelegateEncodeObject,
   MsgUndelegateEncodeObject,
   MsgWithdrawDelegatorRewardEncodeObject,
+  AminoTypes,
 } from '@cosmjs/stargate';
 import {
   CosmWasmClient,
@@ -687,7 +688,11 @@ export class SigningNeutronClient extends CosmWasmClient {
 }
 
 export class AminoSignerAdapter implements SignerAdapter {
-  constructor(private signer, private aminoTypes, private registry) {}
+  constructor(
+    private signer: OfflineAminoSigner,
+    private aminoTypes: AminoTypes,
+    private registry: Registry,
+  ) {}
 
   async sign(
     signerAddress: string,
@@ -754,7 +759,10 @@ export class AminoSignerAdapter implements SignerAdapter {
 }
 
 export class DirectSignerAdapter implements SignerAdapter {
-  constructor(private signer, private aminoTypes, private registry) {}
+  constructor(
+    private signer: OfflineDirectSigner,
+    private registry: Registry,
+  ) {}
 
   async sign(
     signerAddress: string,
@@ -788,9 +796,10 @@ export class DirectSignerAdapter implements SignerAdapter {
       chainId,
       accountNumber,
     );
-    const { signature, signed } = await (
-      this.signer as OfflineDirectSigner
-    ).signDirect(signerAddress, signDoc);
+    const { signature, signed } = await this.signer.signDirect(
+      signerAddress,
+      signDoc,
+    );
     return TxRaw.fromPartial({
       bodyBytes: signed.bodyBytes,
       authInfoBytes: signed.authInfoBytes,
@@ -815,8 +824,8 @@ export class DirectSignerAdapter implements SignerAdapter {
 export class Eip191SignerAdapter implements SignerAdapter {
   constructor(
     private signer: Eip191Signer,
-    private aminoTypes,
-    private registry,
+    private aminoTypes: AminoTypes,
+    private registry: Registry,
   ) {}
 
   async sign(
