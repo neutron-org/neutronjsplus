@@ -1,4 +1,4 @@
-import { AccountData, OfflineSigner } from '@cosmjs/proto-signing';
+import { AccountData } from '@cosmjs/proto-signing';
 import { StdSignDoc } from '@cosmjs/amino/build/signdoc';
 
 /**

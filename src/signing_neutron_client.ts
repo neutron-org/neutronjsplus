@@ -21,7 +21,6 @@ import {
   makeAuthInfoBytes,
   makeSignDoc,
   OfflineDirectSigner,
-  OfflineSigner,
   Registry,
   TxBodyEncodeObject,
 } from '@cosmjs/proto-signing';
@@ -111,213 +110,12 @@ export interface SignerAdapter {
   getPubKey(signer: string): Promise<Any>;
 }
 
-export class AminoSignerAdapter implements SignerAdapter {
-  constructor(private signer, private aminoTypes, private registry) {}
-
-  async sign(
-    signerAddress: string,
-    messages: readonly EncodeObject[],
-    fee: StdFee,
-    memo: string,
-    { accountNumber, sequence, chainId }: SignerData,
-    timeoutHeight?: bigint,
-  ): Promise<TxRaw> {
-    const pubkey = await this.getPubKey(signerAddress);
-    const signMode = SignMode.SIGN_MODE_LEGACY_AMINO_JSON;
-    const msgs = messages.map((msg) => this.aminoTypes.toAmino(msg));
-    const signDoc = makeSignDocAmino(
-      msgs,
-      fee,
-      chainId,
-      memo,
-      accountNumber,
-      sequence,
-      timeoutHeight,
-    );
-    const { signature, signed } = await (
-      this.signer as OfflineAminoSigner
-    ).signAmino(signerAddress, signDoc);
-    const signedTxBody = {
-      messages: signed.msgs.map((msg) => this.aminoTypes.fromAmino(msg)),
-      memo: signed.memo,
-      timeoutHeight: timeoutHeight,
-    };
-    const signedTxBodyEncodeObject: TxBodyEncodeObject = {
-      typeUrl: '/cosmos.tx.v1beta1.TxBody',
-      value: signedTxBody,
-    };
-    const signedTxBodyBytes = this.registry.encode(signedTxBodyEncodeObject);
-    const signedGasLimit = Int53.fromString(signed.fee.gas).toNumber();
-    const signedSequence = Int53.fromString(signed.sequence).toNumber();
-    const signedAuthInfoBytes = makeAuthInfoBytes(
-      [{ pubkey, sequence: signedSequence }],
-      signed.fee.amount,
-      signedGasLimit,
-      signed.fee.granter,
-      signed.fee.payer,
-      signMode,
-    );
-    return TxRaw.fromPartial({
-      bodyBytes: signedTxBodyBytes,
-      authInfoBytes: signedAuthInfoBytes,
-      signatures: [fromBase64(signature.signature)],
-    });
-  }
-
-  async getPubKey(signer: string): Promise<Any> {
-    const accountFromSigner = (await this.signer.getAccounts()).find(
-      (account) => account.address === signer,
-    );
-    if (!accountFromSigner) {
-      throw new Error('Failed to retrieve account from signer');
-    }
-
-    return Promise.resolve(
-      encodePubkey(encodeSecp256k1Pubkey(accountFromSigner.pubkey)),
-    );
-  }
-}
-
-export class DirectSignerAdapter implements SignerAdapter {
-  constructor(private signer, private aminoTypes, private registry) {}
-
-  async sign(
-    signerAddress: string,
-    messages: readonly EncodeObject[],
-    fee: StdFee,
-    memo: string,
-    { accountNumber, sequence, chainId }: SignerData,
-    timeoutHeight?: bigint,
-  ): Promise<TxRaw> {
-    const pubkey = await this.getPubKey(signerAddress);
-    const txBodyEncodeObject: TxBodyEncodeObject = {
-      typeUrl: '/cosmos.tx.v1beta1.TxBody',
-      value: {
-        messages: messages,
-        memo: memo,
-        timeoutHeight: timeoutHeight,
-      },
-    };
-    const txBodyBytes = this.registry.encode(txBodyEncodeObject);
-    const gasLimit = Int53.fromString(fee.gas).toNumber();
-    const authInfoBytes = makeAuthInfoBytes(
-      [{ pubkey, sequence }],
-      fee.amount,
-      gasLimit,
-      fee.granter,
-      fee.payer,
-    );
-    const signDoc = makeSignDoc(
-      txBodyBytes,
-      authInfoBytes,
-      chainId,
-      accountNumber,
-    );
-    const { signature, signed } = await (
-      this.signer as OfflineDirectSigner
-    ).signDirect(signerAddress, signDoc);
-    return TxRaw.fromPartial({
-      bodyBytes: signed.bodyBytes,
-      authInfoBytes: signed.authInfoBytes,
-      signatures: [fromBase64(signature.signature)],
-    });
-  }
-
-  async getPubKey(signer: string): Promise<Any> {
-    const accountFromSigner = (await this.signer.getAccounts()).find(
-      (account) => account.address === signer,
-    );
-    if (!accountFromSigner) {
-      throw new Error('Failed to retrieve account from signer');
-    }
-
-    return Promise.resolve(
-      encodePubkey(encodeSecp256k1Pubkey(accountFromSigner.pubkey)),
-    );
-  }
-}
-
-export class Eip191SignerAdapter implements SignerAdapter {
-  constructor(
-    private signer: Eip191Signer,
-    private aminoTypes,
-    private registry,
-  ) {}
-
-  async sign(
-    signerAddress: string,
-    messages: readonly EncodeObject[],
-    fee: StdFee,
-    memo: string,
-    { accountNumber, sequence, chainId }: SignerData,
-    timeoutHeight?: bigint,
-  ): Promise<TxRaw> {
-    const pubkey = await this.getPubKey(signerAddress);
-    const signMode = SignMode.SIGN_MODE_EIP_191;
-    const msgs = messages.map((msg) => this.aminoTypes.toAmino(msg));
-    const signDoc = makeSignDocAmino(
-      msgs,
-      fee,
-      chainId,
-      memo,
-      accountNumber,
-      sequence,
-      timeoutHeight,
-    );
-
-    // Use the EIP-191 signer to sign the document
-    const { signature, signed } = await this.signer.signEip191(
-      signerAddress,
-      signDoc,
-    );
-
-    const signedTxBody = {
-      messages: signed.msgs.map((msg) => this.aminoTypes.fromAmino(msg)),
-      memo: signed.memo,
-      timeoutHeight: timeoutHeight,
-    };
-    const signedTxBodyEncodeObject: TxBodyEncodeObject = {
-      typeUrl: '/cosmos.tx.v1beta1.TxBody',
-      value: signedTxBody,
-    };
-    const signedTxBodyBytes = this.registry.encode(signedTxBodyEncodeObject);
-    const signedGasLimit = Int53.fromString(signed.fee.gas).toNumber();
-    const signedSequence = Int53.fromString(signed.sequence).toNumber();
-    const signedAuthInfoBytes = makeAuthInfoBytes(
-      [{ pubkey, sequence: signedSequence }],
-      signed.fee.amount,
-      signedGasLimit,
-      signed.fee.granter,
-      signed.fee.payer,
-      signMode,
-    );
-    return TxRaw.fromPartial({
-      bodyBytes: signedTxBodyBytes,
-      authInfoBytes: signedAuthInfoBytes,
-      signatures: [signature.signature],
-    });
-  }
-
-  async getPubKey(signer: string): Promise<Any> {
-    const accountFromSigner = (await this.signer.getAccounts()).find(
-      (account) => account.address === signer,
-    );
-    if (!accountFromSigner) {
-      throw new Error('Failed to retrieve account from signer');
-    }
-
-    return getEip191PubKey(accountFromSigner.pubkey);
-  }
-}
-
-// Eip191SigningCosmwasmClient has the same interface as SigningCosmWasmClient from cosmjs.
-// It is mostly a copypaste of one with modified sign method that allows
-// for SIGN_MODE_EIP_191 to be used with the Neutron chain.
-export class Eip191SigningCosmwasmClient extends CosmWasmClient {
+// SigningNeutronClient has the same interface as SigningCosmWasmClient from cosmjs.
+// Allows for using eip191 signing method as well as usual direct and amino methods.
+export class SigningNeutronClient extends CosmWasmClient {
   public readonly registry: Registry;
   public readonly broadcastTimeoutMs: number | undefined;
   public readonly broadcastPollIntervalMs: number | undefined;
-  private readonly signer: OfflineSigner | Eip191Signer;
 
   private readonly gasPrice: GasPrice | undefined;
   // Starting with Cosmos SDK 0.47, we see many cases in which 1.3 is not enough anymore
@@ -334,13 +132,9 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     endpoint: string | HttpEndpoint,
     signer: SignerAdapter,
     options: SigningStargateClientOptions = {},
-  ): Promise<Eip191SigningCosmwasmClient> {
+  ): Promise<SigningNeutronClient> {
     const cometClient = await connectComet(endpoint);
-    return Eip191SigningCosmwasmClient.createWithSigner(
-      cometClient,
-      signer,
-      options,
-    );
+    return SigningNeutronClient.createWithSigner(cometClient, signer, options);
   }
 
   /**
@@ -351,13 +145,13 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     cometClient: CometClient,
     signer: SignerAdapter,
     options: SigningStargateClientOptions = {},
-  ): Promise<Eip191SigningCosmwasmClient> {
-    return new Eip191SigningCosmwasmClient(cometClient, signer, options);
+  ): Promise<SigningNeutronClient> {
+    return new SigningNeutronClient(cometClient, signer, options);
   }
 
   protected constructor(
     cometClient: CometClient | undefined,
-    private signerAdapter: SignerAdapter,
+    private signer: SignerAdapter,
     options: SigningStargateClientOptions,
   ) {
     super(cometClient);
@@ -380,7 +174,7 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
     memo: string | undefined,
   ): Promise<number> {
     const anyMsgs = messages.map((m) => this.registry.encodeAsAny(m));
-    const pubkey: Any = await this.signerAdapter.getPubKey(signerAddress);
+    const pubkey: Any = await this.signer.getPubKey(signerAddress);
 
     const rawAccount = await this.forceGetQueryClient().auth.account(
       signerAddress,
@@ -518,7 +312,7 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
       };
     }
 
-    return this.signerAdapter.sign(
+    return this.signer.sign(
       signerAddress,
       messages,
       fee,
@@ -889,6 +683,205 @@ export class Eip191SigningCosmwasmClient extends CosmWasmClient {
       fee,
       memo,
     );
+  }
+}
+
+export class AminoSignerAdapter implements SignerAdapter {
+  constructor(private signer, private aminoTypes, private registry) {}
+
+  async sign(
+    signerAddress: string,
+    messages: readonly EncodeObject[],
+    fee: StdFee,
+    memo: string,
+    { accountNumber, sequence, chainId }: SignerData,
+    timeoutHeight?: bigint,
+  ): Promise<TxRaw> {
+    const pubkey = await this.getPubKey(signerAddress);
+    const signMode = SignMode.SIGN_MODE_LEGACY_AMINO_JSON;
+    const msgs = messages.map((msg) => this.aminoTypes.toAmino(msg));
+    const signDoc = makeSignDocAmino(
+      msgs,
+      fee,
+      chainId,
+      memo,
+      accountNumber,
+      sequence,
+      timeoutHeight,
+    );
+    const { signature, signed } = await (
+      this.signer as OfflineAminoSigner
+    ).signAmino(signerAddress, signDoc);
+    const signedTxBody = {
+      messages: signed.msgs.map((msg) => this.aminoTypes.fromAmino(msg)),
+      memo: signed.memo,
+      timeoutHeight: timeoutHeight,
+    };
+    const signedTxBodyEncodeObject: TxBodyEncodeObject = {
+      typeUrl: '/cosmos.tx.v1beta1.TxBody',
+      value: signedTxBody,
+    };
+    const signedTxBodyBytes = this.registry.encode(signedTxBodyEncodeObject);
+    const signedGasLimit = Int53.fromString(signed.fee.gas).toNumber();
+    const signedSequence = Int53.fromString(signed.sequence).toNumber();
+    const signedAuthInfoBytes = makeAuthInfoBytes(
+      [{ pubkey, sequence: signedSequence }],
+      signed.fee.amount,
+      signedGasLimit,
+      signed.fee.granter,
+      signed.fee.payer,
+      signMode,
+    );
+    return TxRaw.fromPartial({
+      bodyBytes: signedTxBodyBytes,
+      authInfoBytes: signedAuthInfoBytes,
+      signatures: [fromBase64(signature.signature)],
+    });
+  }
+
+  async getPubKey(signer: string): Promise<Any> {
+    const accountFromSigner = (await this.signer.getAccounts()).find(
+      (account) => account.address === signer,
+    );
+    if (!accountFromSigner) {
+      throw new Error('Failed to retrieve account from signer');
+    }
+
+    return Promise.resolve(
+      encodePubkey(encodeSecp256k1Pubkey(accountFromSigner.pubkey)),
+    );
+  }
+}
+
+export class DirectSignerAdapter implements SignerAdapter {
+  constructor(private signer, private aminoTypes, private registry) {}
+
+  async sign(
+    signerAddress: string,
+    messages: readonly EncodeObject[],
+    fee: StdFee,
+    memo: string,
+    { accountNumber, sequence, chainId }: SignerData,
+    timeoutHeight?: bigint,
+  ): Promise<TxRaw> {
+    const pubkey = await this.getPubKey(signerAddress);
+    const txBodyEncodeObject: TxBodyEncodeObject = {
+      typeUrl: '/cosmos.tx.v1beta1.TxBody',
+      value: {
+        messages: messages,
+        memo: memo,
+        timeoutHeight: timeoutHeight,
+      },
+    };
+    const txBodyBytes = this.registry.encode(txBodyEncodeObject);
+    const gasLimit = Int53.fromString(fee.gas).toNumber();
+    const authInfoBytes = makeAuthInfoBytes(
+      [{ pubkey, sequence }],
+      fee.amount,
+      gasLimit,
+      fee.granter,
+      fee.payer,
+    );
+    const signDoc = makeSignDoc(
+      txBodyBytes,
+      authInfoBytes,
+      chainId,
+      accountNumber,
+    );
+    const { signature, signed } = await (
+      this.signer as OfflineDirectSigner
+    ).signDirect(signerAddress, signDoc);
+    return TxRaw.fromPartial({
+      bodyBytes: signed.bodyBytes,
+      authInfoBytes: signed.authInfoBytes,
+      signatures: [fromBase64(signature.signature)],
+    });
+  }
+
+  async getPubKey(signer: string): Promise<Any> {
+    const accountFromSigner = (await this.signer.getAccounts()).find(
+      (account) => account.address === signer,
+    );
+    if (!accountFromSigner) {
+      throw new Error('Failed to retrieve account from signer');
+    }
+
+    return Promise.resolve(
+      encodePubkey(encodeSecp256k1Pubkey(accountFromSigner.pubkey)),
+    );
+  }
+}
+
+export class Eip191SignerAdapter implements SignerAdapter {
+  constructor(
+    private signer: Eip191Signer,
+    private aminoTypes,
+    private registry,
+  ) {}
+
+  async sign(
+    signerAddress: string,
+    messages: readonly EncodeObject[],
+    fee: StdFee,
+    memo: string,
+    { accountNumber, sequence, chainId }: SignerData,
+    timeoutHeight?: bigint,
+  ): Promise<TxRaw> {
+    const pubkey = await this.getPubKey(signerAddress);
+    const signMode = SignMode.SIGN_MODE_EIP_191;
+    const msgs = messages.map((msg) => this.aminoTypes.toAmino(msg));
+    const signDoc = makeSignDocAmino(
+      msgs,
+      fee,
+      chainId,
+      memo,
+      accountNumber,
+      sequence,
+      timeoutHeight,
+    );
+
+    // Use the EIP-191 signer to sign the document
+    const { signature, signed } = await this.signer.signEip191(
+      signerAddress,
+      signDoc,
+    );
+
+    const signedTxBody = {
+      messages: signed.msgs.map((msg) => this.aminoTypes.fromAmino(msg)),
+      memo: signed.memo,
+      timeoutHeight: timeoutHeight,
+    };
+    const signedTxBodyEncodeObject: TxBodyEncodeObject = {
+      typeUrl: '/cosmos.tx.v1beta1.TxBody',
+      value: signedTxBody,
+    };
+    const signedTxBodyBytes = this.registry.encode(signedTxBodyEncodeObject);
+    const signedGasLimit = Int53.fromString(signed.fee.gas).toNumber();
+    const signedSequence = Int53.fromString(signed.sequence).toNumber();
+    const signedAuthInfoBytes = makeAuthInfoBytes(
+      [{ pubkey, sequence: signedSequence }],
+      signed.fee.amount,
+      signedGasLimit,
+      signed.fee.granter,
+      signed.fee.payer,
+      signMode,
+    );
+    return TxRaw.fromPartial({
+      bodyBytes: signedTxBodyBytes,
+      authInfoBytes: signedAuthInfoBytes,
+      signatures: [signature.signature],
+    });
+  }
+
+  async getPubKey(signer: string): Promise<Any> {
+    const accountFromSigner = (await this.signer.getAccounts()).find(
+      (account) => account.address === signer,
+    );
+    if (!accountFromSigner) {
+      throw new Error('Failed to retrieve account from signer');
+    }
+
+    return getEip191PubKey(accountFromSigner.pubkey);
   }
 }
 
