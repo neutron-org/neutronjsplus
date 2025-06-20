@@ -619,6 +619,7 @@ export const updateFeerefunderParamsProposal = (
             authority: ADMIN_MODULE_ADDRESS,
             params: {
               min_fee: info.min_fee,
+              fee_enabled: info.fee_enabled,
             },
           }),
         },
