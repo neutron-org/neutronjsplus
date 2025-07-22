@@ -134,6 +134,7 @@ export type ParamsTransferInfo = {
 };
 
 export type ParamsFeerefunderInfo = {
+  fee_enabled: boolean;
   min_fee: {
     recv_fee: any;
     ack_fee: any;
@@ -617,6 +618,7 @@ export const updateFeerefunderParamsProposal = (
             authority: ADMIN_MODULE_ADDRESS,
             params: {
               min_fee: info.min_fee,
+              fee_enabled: info.fee_enabled,
             },
           }),
         },

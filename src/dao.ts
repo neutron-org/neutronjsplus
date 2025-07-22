@@ -1542,6 +1542,7 @@ export class DaoMember {
     description: string,
     message: ParamsFeerefunderInfo = {
       min_fee: { recv_fee: null, ack_fee: null, timeout_fee: null },
+      fee_enabled: true,
     },
     amount: string,
   ): Promise<number> {
