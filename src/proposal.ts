@@ -542,6 +542,29 @@ export const updateTokenfactoryParamsProposal = (
   },
 });
 
+export const updateCoinfactoryParamsProposal = (
+    info: ParamsTokenfactoryInfo,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.coinfactory.v1beta1.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params: {
+              denom_creation_fee: info.denom_creation_fee,
+              denom_creation_gas_consume: info.denom_creation_gas_consume,
+              fee_collector_address: info.fee_collector_address,
+              whitelisted_hooks: info.whitelisted_hooks,
+            },
+          }),
+        },
+      },
+    },
+  },
+});
+
 export const updateFeeburnerParamsProposal = (
   info: ParamsFeeburnerInfo,
 ): any => ({
