@@ -16,7 +16,7 @@
     "postinstall": "yarn build:neutronjs"
   },
   "dependencies": {
-    "@cosmjs/cosmwasm-stargate": "^0.32.4",
+    "@cosmjs/cosmwasm-stargate": "^0.33.1",
     "@cosmjs/proto-signing": "^0.32.4",
     "@cosmjs/stargate": "0.32.4",
     "@neutron-org/neutronjs": "https://github.com/neutron-org/neutronjs.git#e022374557c3c362c407f4ca6b83a9d26b4cda66",
