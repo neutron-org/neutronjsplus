@@ -62,6 +62,7 @@ import {
   VotingCw4Module,
   VotingVaultsModule,
 } from './dao_types';
+import { SigningNeutronClient } from './signing_neutron_client';
 
 export const getVotingModule = async (
   client: CosmWasmClient,
@@ -381,7 +382,7 @@ export class Dao {
 export class DaoMember {
   constructor(
     public dao: Dao,
-    private client: SigningCosmWasmClient,
+    private client: SigningCosmWasmClient | SigningNeutronClient,
     public user: string,
     private denom: string,
   ) {}
@@ -1541,6 +1542,7 @@ export class DaoMember {
     description: string,
     message: ParamsFeerefunderInfo = {
       min_fee: { recv_fee: null, ack_fee: null, timeout_fee: null },
+      fee_enabled: true,
     },
     amount: string,
   ): Promise<number> {
