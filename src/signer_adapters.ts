@@ -15,7 +15,7 @@ import {
 } from '@cosmjs/proto-signing';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
-import { makeSignDoc as makeSignDocAmino } from '@cosmjs/amino/build/signdoc';
+import { makeSignDoc as makeSignDocAmino } from '@cosmjs/amino';
 import { Int53 } from '@cosmjs/math';
 import { fromBase64 } from '@cosmjs/encoding';
 import { Any } from 'cosmjs-types/google/protobuf/any';
