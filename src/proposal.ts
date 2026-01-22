@@ -899,7 +899,7 @@ export interface AddSchedule {
   name: string;
   period: number;
   msgs: MsgExecuteContract[];
-  execution_stage: string;
+  execution_stage: number;
 }
 
 export interface RemoveSchedule {
