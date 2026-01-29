@@ -1,7 +1,6 @@
 import { Coin } from '@cosmjs/proto-signing';
 import { ADMIN_MODULE_ADDRESS } from './constants';
 import { MsgExecuteContract } from '@neutron-org/neutronjs/neutron/cron/schedule';
-import { ConsumerParams } from '@neutron-org/neutronjs/interchain_security/ccv/v1/shared_consumer';
 
 export type ParamChangeProposalInfo = {
   title: string;
@@ -136,6 +135,7 @@ export type ParamsTransferInfo = {
 };
 
 export type ParamsFeerefunderInfo = {
+  fee_enabled: boolean;
   min_fee: {
     recv_fee: any;
     ack_fee: any;
@@ -155,7 +155,7 @@ export type ParamsCronInfo = {
 };
 
 export type ParamsDexInfo = {
-  fee_tiers: number[];
+  fee_tiers: (string | number)[];
   paused: boolean;
   max_jits_per_block: number;
   good_til_purge_allowance: number;
@@ -544,6 +544,29 @@ export const updateTokenfactoryParamsProposal = (
   },
 });
 
+export const updateCoinfactoryParamsProposal = (
+    info: ParamsTokenfactoryInfo,
+): any => ({
+  custom: {
+    submit_admin_proposal: {
+      admin_proposal: {
+        proposal_execute_message: {
+          message: JSON.stringify({
+            '@type': '/neutron.coinfactory.v1beta1.MsgUpdateParams',
+            authority: ADMIN_MODULE_ADDRESS,
+            params: {
+              denom_creation_fee: info.denom_creation_fee,
+              denom_creation_gas_consume: info.denom_creation_gas_consume,
+              fee_collector_address: info.fee_collector_address,
+              whitelisted_hooks: info.whitelisted_hooks,
+            },
+          }),
+        },
+      },
+    },
+  },
+});
+
 export const updateFeeburnerParamsProposal = (
   info: ParamsFeeburnerInfo,
 ): any => ({
@@ -620,6 +643,7 @@ export const updateFeerefunderParamsProposal = (
             authority: ADMIN_MODULE_ADDRESS,
             params: {
               min_fee: info.min_fee,
+              fee_enabled: info.fee_enabled,
             },
           }),
         },
@@ -864,22 +888,6 @@ export const updateDynamicFeesParamsProposal = (
         proposal_execute_message: {
           message: JSON.stringify({
             '@type': '/neutron.dynamicfees.v1.MsgUpdateParams',
-            authority: ADMIN_MODULE_ADDRESS,
-            params,
-          }),
-        },
-      },
-    },
-  },
-});
-
-export const updateConsumerParamsProposal = (params: ConsumerParams): any => ({
-  custom: {
-    submit_admin_proposal: {
-      admin_proposal: {
-        proposal_execute_message: {
-          message: JSON.stringify({
-            '@type': '/interchain_security.ccv.consumer.v1.MsgUpdateParams',
             authority: ADMIN_MODULE_ADDRESS,
             params,
           }),
