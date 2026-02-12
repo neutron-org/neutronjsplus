@@ -18,7 +18,7 @@ import {
 import { assertDefined } from '@cosmjs/utils';
 import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-import { ChangeAdminResult } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
+import { ChangeAdminResult } from '@cosmjs/cosmwasm-stargate';
 import { sha256 } from '@cosmjs/crypto';
 
 import {

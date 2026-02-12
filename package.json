@@ -16,15 +16,16 @@
     "postinstall": "yarn build:neutronjs"
   },
   "dependencies": {
-    "@cosmjs/cosmwasm-stargate": "^0.32.4",
-    "@cosmjs/proto-signing": "^0.32.4",
-    "@cosmjs/stargate": "0.32.4",
-    "@neutron-org/neutronjs": "https://github.com/neutron-org/neutronjs.git#056cdd0577d5b27731b4a80a57977aa155c6a269",
-    "axios": "1.6.0",
+    "@cosmjs/cosmwasm-stargate": "^0.37.0",
+    "@cosmjs/proto-signing": "^0.37.0",
+    "@cosmjs/stargate": "0.37.0",
+    "@neutron-org/neutronjs": "https://github.com/neutron-org/neutronjs.git#4860c54d72692e4faad199ca87d709b2ae6d4fda",
+    "axios": "1.12.0",
     "bip39": "^3.1.0",
     "long": "^5.2.1",
     "merkletreejs": "^0.3.9",
-    "@types/pako": "^1.0.1"
+    "@types/pako": "^1.0.1",
+    "pako": "^2.1.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.20.2",

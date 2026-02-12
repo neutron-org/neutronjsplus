@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "esnext",
     "types": ["node", "long"],
-    "module": "commonjs",
-    "lib": ["esnext"],
+    "module": "nodeNext",
+    "lib": ["es2022"],
+    "moduleResolution": "NodeNext",
     "outDir": "./dist",
-    "resolveJsonModule": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "declaration": true,

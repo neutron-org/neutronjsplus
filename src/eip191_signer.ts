@@ -1,5 +1,5 @@
 import { AccountData } from '@cosmjs/proto-signing';
-import { StdSignDoc } from '@cosmjs/amino/build/signdoc';
+import { StdSignDoc } from '@cosmjs/amino';
 
 /**
  * Interface for EIP-191 signer
