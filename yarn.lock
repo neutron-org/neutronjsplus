@@ -1014,9 +1014,9 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@neutron-org/neutronjs@https://github.com/neutron-org/neutronjs.git#681d84c45171959dfa7e9086d422288aebc8e6cc":
+"@neutron-org/neutronjs@https://github.com/neutron-org/neutronjs.git#8f383e823be8a53d16d1d22b0f862d03fa4e0cdd":
   version "4.2.0"
-  resolved "https://github.com/neutron-org/neutronjs.git#681d84c45171959dfa7e9086d422288aebc8e6cc"
+  resolved "https://github.com/neutron-org/neutronjs.git#8f383e823be8a53d16d1d22b0f862d03fa4e0cdd"
   dependencies:
     protobufjs "^7.5.4"
 
