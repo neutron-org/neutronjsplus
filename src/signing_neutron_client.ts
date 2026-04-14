@@ -166,7 +166,11 @@ export class SigningNeutronClient extends CosmWasmClient {
     }
     const baseAccount = BaseAccount.decode(rawAccount.value);
     const sequence = uint64FromProto(baseAccount.sequence).toNumber();
-    const rpc = createProtobufRpcClient(this.forceGetQueryClient());
+    const queryClient: Parameters<typeof createProtobufRpcClient>[0] =
+      this.forceGetQueryClient() as unknown as Parameters<
+        typeof createProtobufRpcClient
+      >[0];
+    const rpc = createProtobufRpcClient(queryClient);
     const { gasInfo } = await simulate(rpc, anyMsgs, memo, pubkey, sequence);
     assertDefined(gasInfo);
     return Uint53.fromString(gasInfo.gasUsed.toString()).toNumber();
