@@ -180,7 +180,7 @@ export type ClientUpdateInfo = {
   title: string;
   description: string;
   subject_client_id: string;
-  substitute_client_id;
+  substitute_client_id: string;
 };
 
 export type UpgradeInfo = {
