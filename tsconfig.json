@@ -1,16 +1,26 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "types": ["node", "long"],
+    "types": [
+      "node",
+      "long"
+    ],
     "module": "nodeNext",
-    "lib": ["es2022"],
+    "lib": [
+      "es2022"
+    ],
     "moduleResolution": "NodeNext",
     "outDir": "./dist",
+    "rootDir": "./src",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "declaration": true,
     "removeComments": true
   },
-  "include": ["./src/**/*"],
-  "exclude": ["./src/**/*.test.ts"]
+  "include": [
+    "./src/**/*"
+  ],
+  "exclude": [
+    "./src/**/*.test.ts"
+  ]
 }
