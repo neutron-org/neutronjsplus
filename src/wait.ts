@@ -1,7 +1,8 @@
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { StargateClient } from '@cosmjs/stargate';
 
-global.WebSocket = require('ws');
+(globalThis as typeof globalThis & { WebSocket: unknown }).WebSocket =
+  require('ws');
 
 export const waitSeconds = async (seconds: number) =>
   new Promise((r) => {
@@ -18,7 +19,7 @@ export const getWithAttempts = async <T>(
   numAttempts = 20,
 ): Promise<T> => {
   let error = null;
-  let data: T;
+  let data: T | undefined;
   while (numAttempts > 0) {
     numAttempts--;
     try {
@@ -35,7 +36,9 @@ export const getWithAttempts = async <T>(
     ? error
     : new Error(
         'getWithAttempts: no attempts left. Latest get response: ' +
-          (data === Object(data) ? JSON.stringify(data) : data).toString(),
+          (typeof data === 'object'
+            ? JSON.stringify(data)
+            : String(data ?? 'undefined')),
       );
 };
 

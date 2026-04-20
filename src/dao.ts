@@ -120,6 +120,9 @@ export const getProposalModules = async (
     );
     const modulePath = proposalContractInfo.label.split('.');
     const moduleType = modulePath.at(-1);
+    if (!moduleType) {
+      continue;
+    }
 
     const preProposeModule: ProposalModule['pre_propose'] = {
       address: preProposalContract.Module.addr,
@@ -163,10 +166,13 @@ export const getDaoContracts = async (
     list_sub_daos: {},
   });
 
-  const subdaos = {};
+  const subdaos: Record<string, DaoContracts> = {};
   for (const subdao of subdaosList) {
     const subDaoContracts = await getSubDaoContracts(client, subdao.addr);
-    subdaos[DaoPrefixes[subDaoContracts.name]] = subDaoContracts;
+    const prefix =
+      DaoPrefixes[subDaoContracts.name as keyof typeof DaoPrefixes] ??
+      subDaoContracts.name;
+    subdaos[prefix] = subDaoContracts;
   }
 
   return {
@@ -215,6 +221,17 @@ export const getSubDaoContracts = async (
 
 export class Dao {
   constructor(private client: CosmWasmClient, public contracts: DaoContracts) {}
+
+  getTimelockAddress(customModule: string): string {
+    const timelockAddress =
+      this.contracts.proposals[customModule]?.pre_propose?.timelock?.address;
+    if (!timelockAddress) {
+      throw new Error(
+        `Timelock contract is not configured for proposal module '${customModule}'`,
+      );
+    }
+    return timelockAddress;
+  }
 
   async checkPassedProposal(proposalId: number) {
     await getWithAttempts(
@@ -312,7 +329,7 @@ export class Dao {
     customModule = 'single',
   ): Promise<TimeLockSingleChoiceProposal> {
     return this.client.queryContractSmart(
-      this.contracts.proposals[customModule].pre_propose.timelock.address,
+      this.getTimelockAddress(customModule),
       {
         proposal: {
           proposal_id: proposalId,
@@ -326,7 +343,7 @@ export class Dao {
     customModule = 'single',
   ): Promise<ProposalFailedExecutionErrorResponse> {
     return this.client.queryContractSmart(
-      this.contracts.proposals[customModule].pre_propose.timelock.address,
+      this.getTimelockAddress(customModule),
       {
         proposal_execution_error: {
           proposal_id: proposalId,
@@ -342,7 +359,7 @@ export class Dao {
         list_sub_daos: {},
       },
     );
-    return res.map((x) => x.addr);
+    return res.map((x: { addr: string }) => x.addr);
   }
 
   async querySubDao(subdaoAddress: string): Promise<GetSubdaoResponse> {
@@ -500,7 +517,7 @@ export class DaoMember {
       amount: [{ denom: this.denom, amount: '10000' }],
     },
   ): Promise<number> {
-    let depositFunds = [];
+    let depositFunds: { denom: string; amount: string }[] = [];
     if (deposit !== '') {
       depositFunds = [{ denom: this.denom, amount: deposit }];
     }
@@ -951,7 +968,7 @@ export class DaoMember {
   ): Promise<ExecuteResult> {
     return this.client.execute(
       this.user,
-      this.dao.contracts.proposals[customModule].pre_propose.timelock.address,
+      this.dao.getTimelockAddress(customModule),
       {
         execute_proposal: {
           proposal_id: proposalId,
@@ -1958,5 +1975,5 @@ export const DaoContractLabels = {
   DAO_PROPOSAL_OVERRULE: 'neutron.proposals.overrule',
 };
 
-export const toBase64String = (x) =>
+export const toBase64String = (x: unknown) =>
   Buffer.from(JSON.stringify(x)).toString('base64');

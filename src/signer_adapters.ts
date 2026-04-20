@@ -54,7 +54,7 @@ export class AminoSignerAdapter implements Signer {
       this.signer as OfflineAminoSigner
     ).signAmino(signerAddress, signDoc);
     const signedTxBody = {
-      messages: signed.msgs.map((msg) => this.aminoTypes.fromAmino(msg)),
+      messages: signed.msgs.map((msg: any) => this.aminoTypes.fromAmino(msg)),
       memo: signed.memo,
       timeoutHeight: timeoutHeight,
     };
@@ -192,7 +192,7 @@ export class Eip191SignerAdapter implements Signer {
     );
 
     const signedTxBody = {
-      messages: signed.msgs.map((msg) => this.aminoTypes.fromAmino(msg)),
+      messages: signed.msgs.map((msg: any) => this.aminoTypes.fromAmino(msg)),
       memo: signed.memo,
       timeoutHeight: timeoutHeight,
     };

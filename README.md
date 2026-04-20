@@ -39,3 +39,25 @@ TODO
 ## License
 
 `neutronjsplus` is distributed under the Apache-2.0 license. See the `LICENSE` file in the repository for details.
+
+### Publishing
+
+Publish a stable release as `latest`:
+
+```sh
+# package.json version: X.Y.Z
+npm publish --access public --tag latest
+```
+
+Publish a release candidate as `next`:
+
+```sh
+# package.json version: X.Y.Z-rc.N
+npm publish --access public --tag next
+```
+
+You can safely check the release content using
+
+```sh
+npm pack --dry-run 2>&1 | less
+```

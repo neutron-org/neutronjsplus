@@ -16,6 +16,7 @@ export const getSequenceId = (tx: IndexedTx | undefined): number => {
       }
     }
   }
+  throw new Error('getSequenceId: packet_sequence attribute not found');
 };
 
 export const createBankSendMessage = (
@@ -44,10 +45,10 @@ export const getEventAttributesFromTx = (
   Record<(typeof attributes)[number], string> | Record<string, never>
 > => {
   const events = data?.tx_response.events;
-  const resp = [];
+  const resp: Array<Record<string, string>> = [];
   for (const e of events) {
     if (event === e.type) {
-      let out = {};
+      let out: Record<string, string> = {};
       for (const a of e.attributes) {
         if (attributes.includes(a.key)) {
           out[a.key] = a.value;
@@ -82,7 +83,11 @@ export const getEventAttribute = (
   return attrValue;
 };
 
-export const getIBCDenom = (portName, channelName, denom: string): string => {
+export const getIBCDenom = (
+  portName: string,
+  channelName: string,
+  denom: string,
+): string => {
   const uatomIBCHash = crypto
     .createHash('sha256')
     .update(`${portName}/${channelName}/${denom}`)
