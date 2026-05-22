@@ -1,6 +1,6 @@
 {
   "name": "@neutron-org/neutronjsplus",
-  "version": "1.0.0",
+  "version": "2.0.0-rc.2",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "Apache-2.0",
@@ -23,7 +23,7 @@
     "@cosmjs/cosmwasm-stargate": "^0.37.0",
     "@cosmjs/proto-signing": "^0.37.0",
     "@cosmjs/stargate": "0.37.0",
-    "@neutron-org/neutronjs": "10.3.0-fix.1",
+    "@neutron-org/neutronjs": "11.0.0-rc.2",
     "axios": "1.12.0",
     "bip39": "^3.1.0",
     "long": "^5.2.1",

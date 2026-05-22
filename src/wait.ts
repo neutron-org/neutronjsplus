@@ -1,8 +1,9 @@
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { StargateClient } from '@cosmjs/stargate';
 
-(globalThis as typeof globalThis & { WebSocket: unknown }).WebSocket =
-  require('ws');
+(
+  globalThis as typeof globalThis & { WebSocket: unknown }
+).WebSocket = require('ws');
 
 export const waitSeconds = async (seconds: number) =>
   new Promise((r) => {
