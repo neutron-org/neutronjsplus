@@ -1051,10 +1051,10 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@neutron-org/neutronjs@11.0.0-rc.1":
-  version "11.0.0-rc.1"
-  resolved "https://registry.npmjs.org/@neutron-org/neutronjs/-/neutronjs-11.0.0-rc.1.tgz"
-  integrity sha512-bOFu/U5VMaC2Al046SJMea6X26fQmVL7D5O3XhovJ3aVhkRfU4qgjXn64tlgoMWz8VsNNJGF5gV4QUIebDYqow==
+"@neutron-org/neutronjs@11.0.0":
+  version "11.0.0"
+  resolved "https://registry.npmjs.org/@neutron-org/neutronjs/-/neutronjs-11.0.0.tgz"
+  integrity sha512-AshcG8WP01ZNQNIKycC+lw+ULlcuViMNFGF5wikIJCU1wDA+6kkkU9T/nDj3kqo/Emh6++q7YyBL9Jy5s6W5kw==
   dependencies:
     protobufjs "^7.5.4"
 
